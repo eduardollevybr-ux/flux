@@ -652,6 +652,7 @@ input,textarea,[contenteditable="true"]{-webkit-user-select:text;user-select:tex
 .pager.dragging .m-cell:active,.pager.dragging .m-saldo:active,.pager.dragging .hz-v:active{transform:none}
 @media (max-width:700px){ .page{overflow-x:hidden} }
 @supports not (overflow-x: clip){ .pager{overflow:hidden} .page.page-flush{overflow-x:hidden} }
+#net-pill.relog{pointer-events:auto;cursor:pointer;color:var(--accent)}
 #net-pill{position:fixed;top:calc(env(safe-area-inset-top,0px) + 8px);left:50%;transform:translateX(-50%);z-index:95;padding:6px 14px;border-radius:999px;font-size:12px;font-weight:600;white-space:nowrap;pointer-events:none;background:var(--surface3);color:var(--muted);border:1px solid var(--line2);box-shadow:var(--shadow);animation:pop .2s ease}
 /* toque: destaque só enquanto o dedo está pressionando (nada de cinza "preso" depois de soltar) */
 @media (hover:none){
@@ -804,7 +805,7 @@ const UI = {
   tab: "saldos",
   sideCollapsed: lsGet("ae.side", false),
   hiddenCols: lsGet("ae.cols", {}),
-  bStart: CUR, bEnd: CUR + 11, hzS: CUR, mCol: "all",
+  bStart: CUR, bEnd: CUR + 11, hzS: CUR, mCol: (v => ["all", ...TYPE_ORDER].includes(v) ? v : "all")(lsGet("flux.mcol", "all")),
   tMonth: CUR,
   signedOut: false, autoToday: true,
 };
@@ -850,14 +851,14 @@ function loadScript(src) { return new Promise((res, rej) => { const s = document
 /* ===== offline: cópia dos dados da conta guardada no aparelho ===== */
 const CACHE_KEY = "flux.cache";
 const isOnline = () => navigator.onLine !== false;
-let NET = { offline: !isOnline(), dirty: false };
+let NET = { offline: !isOnline(), dirty: false, relogin: false };
 function setNet(p) { Object.assign(NET, p); renderNet(); }
 function renderNet() {
   let el = document.getElementById("net-pill");
-  const txt = NET.offline ? "sem internet · salvo no aparelho" : "";
+  const txt = NET.offline ? "sem internet · salvo no aparelho" : NET.relogin ? "toca aqui pra entrar de novo e sincronizar" : "";
   if (!txt) { if (el) el.remove(); return; }
-  if (!el) { el = document.createElement("div"); el.id = "net-pill"; el.setAttribute("role", "status"); document.body.appendChild(el); }
-  el.className = NET.offline ? "off" : "sync";
+  if (!el) { el = document.createElement("div"); el.id = "net-pill"; el.setAttribute("role", "status"); document.body.appendChild(el); el.addEventListener("click", () => { if (NET.relogin && !NET.offline && window.fluxRelogin) window.fluxRelogin(); }); }
+  el.className = NET.offline ? "off" : NET.relogin ? "relog" : "sync";
   el.textContent = txt;
 }
 window.addEventListener("offline", () => setNet({ offline: true }));
@@ -866,6 +867,7 @@ renderNet();
 
 async function initSupabase() {
   S.mode = "supabase";
+  try { navigator.storage && navigator.storage.persist && navigator.storage.persist(); } catch { }
   let cache = lsGet(CACHE_KEY, null);
   if (cache && !cache.uid) cache = null;
   let saveT = null, saving = false, lastSaved = cache ? cache.updated_at || null : null;
@@ -876,7 +878,7 @@ async function initSupabase() {
     setNet({ dirty: !!dirty });
   };
   const push = async () => {
-    if (!SB_USER || !SB || !isOnline()) return false;
+    if (!SB_USER || !SB || !isOnline() || NET.relogin) return false;
     saving = true;
     const row = { user_id: SB_USER.id, data: snapshotData(), updated_at: new Date().toISOString() };
     let error = null;
@@ -893,7 +895,7 @@ async function initSupabase() {
   };
   backend.signOut = async () => {
     clearTimeout(saveT);
-    if (cache && cache.dirty && !(await push())) { toast("sem internet. conecta pra sair sem perder o que você adicionou", true); return; }
+    if (cache && cache.dirty && !(await push())) { toast(NET.relogin ? "entra de novo pra sincronizar antes de sair" : "sem internet. conecta pra sair sem perder o que você adicionou", true); return; }
     lsSet(CACHE_KEY, null); cache = null;
     if (SB) await SB.auth.signOut({ scope: "local" });
     else { SB_USER = null; S.loaded = false; applyData(null); showAuth("login"); }
@@ -922,7 +924,7 @@ async function initSupabase() {
       applyData(cache.data); S.profile && (S.profile.email = SB_USER.email);
       S.loaded = true; dataChanged(); await push(); return;
     }
-    if (!isOnline()) { if (!S.loaded && cache && cache.uid === SB_USER.id) openFromCache(); return; }
+    if (!isOnline() || NET.relogin) { if (!S.loaded && cache && cache.uid === SB_USER.id) openFromCache(); return; }
     let data = null, error = null;
     try { ({ data, error } = await SB.from(SB_TABLE).select("data,updated_at").eq("user_id", SB_USER.id).maybeSingle()); } catch (e) { error = e; }
     if (error) { console.warn(error); if (!S.loaded) toast("não deu pra carregar seus dados. tenta de novo", true); return; }
@@ -940,27 +942,53 @@ async function initSupabase() {
       const same = SB_USER && SB_USER.id === session.user.id;
       if (same && synced) return;
       if (!same && cache && cache.uid !== session.user.id) { lsSet(CACHE_KEY, null); cache = null; }
-      SB_USER = session.user; synced = true;
+      SB_USER = session.user; synced = true; setNet({ relogin: false });
       if (!same) { UI.autoToday = true; UI.tab = "saldos"; UI.tMonth = CUR; }
       hideAuth(); await load();
     } else {
-      // sem internet a sessão não consegue ser renovada: segue com a cópia do aparelho
-      if (!isOnline() && cache) return;
-      synced = false; SB_USER = null; S.loaded = false; applyData(null); setNet({ dirty: false }); showAuth("login");
+      // sessão perdida (sem internet, internet fraca ou login vencido): continua no último login com a cópia do aparelho
+      if (cache && !lsGet(CACHE_KEY, null)) cache = null; // saiu ou apagou a conta de propósito
+      if (cache) {
+        synced = false;
+        if (!S.loaded || !SB_USER || SB_USER.id !== cache.uid) openFromCache();
+        setNet({ relogin: isOnline() });
+        tryRecover();
+        return;
+      }
+      synced = false; SB_USER = null; S.loaded = false; applyData(null); setNet({ dirty: false, relogin: false }); showAuth("login");
     }
+  };
+  // tenta recuperar a sessão guardada sem pedir login (ex.: a internet estava fraca na hora de abrir)
+  let recovering = false;
+  async function tryRecover() {
+    if (recovering || !SB || !isOnline()) return false;
+    recovering = true;
+    let session = null;
+    try { ({ data: { session } } = await SB.auth.getSession()); } catch { }
+    recovering = false;
+    if (session && session.user) { await onSession(session); return true; }
+    setNet({ relogin: isOnline() && !!cache });
+    return false;
+  }
+  // tocou no aviso: tenta de novo e, se precisar mesmo, abre o login já com o e-mail da conta
+  window.fluxRelogin = async () => {
+    if (await tryRecover()) return;
+    showAuth("login", { email: cache && cache.email, back: true });
   };
   SB.auth.onAuthStateChange((ev, session) => {
     if (ev === "PASSWORD_RECOVERY") { SB_USER = session?.user || null; showAuth("newpass"); return; }
-    if (ev === "SIGNED_IN" || ev === "SIGNED_OUT" || ev === "INITIAL_SESSION") onSession(session);
+    if (ev === "SIGNED_IN" || ev === "SIGNED_OUT" || ev === "INITIAL_SESSION" || (ev === "TOKEN_REFRESHED" && NET.relogin)) onSession(session);
   });
   // voltou a internet: envia o que ficou pendente e busca a versão mais nova
   window.addEventListener("online", async () => {
     if (!SB_USER) return;
+    if (NET.relogin || !synced) { await tryRecover(); return; }
     try { await SB.auth.getSession(); } catch { }
     if (cache && cache.dirty) await push(); else await load();
   });
   document.addEventListener("visibilitychange", async () => {
     if (document.visibilityState !== "visible" || !SB_USER || saving || !isOnline()) return;
+    if (NET.relogin || !synced) { await tryRecover(); return; }
     if (cache && cache.dirty) { await push(); return; }
     let data = null;
     try { ({ data } = await SB.from(SB_TABLE).select("data,updated_at").eq("user_id", SB_USER.id).maybeSingle()); } catch { return; }
@@ -1592,6 +1620,7 @@ $("#bottom-nav").addEventListener("click", e => {
 matchMedia("(max-width: 700px)").addEventListener?.("change", () => { $("#view").dataset.tab = ""; render(); });
 
 function renderAll() {
+  lsSet("flux.mcol", UI.mCol); // abre sempre na última coluna escolhida
   $$("[data-logo]").forEach(el => { if (!el.firstChild) el.innerHTML = logoSVG(+el.dataset.logo || 32, el.dataset.label); });
   applyTheme();
   if (UI.signedOut) { renderSignedOut(); return; }
@@ -2439,7 +2468,8 @@ async function signOut() {
 /* ================= login (supabase) ================= */
 let AUTH = "login";
 function hideAuth() { const el = $("#auth"); if (el) el.remove(); $("#app").style.display = ""; const f = $("#fab"); if (f) placeFab(); }
-function showAuth(mode) {
+function showAuth(mode, opt) {
+  opt = opt || {};
   AUTH = mode; closePanel(); while (modals.length) modals[modals.length - 1].close();
   $("#app").style.display = "none"; const fab = $("#fab"); if (fab) fab.hidden = true;
   let el = $("#auth");
@@ -2449,7 +2479,7 @@ function showAuth(mode) {
     loading: ["carregando…", "", ""],
     login: ["entrar", "entra com seu e-mail e senha.", `<div class="field"><label for="au-e">e-mail</label><input class="input" id="au-e" type="email" autocomplete="email" inputmode="email"></div>${pw("au-p", "senha", "current-password")}
       <button class="btn primary block" data-au="login">entrar</button>
-      <div class="auth-links"><button data-go="forgot">esqueci minha senha</button><button data-go="signup">criar conta</button></div>`],
+      <div class="auth-links"><button data-go="forgot">esqueci minha senha</button>${opt.back ? `<button data-back>voltar pro app</button>` : `<button data-go="signup">criar conta</button>`}</div>`],
     signup: ["criar conta", "leva menos de um minuto.", `<div class="field"><label for="au-n">nome</label><input class="input" id="au-n" autocomplete="given-name"></div>
       <div class="field"><label for="au-e">e-mail</label><input class="input" id="au-e" type="email" autocomplete="email" inputmode="email"></div>${pw("au-p", "senha", "new-password")}${pw("au-p2", "confirmar senha", "new-password")}
       <button class="btn primary block" data-au="signup">criar conta</button>
@@ -2461,12 +2491,14 @@ function showAuth(mode) {
       <button class="btn primary block" data-au="newpass">salvar senha</button>`],
   }[mode];
   el.innerHTML = `<form class="auth-card" novalidate>${logoSVG(64, true)}<h2>${T[0]}</h2>${T[1] ? `<p class="muted">${T[1]}</p>` : ""}${T[2]}<p class="auth-msg" id="au-msg" role="alert"></p></form>`;
+  if (opt.email) { const e = $("#au-e", el); if (e) { e.value = opt.email; const p = $("#au-p", el); setTimeout(() => p && p.focus(), 60); } }
 }
 function bindAuth(el) {
   el.addEventListener("submit", e => { e.preventDefault(); const b = $("[data-au]", el); if (b) b.click(); });
   el.addEventListener("click", async e => {
     const eye = e.target.closest("[data-eye]");
     if (eye) { e.preventDefault(); const i = $("#" + eye.dataset.eye, el); const show = i.type === "password"; i.type = show ? "text" : "password"; eye.innerHTML = show ? I.eyeOff : I.eye; eye.setAttribute("aria-label", show ? "esconder senha" : "mostrar senha"); return; }
+    const back = e.target.closest("[data-back]"); if (back) { e.preventDefault(); hideAuth(); render(); return; }
     const go = e.target.closest("[data-go]"); if (go) { e.preventDefault(); showAuth(go.dataset.go); return; }
     const b = e.target.closest("[data-au]"); if (!b) return;
     e.preventDefault();
