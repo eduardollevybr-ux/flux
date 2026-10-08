@@ -172,7 +172,7 @@ button{cursor:pointer;background:none;border:0;padding:0}
   .d-hz .board .board-row{gap:8px}
   .hcard .mtable td{height:30px}
   .hcard .mtable td.c-saldo{text-align:right!important;padding-right:14px!important;padding-left:8px!important}}
-.mcols th.hz-mth{text-align:center!important;font-size:14px!important;font-weight:700!important;padding:7px 0!important;cursor:default}
+.mcols th.hz-mth{text-align:center!important;font-size:14px!important;font-weight:700!important;padding:4px 0!important;cursor:default}
 .mcols th.hz-mth.cur{background:var(--hz-cur);color:var(--hz-cur-fg)!important}
 .mbox{background:var(--surface);border:1px solid var(--line2);border-radius:14px;overflow:clip}
 .mtable th,.mtable td{border-right:1px solid var(--line)}
@@ -517,11 +517,11 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 .hz{display:flex;flex-direction:column}
 .hz-head,.hz-row{display:grid;grid-template-columns:repeat(3,minmax(0,.6fr) minmax(0,1fr))}
 .hz-head{position:sticky;top:0;z-index:2;background:var(--bg);border-bottom:1px solid var(--line2)}
-.hz-mh{grid-column:span 2;text-align:center;font-weight:700;font-size:16px;padding:14px 0;border-right:1px solid var(--line)}
+.hz-mh{grid-column:span 2;text-align:center;font-weight:700;font-size:16px;padding:8px 0;border-right:1px solid var(--line)}
 .hz-mh:last-child{border-right:0}
 .hz-mh.cur{background:var(--hz-cur);color:var(--hz-cur-fg)}
 .hz-row{border-bottom:0}
-.hz-d,.hz-v{height:48px;display:flex;align-items:center;font-size:16px}
+.hz-d,.hz-v{height:40px;display:flex;align-items:center;font-size:16px}
 .hz-d{justify-content:center;font-weight:500}
 .hz-d.we{background:var(--weekend)}
 .hz-d.today{background:var(--today-bg);color:var(--today-fg);font-weight:700}
@@ -750,12 +750,12 @@ const dBR = s => { const d = parse(s); return `${pad(d.getDate())}/${pad(d.getMo
 const dShort = s => { const d = parse(s); return `${WD[d.getDay()]}, ${d.getDate()} ${MON3[d.getMonth()]}${d.getFullYear() !== NOW.getFullYear() ? " " + d.getFullYear() : ""}`; };
 const dLong = s => { const d = parse(s); return `${WD[d.getDay()]}, ${d.getDate()} de ${MONTHS[d.getMonth()]} de ${d.getFullYear()}`; };
 const uid = p => p + Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
-/* abreviação padronizada: sempre 2 casas quando abrevia */
+/* abreviação padronizada: sempre 2 casas quando abrevia, com ponto (ex.: 1.34K) */
 function abbr(v) {
   const a = Math.abs(v), s = v < -0.004 ? "-" : "";
   if (a < 1000) return s + Math.round(a);
-  if (a < 1e6) return s + (a / 1000).toFixed(2).replace(".", ",") + "K";
-  return s + (a / 1e6).toFixed(2).replace(".", ",") + "M";
+  if (a < 1e6) return s + (a / 1000).toFixed(2) + "K";
+  return s + (a / 1e6).toFixed(2) + "M";
 }
 const lsGet = (k, def) => { try { const v = localStorage.getItem(k); return v == null ? def : JSON.parse(v); } catch { return def; } };
 const lsSet = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch { } };
