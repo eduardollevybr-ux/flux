@@ -895,6 +895,26 @@ input,textarea,[contenteditable="true"]{-webkit-user-select:text;user-select:tex
 .bs-msg:has(.warn) .bs-mt b{color:var(--m-neg-fg)}
 .bs-none{padding:48px 32px}
 @media (min-width:701px){ .bs-title{display:none} .bs-bar{margin-top:4px} }
+
+/* ===== pop-ups sem borda clara em volta ===== */
+:root{--pop-bg:#141414}
+:root.light{--pop-bg:#FFFFFF}
+.modal,.popover,.mail-box{border:0!important;background:var(--pop-bg)}
+.popover .pop-item:active{background:var(--surface3)}
+@media (hover:hover){.popover .pop-item:hover{background:var(--surface3)}}
+:root.light .popover .pop-item:active{background:var(--surface2)}
+@media (hover:hover){:root.light .popover .pop-item:hover{background:var(--surface2)}}
+/* escolhas de repetição: só linhas, sem caixas */
+.scope-list{gap:0;margin:0 -20px;border-top:1px solid var(--line)}
+.scope{border:0;border-bottom:1px solid var(--line);border-radius:0;background:transparent;padding:18px 20px;min-height:58px;justify-content:center}
+.scope:active{transform:none;background:var(--surface3)}
+@media (hover:hover){.scope:hover{background:var(--surface3)}}
+.scope b{font-size:16px;font-weight:700}
+.scope span{font-size:14px}
+.scope:last-child{border-bottom:0}
+
+.bs-inf-l{display:flex;flex-direction:column;gap:2px}
+.bs-inf-l small{font-size:13px;color:var(--muted);font-weight:500}
 </style>
 <script>try{var t=JSON.parse(localStorage.getItem("ae.theme")||"null")||"dark";if(t==="system")t=matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light";if(t==="light")document.documentElement.classList.add("light")}catch(e){}</script>
 </head><body>
@@ -1427,7 +1447,9 @@ function toast(msg, err) {
 }
 
 let popClose = null;
+let popAnchor = null;
 function openPopover(anchor, html, { width, onMount, align = "below" } = {}) {
+  if (popClose && popAnchor === anchor) { closePopover(); return null; } // tocar de novo no mesmo botão fecha
   closePopover();
   const root = $("#pop-root");
   const el = document.createElement("div");
@@ -1451,7 +1473,8 @@ function openPopover(anchor, html, { width, onMount, align = "below" } = {}) {
   el.style.maxHeight = (bottom - top) + "px";
   const off = e => { if (!el.contains(e.target) && !anchor.contains(e.target)) closePopover(); };
   setTimeout(() => document.addEventListener("pointerdown", off), 0);
-  popClose = () => { document.removeEventListener("pointerdown", off); el.remove(); popClose = null; };
+  popAnchor = anchor;
+  popClose = () => { document.removeEventListener("pointerdown", off); el.remove(); popClose = null; popAnchor = null; };
   onMount && onMount(el);
   return el;
 }
@@ -2336,14 +2359,29 @@ function chooseScope({ title, text, date, hasNext, danger }) {
     m.el.addEventListener("click", e => { const b = e.target.closest("[data-s]"); if (!b || b.disabled) return; done = true; m.close(); res(b.dataset.s); });
   });
 }
+// apagar algo que se repete: três opções diretas, sem explicações
+function chooseDelScope() {
+  return new Promise(res => {
+    let done = false;
+    const m = openModal({
+      title: "apagar repetições", body: `<p class="dialog-text">essa ação não poderá ser desfeita.</p>
+      <div class="scope-list del">
+        <button class="scope" data-s="one"><b>apagar somente esta</b></button>
+        <button class="scope" data-s="from"><b>apagar esta e as próximas</b></button>
+        <button class="scope danger" data-s="all"><b>apagar todas</b></button>
+      </div>`, onClose: () => { if (!done) res(null); }
+    });
+    m.el.addEventListener("click", e => { const b = e.target.closest("[data-s]"); if (!b) return; done = true; m.close(); res(b.dataset.s); });
+  });
+}
 async function deleteOcc(tx, date) {
   if (!tx) return;
   if ((tx.rep || "none") === "none") {
-    if (!(await confirmBox({ title: "apagar movimentação?", text: `"${esc(tx.desc)}" vai sumir do app.`, ok: "apagar" }))) return;
+    if (!(await confirmBox({ title: "apagar movimentação?", text: "essa ação não poderá ser desfeita.", ok: "apagar" }))) return;
     await delTx(tx.id); afterDelete(); return;
   }
   const nd = nextOccDate(tx, date);
-  const s = await chooseScope({ title: "apagar movimentação", text: `"${esc(tx.desc)}" se repete. o que você quer apagar?`, date, hasNext: !!nd, danger: true });
+  const s = await chooseDelScope();
   if (!s) return;
   const first = occInfo(tx, date)?.n === 1;
   if (s === "all" || (s === "from" && first)) await delTx(tx.id);
@@ -2586,14 +2624,23 @@ function bsItem(x) {
 }
 function bsResultsHTML(list) {
   if (!list.length) return `<div class="empty bs-none"><span>nada encontrado para "${esc(UI.bsQ.trim())}".<br>tente outro nome ou outro período.</span></div>`;
-  const fut = list.filter(x => x.date > TODAY).sort((a, b) => a.date.localeCompare(b.date));
+  // "sem data para acabar": no futuro mostra só os próximos 12 meses e, no resumo, o valor por mês em vez de um total de 5 anos
+  const isInf = tx => { const r = tx.rep || "none"; return r !== "none" && r !== "installment" && tx.until !== "count" && !tx.endBefore; };
+  const futAll = list.filter(x => x.date > TODAY), lim = miLast(CUR + 11);
+  const fut = futAll.filter(x => !isInf(x.tx) || x.date <= lim).sort((a, b) => a.date.localeCompare(b.date));
   const past = list.filter(x => x.date <= TODAY).sort((a, b) => b.date.localeCompare(a.date));
   const allIn = list.every(x => x.tx.type === "entrada"), noIn = !list.some(x => x.tx.type === "entrada");
   const sum = arr => r2(arr.reduce((a, x) => a + (allIn || noIn ? x.value : (x.tx.type === "entrada" ? x.value : -x.value)), 0));
   const L = allIn ? ["já recebido", "ainda vai receber", "já recebidas"] : noIn ? ["já pago", "ainda vai pagar", "já pagas"] : ["até hoje", "daqui para frente", "já aconteceram"];
   let h = `<div class="bs-sum">`;
   if (past.length) h += `<div class="bs-line"><b>${L[0]}</b><span class="num">${brl(sum(past))}</span></div>`;
-  if (fut.length) h += `<div class="bs-line"><b>${L[1]}</b><span class="num">${brl(sum(fut))}</span></div>`;
+  const futFin = futAll.filter(x => !isInf(x.tx)), infTx = [...new Set(futAll.filter(x => isInf(x.tx)).map(x => x.tx))];
+  if (futFin.length) h += `<div class="bs-line"><b>${L[1]}</b><span class="num">${brl(sum(futFin))}</span></div>`;
+  if (infTx.length) {
+    const PM = { monthly: 1, weekly: 52 / 12, daily: 365 / 12, yearly: 1 / 12 }, avg = infTx.some(t => t.rep !== "monthly");
+    const pm = r2(infTx.reduce((a, t) => a + (allIn || noIn || t.type === "entrada" ? 1 : -1) * t.value * (PM[t.rep] || 1), 0));
+    h += `<div class="bs-line bs-inf"><span class="bs-inf-l"><b>${avg ? "em média por mês" : "todo mês"}</b><small>sem data para acabar</small></span><span class="num">${brl(pm)}</span></div>`;
+  }
   h += `</div>`;
   const group = (key, title, arr, first) => {
     if (!arr.length) return "";
@@ -2621,8 +2668,8 @@ function bsInsights() {
     () => { const a = st.diarioMedio, b = pv.diarioMedio; if (!(a > 0 && b > 0)) return null; const p = Math.round((a - b) / b * 100);
       return p === 0 ? m("info", BI.wallet, `seu diário médio está igual ao de ${pName}.`) : p < 0 ? m("good", BI.down, `seu diário médio está <b>${-p}% menor</b> que em ${pName}.`) : m("info", BI.up, `seu diário médio está <b>${p}% maior</b> que em ${pName}.`); },
     () => { const g = monthOcc.filter(x => x.tx.type === "saida" || x.tx.type === "cartao").sort((a, b) => b.value - a.value)[0]; return g ? m("info", BI.receipt, `o maior gasto de ${mName} é <b>${esc(g.tx.desc)}</b>, de ${bm(g.value)}.`) : null; },
-    () => { let best = null; for (const tx of S.txs) { if (tx.rep !== "installment") continue; let left = 0, last = null; expand(tx, ymd(addDays(NOW, 1)), miLast(MAX_MI), d => { left++; last = d; }); if (left && (!best || left > best.left)) best = { tx, left, last }; }
-      if (!best) return null; const ld = parse(best.last); return m("info", I.cal, `${best.left === 1 ? "falta <b>1 parcela</b>" : `faltam <b>${best.left} parcelas</b>`} de ${esc(best.tx.desc)}. a última é em ${MON3[ld.getMonth()]}/${String(ld.getFullYear()).slice(2)}.`); },
+    () => { let best = null; for (const tx of S.txs) { const fin = tx.rep === "installment" || ((tx.rep || "none") !== "none" && tx.until === "count") || ((tx.rep || "none") !== "none" && tx.endBefore); if (!fin) continue; let left = 0, last = null; expand(tx, ymd(addDays(NOW, 1)), miLast(MAX_MI), d => { left++; last = d; }); if (left && (!best || left > best.left)) best = { tx, left, last }; }
+      if (!best) return null; const ld = parse(best.last); return m("info", I.cal, `${best.left === 1 ? `falta <b>1 ${best.tx.rep === "installment" ? "parcela" : "pagamento"}</b>` : `faltam <b>${best.left} ${best.tx.rep === "installment" ? "parcelas" : (best.tx.type === "entrada" ? "recebimentos" : "pagamentos")}</b>`} de ${esc(best.tx.desc)}. a última é em ${MON3[ld.getMonth()]}/${String(ld.getFullYear()).slice(2)}.`); },
     () => { const v = r2(occs(`${NOW.getFullYear()}-01-01`, TODAY).filter(x => x.tx.type === "economia").reduce((a, x) => a + x.value, 0)); return v > 0 ? m("good", BI.piggy, `você já guardou <b>${bm(v)}</b> este ano.`) : null; },
     () => { const n = occs(ymd(addDays(NOW, 1)), miLast(CUR + 2)).filter(x => x.tx.type === "entrada").sort((a, b) => a.date.localeCompare(b.date))[0]; return n ? m("good", BI.inc, `a próxima entrada é <b>${esc(n.tx.desc)}</b>, de ${bm(n.value)}, em ${ddmm(n.date)}.`) : null; },
     () => { if (!(st.econBase > 0)) return null; const p = st.econPct; if (st.econVal <= 0) return m("info", BI.piggy, `você ainda não guardou nada em ${mName}.`);
@@ -2868,7 +2915,7 @@ function openPrevForm(id) {
           await backend.put("prev", p ? p.id : uid("p"), { value, desc: desc || "gasto do dia a dia", createdAt: p ? p.createdAt || Date.now() : Date.now() });
         }
         if (e.target.closest("[data-delprev]")) {
-          if (!(await confirmBox({ title: "apagar gasto?", text: `"${esc(p.desc)}" vai sair da previsão de diário.`, ok: "apagar" }))) return;
+          if (!(await confirmBox({ title: "apagar gasto?", text: "essa ação não poderá ser desfeita.", ok: "apagar" }))) return;
           s.close(); await backend.del("prev", p.id);
         }
       });
@@ -2913,7 +2960,7 @@ function openCardForm(id) {
       }
       if (e.target.closest("[data-delcard]")) {
         const n = S.txs.filter(t => t.cardId === c.id).length;
-        if (!(await confirmBox({ title: "apagar cartão?", text: n ? `"${esc(c.name)}" vai sumir. ${n === 1 ? "o gasto continua" : `os ${n} gastos continuam`}, só que sem cartão.` : `"${esc(c.name)}" vai sumir da lista.`, ok: "apagar" }))) return;
+        if (!(await confirmBox({ title: "apagar cartão?", text: "essa ação não poderá ser desfeita.", ok: "apagar" }))) return;
         s.close(); await backend.del("cards", c.id);
       }
     }),
@@ -2961,11 +3008,11 @@ function openMyData() {
       ${srow({ attr: "data-apagar", ico: I.trash, main: "apagar minha conta", sub: "exclui permanentemente sua conta e apaga todos os seus dados no app", chev: false, cls: "danger-row" })}</div>`,
     onMount: el => el.addEventListener("click", async e => {
       if (e.target.closest("[data-zerar]")) {
-        if (!(await confirmBox({ title: "zerar minha conta?", text: `${S.txs.length === 1 ? "a sua movimentação vai ser apagada" : `todas as suas ${S.txs.length} movimentações vão ser apagadas`}. cartões, previsão de diário e perfil continuam como estão.`, ok: "zerar conta" }))) return;
+        if (!(await confirmBox({ title: "zerar minha conta?", text: "essa ação não poderá ser desfeita.", ok: "zerar conta" }))) return;
         await wipe(["tx"]); S.checkins = {}; backend.putCheckins({});
       }
       if (e.target.closest("[data-apagar]")) {
-        if (!(await confirmBox({ title: "apagar minha conta?", text: "sua conta e todos os seus dados vão ser apagados de vez.", ok: "apagar conta" }))) return;
+        if (!(await confirmBox({ title: "apagar minha conta?", text: "essa ação não poderá ser desfeita.", ok: "apagar conta" }))) return;
         if (S.mode === "supabase" && (!SB || !isOnline())) { toast("sem internet. conecta para apagar a conta", true); return; }
         while (SCREENS.length) SCREENS[SCREENS.length - 1].close();
         if (S.mode === "supabase") {
