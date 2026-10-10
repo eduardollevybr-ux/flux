@@ -845,6 +845,11 @@ input,textarea,[contenteditable="true"]{-webkit-user-select:text;user-select:tex
 
 /* botão "+" flutuante removido de cima da barra inferior */
 #fab,.fab{display:none!important}
+
+/* estados vazios: círculo menor */
+.empty .plus,.sempty .circ{width:72px;height:72px}
+.empty .plus svg,.sempty .circ svg{width:24px;height:24px}
+.empty,.sempty{gap:20px}
 </style>
 <script>try{var t=JSON.parse(localStorage.getItem("ae.theme")||"null")||"dark";if(t==="system")t=matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light";if(t==="light")document.documentElement.classList.add("light")}catch(e){}</script>
 </head><body>
@@ -1011,7 +1016,7 @@ const prof = () => ({ ...DEFAULT_PROFILE, ...(S.profile || {}) });
 let backend = null;
 const chains = {};
 function queue(key, fn) { chains[key] = (chains[key] || Promise.resolve()).then(fn, fn); return chains[key]; }
-function onErr(e) { console.warn(e); toast("não deu pra salvar agora. tenta de novo em instantes", true); }
+function onErr(e) { console.warn(e); toast("não deu para salvar agora. tenta de novo em instantes", true); }
 
 /* ===== supabase: cole aqui a URL e a chave "anon public" do seu projeto ===== */
 const SUPABASE_URL = "https://ccxiuaqirickchmrowrz.supabase.co";
@@ -1050,7 +1055,7 @@ let NET = { offline: !isOnline(), dirty: false, relogin: false };
 function setNet(p) { Object.assign(NET, p); renderNet(); }
 function renderNet() {
   let el = document.getElementById("net-pill");
-  const txt = NET.offline ? "sem internet · salvo no aparelho" : NET.relogin ? "toca aqui pra entrar de novo e sincronizar" : "";
+  const txt = NET.offline ? "sem internet · salvo no aparelho" : NET.relogin ? "toca aqui para entrar de novo e sincronizar" : "";
   if (!txt) { if (el) el.remove(); return; }
   if (!el) { el = document.createElement("div"); el.id = "net-pill"; el.setAttribute("role", "status"); document.body.appendChild(el); el.addEventListener("click", () => { if (NET.relogin && !NET.offline && window.fluxRelogin) window.fluxRelogin(); }); }
   el.className = NET.offline ? "off" : NET.relogin ? "relog" : "sync";
@@ -1079,18 +1084,18 @@ async function initSupabase() {
     let error = null;
     try { ({ error } = await SB.from(SB_TABLE).upsert(row)); } catch (e) { error = e; }
     saving = false;
-    if (error) { console.warn(error); if (isOnline()) toast("não deu pra salvar agora. tenta de novo em instantes", true); return false; }
+    if (error) { console.warn(error); if (isOnline()) toast("não deu para salvar agora. tenta de novo em instantes", true); return false; }
     lastSaved = row.updated_at; writeCache(false); return true;
   };
   const schedulePush = () => { clearTimeout(saveT); saveT = setTimeout(push, 600); };
   backend = memBackend(() => { writeCache(true); schedulePush(); });
   backend.setPassword = async pw => {
-    if (!SB || !isOnline()) throw new Error("sem internet. conecta pra trocar a senha");
+    if (!SB || !isOnline()) throw new Error("sem internet. conecta para trocar a senha");
     const { error } = await SB.auth.updateUser({ password: pw }); if (error) throw error;
   };
   backend.signOut = async () => {
     clearTimeout(saveT);
-    if (cache && cache.dirty && !(await push())) { toast(NET.relogin ? "entra de novo pra sincronizar antes de sair" : "sem internet. conecta pra sair sem perder o que você adicionou", true); return; }
+    if (cache && cache.dirty && !(await push())) { toast(NET.relogin ? "entra de novo para sincronizar antes de sair" : "sem internet. conecta para sair sem perder o que você adicionou", true); return; }
     lsSet(CACHE_KEY, null); cache = null;
     if (SB) await SB.auth.signOut({ scope: "local" });
     else { SB_USER = null; S.loaded = false; applyData(null); showAuth("login"); }
@@ -1109,7 +1114,7 @@ async function initSupabase() {
   try { await loadScript("https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"); }
   catch {
     if (cache) { window.addEventListener("online", () => location.reload(), { once: true }); return; }
-    toast("não deu pra conectar agora. confere sua internet", true); initLocal(); return;
+    toast("não deu para conectar agora. confere sua internet", true); initLocal(); return;
   }
   SB = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, { auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true, storageKey: "flux-auth" } });
 
@@ -1122,7 +1127,7 @@ async function initSupabase() {
     if (!isOnline() || NET.relogin) { if (!S.loaded && cache && cache.uid === SB_USER.id) openFromCache(); return; }
     let data = null, error = null;
     try { ({ data, error } = await SB.from(SB_TABLE).select("data,updated_at").eq("user_id", SB_USER.id).maybeSingle()); } catch (e) { error = e; }
-    if (error) { console.warn(error); if (!S.loaded) toast("não deu pra carregar seus dados. tenta de novo", true); return; }
+    if (error) { console.warn(error); if (!S.loaded) toast("não deu para carregar seus dados. tenta de novo", true); return; }
     let imported = false;
     if (data) { applyData(data.data); lastSaved = data.updated_at; }
     else { const loc = lsGet("ae.data", null); applyData(loc); imported = !!(loc && ((loc.txs || []).length || (loc.prev || []).length)); }
@@ -1517,7 +1522,7 @@ function renderSidebar() {
   $("#nav-main").innerHTML = nb("saldos", "saldos") + nb("totais", "totais") + nb("menu", "menu");
   $("#nav-short").innerHTML =
     `<button class="nav-btn" id="btn-add" aria-label="adicionar movimentação" aria-haspopup="menu">${I.add}<span class="t">adicionar</span></button>
-     <button class="nav-btn" id="btn-today" aria-label="ir pra hoje, dia ${NOW.getDate()}"><span class="cal-ico">${I.cal}<b>${NOW.getDate()}</b></span><span class="t">ir pra hoje</span></button>` +
+     <button class="nav-btn" id="btn-today" aria-label="ir para hoje, dia ${NOW.getDate()}"><span class="cal-ico">${I.cal}<b>${NOW.getDate()}</b></span><span class="t">ir para hoje</span></button>` +
     nb("horizonte", "horizonte");
   $("#sidebar").classList.toggle("collapsed", !!UI.sideCollapsed);
   $("#btn-collapse").setAttribute("aria-label", UI.sideCollapsed ? "expandir barra lateral" : "recolher barra lateral");
@@ -1561,7 +1566,7 @@ function glide(get, set, to, dur, done) {
   requestAnimationFrame(step);
 }
 function scrollToToday(smooth, delay = 0) {
-  const dur = 750; // mesma animação do botão "ir pra hoje"
+  const dur = 750; // mesma animação do botão "ir para hoje"
   if (isMobile()) {
     const pg = $("#view .page"), row = $(`#view .pane.cur [data-row="${TODAY}"]`);
     if (!pg || !row) return;
@@ -1676,7 +1681,7 @@ function bindVScroll(board) {
     if (!b.classList || !b.classList.contains("mbox")) return;
     const t = b.scrollTop, max = b.scrollHeight - b.clientHeight;
     if (Math.abs(t - VTOP) < 1 || (t >= max - 1 && VTOP > t)) return; // já sincronizado ou mês mais curto no fim
-    if (t >= max - 1) { for (const o of vBoxes()) if (o !== b) o.scrollTop = o.scrollHeight; VTOP = vMax(); } // chegou no fim: todos os meses vão pro último dia
+    if (t >= max - 1) { for (const o of vBoxes()) if (o !== b) o.scrollTop = o.scrollHeight; VTOP = vMax(); } // chegou no fim: todos os meses vão para o último dia
     else { VTOP = t; for (const o of vBoxes()) if (o !== b) o.scrollTop = t; }
     const p = $("#vbar"); if (p) p.scrollTop = VTOP;
   }, { capture: true, passive: true });
@@ -1793,8 +1798,8 @@ function renderMobileChrome() {
   const hz = mob && UI.tab === "horizonte";
   document.body.classList.toggle("m-hz", hz);
   document.body.classList.toggle("d-hz", !mob && UI.tab === "horizonte");
-  $("#top-left").innerHTML = hz ? `<button class="icon-btn bare" data-mback aria-label="voltar pra saldos">${I.back}</button>`
-    : mob && UI.tab !== "menu" ? `<button class="m-cal" data-mtoday aria-label="ir pra hoje, dia ${NOW.getDate()}"><span class="mc-body"><b class="num">${NOW.getDate()}</b></span><i class="mc-ring l"></i><i class="mc-ring r"></i></button>` : "";
+  $("#top-left").innerHTML = hz ? `<button class="icon-btn bare" data-mback aria-label="voltar para saldos">${I.back}</button>`
+    : mob && UI.tab !== "menu" ? `<button class="m-cal" data-mtoday aria-label="ir para hoje, dia ${NOW.getDate()}"><span class="mc-body"><b class="num">${NOW.getDate()}</b></span><i class="mc-ring l"></i><i class="mc-ring r"></i></button>` : "";
   $(".topbar").hidden = mob && UI.tab === "menu";
   const bn = (tab, label, ic) => `<button class="bn ${UI.tab === tab || (tab === "saldos" && UI.tab === "horizonte") ? "active" : ""}" data-tab="${tab}" aria-label="${label}">${ic}<span>${label}</span></button>`;
   const nav = $("#bottom-nav");
@@ -1925,7 +1930,7 @@ function monthCard(mi, horizon) {
     body += `<tr class="${cls}" data-row="${ds}"><td class="c-dia num" data-act="check" data-d="${ds}" role="button" tabindex="0" aria-label="dia ${d} de ${MONTHS[m]}: ${S.checkins[ds] ? "desmarcar" : "marcar"} check-in">${d}${S.checkins[ds] ? `<span class="check ${UI.popCheck === ds ? "pop" : ""}" aria-hidden="true">${I.checkW}</span>` : ""}</td>`;
     for (const t of cols) {
       const { v, real, fc } = cellVal(o, t, ds); tot[t] = r2(tot[t] + v);
-      body += `<td class="cell num ${v ? "" : "z"} ${fc ? "fc" : ""} ${hid[t] ? "col-min" : ""}" data-act="cell" data-d="${ds}" data-t="${t}" role="button" tabindex="0" aria-label="${TYPES[t].col} em ${d} de ${MONTHS[m]}: ${fmt(v)}${fc ? " (com previsão)" : ""}. clique pra ver, botão direito pra adicionar"><span class="in">${ti(fc && !real ? "prev" : t)}<span class="v">${brl(v)}</span></span></td>`;
+      body += `<td class="cell num ${v ? "" : "z"} ${fc ? "fc" : ""} ${hid[t] ? "col-min" : ""}" data-act="cell" data-d="${ds}" data-t="${t}" role="button" tabindex="0" aria-label="${TYPES[t].col} em ${d} de ${MONTHS[m]}: ${fmt(v)}${fc ? " (com previsão)" : ""}. clique para ver, botão direito para adicionar"><span class="in">${ti(fc && !real ? "prev" : t)}<span class="v">${brl(v)}</span></span></td>`;
     }
     body += `<td class="c-saldo num ${saldoCls(s)}" data-act="saldo" data-d="${ds}" role="button" tabindex="0" aria-label="saldo em ${d} de ${MONTHS[m]}: ${fmt(s)}">${horizon ? abbr(s) : brl(s)}</td></tr>`;
   }
@@ -1979,7 +1984,7 @@ function mMonthInner(horizon, col) {
       h += `<div class="m-vals">`;
       for (const t of cols) {
         const { v, real, fc } = cellVal(o, t, ds); tot[t] = r2(tot[t] + v);
-        h += `<button class="m-cell num ${v ? "" : "z"} ${fc ? "fc" : ""}" data-act="cell" data-d="${ds}" data-t="${t}" aria-label="${TYPES[t].col} em ${d} de ${MONTHS[m]}: ${fmt(v)}${fc ? " (com previsão)" : ""}. toque pra ver, segure pra adicionar">${ti(fc && !real ? "prev" : t)}<span>${brl(v)}</span></button>`;
+        h += `<button class="m-cell num ${v ? "" : "z"} ${fc ? "fc" : ""}" data-act="cell" data-d="${ds}" data-t="${t}" aria-label="${TYPES[t].col} em ${d} de ${MONTHS[m]}: ${fmt(v)}${fc ? " (com previsão)" : ""}. toque para ver, segure para adicionar">${ti(fc && !real ? "prev" : t)}<span>${brl(v)}</span></button>`;
       }
       h += `</div>`;
     }
@@ -2202,7 +2207,7 @@ function renderPanel() {
       if (PANEL.filter) list = list.filter(x => x.tx.type === PANEL.filter);
       const pd = perDayPrev();
       if (day && PANEL.date > TODAY && pd > 0.004 && (!PANEL.filter || PANEL.filter === "diario"))
-        prevRow = `<div class="lrow static" role="group" aria-label="previsão de diário: ${brl(pd)}"><span class="lrow-top">${ti("prev")}<b class="ellip">previsão de diário</b><span class="lrow-val num">${brl(pd)}</span></span><span class="lrow-sub">previsão pro dia</span></div>`;
+        prevRow = `<div class="lrow static" role="group" aria-label="previsão de diário: ${brl(pd)}"><span class="lrow-top">${ti("prev")}<b class="ellip">previsão de diário</b><span class="lrow-val num">${brl(pd)}</span></span><span class="lrow-sub">previsão para o dia</span></div>`;
     }
     head = `<button class="icon-btn flat" ${PANEL.calcF ? "data-pcalcback" : "data-pclose"} aria-label="voltar">${I.back}</button>
       <div class="ph-mid"><button class="icon-btn flat" data-pstep="-1" aria-label="${day ? "dia anterior" : "mês anterior"}" ${prevOk ? "" : "disabled"}>${I.left}</button>${mid}<button class="icon-btn flat" data-pstep="1" aria-label="${day ? "próximo dia" : "próximo mês"}" ${nextOk ? "" : "disabled"}>${I.right}</button></div>
@@ -2210,7 +2215,7 @@ function renderPanel() {
     const dd = `<button class="pill-dd" data-pfilter aria-haspopup="menu" aria-label="filtrar por tipo, atual: ${PANEL.filter ? TYPES[PANEL.filter].col : "todas"}">${filterLabel()}<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 9l6 6 6-6"/></svg></button>`;
     const items = !S.loaded ? `<div class="skel"></div><div class="skel"></div><div class="skel"></div>`
       : list.length || prevRow ? `<div class="lrows">${list.map(itemHTML).join("")}${prevRow}</div>`
-      : `<div class="empty"><button class="plus" data-padd aria-label="adicionar movimentação">${I.plus.replace("<svg", '<svg width="26" height="26"')}</button><span>${PANEL.mode === "day" ? "nenhuma movimentação neste dia" : "nenhuma movimentação neste mês"}</span></div>`;
+      : `<div class="empty"><button class="plus" data-padd aria-label="adicionar movimentação">${I.plus.replace("<svg", '<svg width="26" height="26"')}</button><span>sem movimentações por aqui. toque no + para adicionar.</span></div>`;
     body = `${PANEL.calcF ? calcFilterBar(PANEL.calcF) : `<div class="pbar">${dd}</div>`}${items}`;
   }
   const fresh = !root.firstChild;
@@ -2340,7 +2345,7 @@ function openForm({ type = "saida", date = TODAY, tx = null, occ = null } = {}) 
         <button class="frow" id="f-date" aria-haspopup="dialog" aria-label="data: ${dBR(effDate(f.date))}. mudar"><span class="fr-ico">${CAL}</span><span class="fr-main">data</span><span class="fr-val num">${dBR(effDate(f.date))}</span>${CHEV}</button>
         <button class="frow" id="f-rep" aria-haspopup="dialog" aria-label="repetição: ${REP_LABEL[f.rep]}. mudar"><span class="fr-ico">${REP_ICO}</span><span class="fr-main">${REP_LABEL[f.rep]}</span>${CHEV}</button>
         ${f.rep === "monthly" ? `<button class="frow" id="f-mday" aria-haspopup="dialog" aria-label="repete no: ${MDAY_LABEL()}. mudar"><span class="fr-ico">${CAL}</span><span class="fr-main">repete no</span><span class="fr-val">${MDAY_LABEL()}</span>${CHEV}</button>` : ""}
-        ${repeats ? `<button class="frow" id="f-until" aria-haspopup="dialog" aria-label="até quando: ${f.until === "count" ? `${f.count} vezes` : "sem data pra acabar"}. mudar"><span class="fr-ico">${I.horizonte.replace("<svg", '<svg width="22" height="22"')}</span><span class="fr-main">até quando</span><span class="fr-val num">${f.until === "count" ? `${f.count} vezes` : "sem data pra acabar"}</span>${CHEV}</button>` : ""}
+        ${repeats ? `<button class="frow" id="f-until" aria-haspopup="dialog" aria-label="até quando: ${f.until === "count" ? `${f.count} vezes` : "sem data para acabar"}. mudar"><span class="fr-ico">${I.horizonte.replace("<svg", '<svg width="22" height="22"')}</span><span class="fr-main">até quando</span><span class="fr-val num">${f.until === "count" ? `${f.count} vezes` : "sem data para acabar"}</span>${CHEV}</button>` : ""}
         ${inst ? `<div class="frow"><span class="fr-ico">${I.card.replace("<svg", '<svg width="22" height="22"')}</span><span class="fr-main">parcelas</span><span class="stepper"><button class="icon-btn" data-inst="-1" aria-label="menos uma parcela">−</button><b class="num" aria-live="polite">${f.installments}</b><button class="icon-btn" data-inst="1" aria-label="mais uma parcela">+</button></span></div>` : ""}
       </div>`);
     const b = $("#f-submit", el);
@@ -2370,7 +2375,7 @@ function openForm({ type = "saida", date = TODAY, tx = null, occ = null } = {}) 
       const day = f.mday === "biz" ? f.aday : +f.date.slice(8);
       const s = openSheet({ title: "repete no", body: `<div class="slist">
           <button class="sitem ${f.mday === "same" ? "on" : ""}" data-md="same"><span class="si-txt"><b>mesmo dia</b><span>sempre no dia ${day}, mesmo se cair em fim de semana ou feriado</span></span></button>
-          <button class="sitem ${f.mday === "biz" ? "on" : ""}" data-md="biz"><span class="si-txt"><b>dia ${day} ou próximo dia útil</b><span>se o dia ${day} cair em fim de semana ou feriado, passa pro próximo dia útil</span></span></button>
+          <button class="sitem ${f.mday === "biz" ? "on" : ""}" data-md="biz"><span class="si-txt"><b>dia ${day} ou próximo dia útil</b><span>se o dia ${day} cair em fim de semana ou feriado, passa para o próximo dia útil</span></span></button>
           <div class="sitem ${f.mday === "nth" ? "on" : ""}" data-md="nth" role="button" tabindex="0"><span class="si-txt"><b>dia útil do mês</b><span>ex.: todo 5º dia útil</span></span>
             <span class="stepper"><button class="icon-btn" data-nc="-1" aria-label="um dia útil a menos">−</button><b class="num" id="md-n">${f.nth}º</b><button class="icon-btn" data-nc="1" aria-label="um dia útil a mais">+</button></span></div>
         </div><p class="hint sheet-hint">dia útil: segunda a sexta, sem contar os feriados nacionais.</p><button class="btn block primary" data-mdsave>confirmar</button>` });
@@ -2386,7 +2391,7 @@ function openForm({ type = "saida", date = TODAY, tx = null, occ = null } = {}) 
     if (t.closest("#f-rep")) listSheet("repetição", Object.keys(REP_LABEL).map(k => [k, REP_LABEL[k], REP_DESC[k]]), f.rep, k => { f.rep = k; draw(); });
     if (t.closest("#f-until")) {
       const s = openSheet({ title: "até quando", body: `<div class="slist">
-          <button class="sitem ${f.until === "forever" ? "on" : ""}" data-u="forever"><span class="si-txt"><b>sem data pra acabar</b><span>repete até você apagar ou mudar</span></span></button>
+          <button class="sitem ${f.until === "forever" ? "on" : ""}" data-u="forever"><span class="si-txt"><b>sem data para acabar</b><span>repete até você apagar ou mudar</span></span></button>
           <div class="sitem ${f.until === "count" ? "on" : ""}" data-u="count" role="button" tabindex="0"><span class="si-txt"><b>número de repetições</b><span>escolhe quantas vezes</span></span>
             <span class="stepper"><button class="icon-btn" data-c="-1" aria-label="menos uma" ${f.count <= 2 ? "disabled" : ""}>−</button><b class="num" id="u-n">${f.count}</b><button class="icon-btn" data-c="1" aria-label="mais uma">+</button></span></div>
         </div><button class="btn block primary" data-usave>confirmar</button>` });
@@ -2405,7 +2410,7 @@ function openForm({ type = "saida", date = TODAY, tx = null, occ = null } = {}) 
   async function submit() {
     if (!(f.value > 0)) { toast("coloca um valor maior que zero", true); $("#f-val", el)?.focus(); return; }
     if (f.type === "cartao" && !(f.cardId && cardName(f.cardId))) { toast("escolhe o cartão desse gasto", true); cardSheet(f.cardId, id => { f.cardId = id; draw(); }); return; }
-    if (f.date < miFirst(MIN_MI) || f.date > miLast(MAX_MI)) { toast("a data precisa estar dentro de 5 anos pra trás ou pra frente", true); return; }
+    if (f.date < miFirst(MIN_MI) || f.date > miLast(MAX_MI)) { toast("a data precisa estar dentro de 5 anos para trás ou para frente", true); return; }
     const desc = f.desc.trim() || TYPES[f.type].label;
     const rule = isRule();
     const base = { type: f.type, desc, rep: f.rep, until: f.until, count: f.count, installments: f.installments, tags: [], cardId: f.type === "cartao" ? f.cardId : "", skip: [], endBefore: null, mday: rule ? f.mday : "same", nth: rule && f.mday === "nth" ? f.nth : null, aday: rule && f.mday === "biz" ? f.aday : null };
@@ -2416,7 +2421,7 @@ function openForm({ type = "saida", date = TODAY, tx = null, occ = null } = {}) 
       m.close(); await saveTx(edit ? tx.id : uid("t"), data); if (PANEL.open) renderPanel(); return;
     }
     const nd = nextOccDate(tx, occD);
-    const s = await chooseScope({ title: "salvar alterações", text: `"${esc(tx.desc)}" se repete. pra quais repetições vale essa mudança?`, date: occD, hasNext: !!nd });
+    const s = await chooseScope({ title: "salvar alterações", text: `"${esc(tx.desc)}" se repete. para quais repetições vale essa mudança?`, date: occD, hasNext: !!nd });
     if (!s) return;
     m.close();
     const delta = dayDiff(occD, fDate), n = oi ? oi.n : 1, now = Date.now();
@@ -2454,7 +2459,7 @@ function datePicker(anchor, value, onPick) {
     const tail = (7 - ((first + n) % 7)) % 7, nmi = mi + 1;
     for (let d = 1; d <= tail; d++) g += cell(miY(nmi), miM(nmi), d, true);
     return `<div class="cal2"><div class="cal2-head"><b>${MONTHS[vm]} de ${vy}</b>
-      <button class="icon-btn flat" data-today aria-label="ir pra hoje">${I.cal}</button>
+      <button class="icon-btn flat" data-today aria-label="ir para hoje">${I.cal}</button>
       <button class="icon-btn flat" data-cm="-1" aria-label="mês anterior" ${mi <= MIN_MI ? "disabled" : ""}>${I.left}</button>
       <button class="icon-btn flat" data-cm="1" aria-label="próximo mês" ${mi >= MAX_MI ? "disabled" : ""}>${I.right}</button></div>
       <div class="cal2-grid">${g}</div></div><button class="btn block primary" data-dsave>confirmar</button>`;
@@ -2479,7 +2484,7 @@ function cardSheet(cur, onPick) {
     const c = e.target.closest("[data-card]"); if (c) { s.close(); onPick(c.dataset.card); return; }
     if (e.target.closest("[data-savecard]")) {
       const name = $("#nc-name", s.el).value.trim();
-      if (!name) { toast("dá um nome pro cartão", true); $("#nc-name", s.el).focus(); return; }
+      if (!name) { toast("dá um nome para o cartão", true); $("#nc-name", s.el).focus(); return; }
       if (S.cards.some(x => x.name.toLowerCase() === name.toLowerCase())) { toast("já tem um cartão com esse nome", true); return; }
       const id = uid("c"); await backend.put("cards", id, { name, createdAt: Date.now() }); s.close(); onPick(id);
     }
@@ -2601,7 +2606,7 @@ function openPassword() {
         if (a.length < 6) { toast("a senha precisa ter pelo menos 6 caracteres", true); return; }
         if (a !== b) { toast("as senhas não são iguais", true); return; }
         if (!backend.setPassword) { toast("a troca de senha só funciona com login", true); return; }
-        backend.setPassword(a).then(() => s.close()).catch(err => { console.warn(err); toast("não deu pra trocar a senha. tenta de novo", true); });
+        backend.setPassword(a).then(() => s.close()).catch(err => { console.warn(err); toast("não deu para trocar a senha. tenta de novo", true); });
       });
     },
   });
@@ -2614,7 +2619,7 @@ function openPrevScreen() {
     const list = prevSorted();
     s.setBody(`<div class="pv-list">${list.length
       ? list.map(p => `<button class="pv-row" data-editprev="${p.id}"><b class="ellip">${esc(p.desc)}</b><span class="num">${brl(p.value)}</span></button>`).join("")
-      : `<div class="sempty"><button class="circ" data-addprev aria-label="adicionar gasto">${I.plus}</button><span>sem gastos por aqui. toque no botão acima pra criar.</span></div>`}</div>
+      : `<div class="sempty"><button class="circ" data-addprev aria-label="adicionar gasto">${I.plus}</button><span>sem gastos por aqui. toque no botão acima para criar.</span></div>`}</div>
       <div class="pv-foot"><div class="pv-line"><b>total mensal</b><span class="num">${brl(prevTotal())}</span></div>
       <button class="pv-line pv-div" data-prevdiv aria-haspopup="dialog" aria-label="dividido por ${prevDiv()} dias, alterar"><b>dividido por</b><span class="pv-dd"><span class="num">${prevDiv()} dias</span><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></span></button>
       <div class="pv-res num" aria-label="previsão por dia: ${brl(perDayPrev())}">${brl(perDayPrev())}</div></div>`);
@@ -2675,7 +2680,7 @@ function openCards() {
         const n = S.txs.filter(t => t.cardId === c.id).length;
         return srow({ attr: `data-editcard="${c.id}"`, ico: I.card, main: esc(c.name), sub: n ? `${n} ${n === 1 ? "movimentação" : "movimentações"}` : "nenhuma movimentação" });
       }).join("")}</div>`
-      : `<div class="sempty"><button class="circ" data-addcard aria-label="adicionar cartão">${SI.cardAdd}</button><span>sem cartões por aqui. toque no botão acima pra criar.</span></div>`);
+      : `<div class="sempty"><button class="circ" data-addcard aria-label="adicionar cartão">${SI.cardAdd}</button><span>sem cartões por aqui. toque no botão acima para criar.</span></div>`);
   };
   const s = openScreen({
     title: "cartões",
@@ -2697,7 +2702,7 @@ function openCardForm(id) {
     onMount: (el, s) => el.addEventListener("click", async e => {
       if (e.target.closest("[data-savecc]")) {
         const name = $("#cc-name", el).value.trim();
-        if (!name) { toast("dá um nome pro cartão", true); $("#cc-name", el).focus(); return; }
+        if (!name) { toast("dá um nome para o cartão", true); $("#cc-name", el).focus(); return; }
         if (S.cards.some(x => x.id !== id && x.name.toLowerCase() === name.toLowerCase())) { toast("já tem um cartão com esse nome", true); return; }
         s.close();
         await backend.put("cards", c ? c.id : uid("c"), { name, createdAt: c ? c.createdAt || Date.now() : Date.now() });
@@ -2757,7 +2762,7 @@ function openMyData() {
       }
       if (e.target.closest("[data-apagar]")) {
         if (!(await confirmBox({ title: "apagar minha conta?", text: "sua conta e todos os seus dados vão ser apagados de vez.", ok: "apagar conta" }))) return;
-        if (S.mode === "supabase" && (!SB || !isOnline())) { toast("sem internet. conecta pra apagar a conta", true); return; }
+        if (S.mode === "supabase" && (!SB || !isOnline())) { toast("sem internet. conecta para apagar a conta", true); return; }
         while (SCREENS.length) SCREENS[SCREENS.length - 1].close();
         if (S.mode === "supabase") {
           const { error } = await SB.from(SB_TABLE).delete().eq("user_id", SB_USER.id);
@@ -2797,14 +2802,14 @@ function showAuth(mode, opt) {
   const T = {
     login: ["entrar", "entra com seu e-mail e senha.", `<div class="field"><label for="au-e">e-mail</label><input class="input" id="au-e" type="email" autocomplete="email" inputmode="email"></div>${pw("au-p", "senha", "current-password")}
       <button class="btn primary block" data-au="login">entrar</button>
-      <div class="auth-links"><button data-go="forgot">esqueci minha senha</button>${opt.back ? `<button data-back>voltar pro app</button>` : `<button data-go="signup">criar conta</button>`}</div>`],
+      <div class="auth-links"><button data-go="forgot">esqueci minha senha</button>${opt.back ? `<button data-back>voltar para o app</button>` : `<button data-go="signup">criar conta</button>`}</div>`],
     signup: ["criar conta", "leva menos de um minuto.", `<div class="field"><label for="au-n">nome</label><input class="input" id="au-n" autocomplete="given-name"></div>
       <div class="field"><label for="au-e">e-mail</label><input class="input" id="au-e" type="email" autocomplete="email" inputmode="email"></div>${pw("au-p", "senha", "new-password")}${pw("au-p2", "confirmar senha", "new-password")}
       <button class="btn primary block" data-au="signup">criar conta</button>
       <div class="auth-links"><button data-go="login">já tenho conta</button></div>`],
-    forgot: ["esqueci minha senha", "a gente envia um link pro seu e-mail pra você criar uma senha nova.", `<div class="field"><label for="au-e">e-mail</label><input class="input" id="au-e" type="email" autocomplete="email" inputmode="email"></div>
+    forgot: ["esqueci minha senha", "a gente envia um link para o seu e-mail para você criar uma senha nova.", `<div class="field"><label for="au-e">e-mail</label><input class="input" id="au-e" type="email" autocomplete="email" inputmode="email"></div>
       <button class="btn primary block" data-au="forgot">enviar link</button>
-      <div class="auth-links"><button data-go="login">voltar pra entrar</button></div>`],
+      <div class="auth-links"><button data-go="login">voltar para entrar</button></div>`],
     newpass: ["nova senha", "escolhe a senha nova da sua conta.", `${pw("au-p", "nova senha", "new-password")}${pw("au-p2", "confirmar senha", "new-password")}
       <button class="btn primary block" data-au="newpass">salvar senha</button>`],
   }[mode];
@@ -2832,14 +2837,14 @@ function bindAuth(el) {
       if (mode === "signup") {
         const { data, error } = await SB.auth.signUp({ email, password: pass, options: { data: { nome: ($("#au-n", el).value || "").trim() }, emailRedirectTo: location.href.split("#")[0].split("?")[0] } });
         if (error) throw error;
-        if (!data.session) { showAuthKeepMsg("login", "pronto! confirma a conta pelo link que enviamos pro seu e-mail e depois entra aqui."); showMailSent(email); }
+        if (!data.session) { showAuthKeepMsg("login", "pronto! confirma a conta pelo link que enviamos para o seu e-mail e depois entra aqui."); showMailSent(email); }
       }
       if (mode === "forgot") { const { error } = await SB.auth.resetPasswordForEmail(email, { redirectTo: location.href.split("#")[0] }); if (error) throw error; msg("se esse e-mail tiver conta, o link já está a caminho."); }
       if (mode === "newpass") { const { error } = await SB.auth.updateUser({ password: pass }); if (error) throw error; msg("senha salva! entrando…"); setTimeout(() => location.replace(location.href.split("#")[0]), 800); }
     } catch (err) {
       console.warn(err);
       const m = String(err.message || "");
-      msg(/invalid login/i.test(m) ? "e-mail ou senha errados" : /already registered/i.test(m) ? "esse e-mail já tem conta. é só entrar" : /rate|seconds/i.test(m) ? "muitas tentativas. espera um pouquinho e tenta de novo" : "não deu pra continuar. tenta de novo");
+      msg(/invalid login/i.test(m) ? "e-mail ou senha errados" : /already registered/i.test(m) ? "esse e-mail já tem conta. é só entrar" : /rate|seconds/i.test(m) ? "muitas tentativas. espera um pouquinho e tenta de novo" : "não deu para continuar. tenta de novo");
     } finally { const bb = $("[data-au]", el); if (bb) bb.disabled = false; }
   });
 }
@@ -2850,7 +2855,7 @@ function showMailSent(email) {
   ov.innerHTML = `<div class="mail-box" role="dialog" aria-modal="true" aria-labelledby="mail-t">
     <div class="mail-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="3"/><path d="m4 7 8 6 8-6"/></svg></div>
     <h2 id="mail-t">confirma seu e-mail</h2>
-    <p>enviamos um link de confirmação pra<span class="mail-to">${esc(email)}</span>abre ele pra ativar sua conta e depois é só entrar aqui.</p>
+    <p>enviamos um link de confirmação para<span class="mail-to">${esc(email)}</span>abre ele para ativar sua conta e depois é só entrar aqui.</p>
     <p class="mail-tip">não chegou? dá uma olhada na caixa de spam ou lixo eletrônico.</p>
     <button class="btn primary block" type="button" data-mail-ok>entendi</button>
   </div>`;
@@ -2870,7 +2875,7 @@ function renderSignedOut() {
   const del = UI.signedOut === "deleted";
   el.innerHTML = `${logoSVG(64, true)}
     <h2 style="margin:0;font-size:24px">${del ? "sua conta foi apagada" : "você saiu da sua conta"}</h2>
-    <p class="muted" style="margin:0;max-width:34ch">${del ? "tudo foi apagado. se quiser, dá pra começar do zero agora." : "até logo! seus dados continuam salvos."}</p>
+    <p class="muted" style="margin:0;max-width:34ch">${del ? "tudo foi apagado. se quiser, dá para começar do zero agora." : "até logo! seus dados continuam salvos."}</p>
     <button class="btn primary" id="relog">${del ? "começar do zero" : "entrar de novo"}</button>`;
   $("#relog").onclick = () => {
     if (del) backend.putProfile({ ...DEFAULT_PROFILE });
