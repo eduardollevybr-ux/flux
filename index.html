@@ -659,6 +659,64 @@ input,textarea,[contenteditable="true"]{-webkit-user-select:text;user-select:tex
   .lrow:not(.static):active,button.row:active,.crow:active,.pop-item:active,.sitem:active,button.frow:active,.nav-btn:active,.cal2-grid button:active,.btn-link:active{background:var(--surface2)}
   .icon-btn.flat:active{background:var(--surface2)}
 }
+
+/* ===== telas cheias do menu: só linhas, sem blocos contornados ===== */
+.scr-ov{position:fixed;inset:0;background:var(--overlay);z-index:44;animation:fade .2s ease}
+.scr{position:fixed;top:0;right:0;bottom:0;width:min(480px,100%);z-index:45;background:var(--screen);display:flex;flex-direction:column;animation:scrIn .5s var(--ease-out);transition:transform .45s var(--ease-out),opacity .45s ease;will-change:transform}
+@keyframes scrIn{from{transform:translateX(100%)}}
+.scr.out{transform:translateX(100%)!important;transition:transform .32s cubic-bezier(.5,0,.9,.4)}
+@media (min-width:701px){.scr{border-left:1px solid var(--line);box-shadow:var(--shadow)}}
+@media (max-width:700px){.scr-ov{display:none}.scr.under{transform:translateX(-26%);opacity:.6}}
+.scr-head{display:grid;grid-template-columns:48px 1fr auto;align-items:center;gap:4px;padding:calc(12px + env(safe-area-inset-top,0px)) 12px 12px;border-bottom:1px solid var(--line);flex:none}
+.scr-title{margin:0;font-size:24px;font-weight:700;padding-left:4px;min-width:0}
+.scr-body{flex:1;overflow-y:auto;overscroll-behavior:contain;display:flex;flex-direction:column;-webkit-overflow-scrolling:touch}
+.scr-body>.form-err{margin:16px 20px 0}
+.srow{display:flex;align-items:center;gap:16px;width:100%;min-height:76px;padding:18px 20px;border-bottom:1px solid var(--line);text-align:left;color:inherit;font-size:18px}
+.srow.stack{align-items:flex-start}
+.srow.stack .sico{margin-top:1px}
+.srow .grow{flex:1;min-width:0}
+.srow-main{display:block}
+.srow-sub{display:block;color:var(--muted);font-size:15px;margin-top:6px;line-height:1.45}
+.srow-val{white-space:nowrap}
+.srow>svg.chev{width:20px;height:20px;color:var(--muted);flex:none;align-self:center}
+.sico{width:28px;height:28px;display:grid;place-items:center;flex:none}
+.sico svg{width:24px;height:24px}
+.sico .pv-ico{width:22px;height:22px;border-radius:99px;border:2.2px dashed var(--c-diario)}
+.danger-row .srow-main,.danger-row .sico{color:var(--c-saida)}
+.s-check{width:22px;height:22px;color:var(--accent);opacity:0;transform:scale(.4);transition:opacity .2s,transform .35s var(--spring)}
+.s-check.on{opacity:1;transform:scale(1)}
+.s-check svg{width:22px;height:22px}
+@media (hover:hover){.srow:hover,.pv-row:hover{background:var(--surface2)}}
+@media (hover:none){.srow:active,.pv-row:active{background:var(--surface2)}}
+.lfield{display:flex;flex-direction:column;gap:8px;margin:0 20px;padding:24px 0 10px;border-bottom:1px solid var(--line2);transition:border-color .2s}
+.lfield:focus-within{border-color:var(--accent)}
+.lfield label{font-size:15px;color:var(--muted)}
+.lfield input{background:none;border:0;outline:none;font-size:21px;color:var(--text);padding:4px 0;width:100%;min-width:0;font-family:inherit}
+.lfield input::placeholder{color:var(--zero)}
+.lf-pw{display:flex;align-items:center;gap:8px}
+.lf-pw .eye{width:36px;height:36px;display:grid;place-items:center;color:var(--muted);flex:none}
+.sbtns{display:flex;flex-direction:column;gap:12px;padding:32px 20px calc(24px + env(safe-area-inset-bottom,0px))}
+.sbtn{height:56px;width:100%;border-radius:999px;font-weight:700;font-size:17px;background:transparent;color:var(--text);border:2px solid var(--line2);transition:transform .15s,background-color .2s}
+.sbtn:active{transform:scale(.97)}
+.sbtn.solid{background:var(--text);color:var(--screen);border-color:transparent}
+.sbtn.is-danger{border-color:color-mix(in srgb,var(--c-saida) 40%,transparent)}
+.sempty{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:28px;padding:40px 44px;text-align:center;color:var(--muted);font-size:18px;line-height:1.5;min-height:320px}
+.sempty .circ{width:104px;height:104px;border-radius:99px;border:2px solid var(--line2);display:grid;place-items:center;color:var(--muted);animation:popIn .5s var(--spring)}
+.sempty .circ svg{width:30px;height:30px}
+.pv-list{flex:1;display:flex;flex-direction:column;background:var(--surface2);min-height:200px}
+.pv-row{display:flex;align-items:center;gap:16px;width:100%;padding:24px 20px;border-bottom:1px solid var(--line2);text-align:left;color:inherit;font-size:18px}
+.pv-row b{flex:1;min-width:0}
+.pv-row span{white-space:nowrap}
+.pv-list .sempty{min-height:0}
+.pv-foot{flex:none;padding:20px 20px calc(28px + env(safe-area-inset-bottom,0px));border-top:1px solid var(--line)}
+.pv-line{display:flex;justify-content:space-between;align-items:center;gap:16px;font-size:18px;padding:8px 0}
+.pv-res{border-top:1px solid var(--line2);margin-top:14px;padding-top:22px;text-align:right;font-size:36px;font-weight:700}
+.pv-x{color:var(--muted);font-weight:500;margin-left:2px}
+/* menu: nome grande e lista só com linhas */
+.mp{gap:0!important}
+.mp-head{padding:36px 20px 28px;border-bottom:1px solid var(--line)}
+.mp-name{font-size:40px;font-weight:700;line-height:1.1}
+.mp-mail{color:var(--muted);font-size:17px;margin-top:10px}
 </style>
 </head><body>
 <div id="app" class="app">
@@ -1141,7 +1199,7 @@ function dataChanged() { CALC = null; render(); }
 function render() {
   if (renderQueued) return;
   renderQueued = true;
-  requestAnimationFrame(() => { renderQueued = false; renderAll(); });
+  requestAnimationFrame(() => { renderQueued = false; renderAll(); if (typeof refreshScreens === "function") refreshScreens(); });
 }
 
 /* ================= ícones de interface ================= */
@@ -1176,7 +1234,7 @@ function toast(msg, err) {
   const m = modals[modals.length - 1];
   if (!m) { console.warn(msg); return; }
   let box = $(".form-err", m.el);
-  if (!box) { box = document.createElement("p"); box.className = "form-err"; box.setAttribute("role", "alert"); $(".modal-body", m.el).prepend(box); }
+  if (!box) { box = document.createElement("p"); box.className = "form-err"; box.setAttribute("role", "alert"); $(".modal-body, .scr-body", m.el).prepend(box); }
   box.textContent = msg; box.scrollIntoView({ block: "nearest" });
 }
 
@@ -1676,7 +1734,7 @@ function stagger(els, step = 38, max = 18) {
 }
 function enterAnim(v) {
   const sel = UI.tab === "totais" ? ".pane.cur .section-title, .pane.cur .calc, .pane.cur .list .row, .page > .page-inner .section-title, .page > .page-inner .calc, .page > .page-inner .list .row"
-    : UI.tab === "menu" ? ".profile-card, .list .row"
+    : UI.tab === "menu" ? ".mp-head, .slist2 .srow"
     : isMobile() ? (UI.tab === "horizonte" ? ".pane.cur .hz-row" : ".pane.cur .m-day") : ".mcard";
   stagger($$(sel, v));
 }
@@ -1873,11 +1931,14 @@ function totaisInner(mi) {
   h += `</div></div><div><h2 class="section-title">movimentações do mês</h2><div class="list">`;
   for (const t of TYPE_ORDER) h += `<button class="row" data-mlist="${t}">${ti(t, true)}<span class="grow">${TYPES[t].label}</span><span class="val num">${brl(st.all[t])}</span>${I.chev}</button>`;
   h += `<button class="row" data-mlist="all"><span class="grow row-link">ver todas</span><span class="muted">${st.list.length} ${st.list.length === 1 ? "movimentação" : "movimentações"}</span>${I.chev}</button></div></div>`;
+  const pdays = prevDaysIn(mi);
+  h += `<div><h2 class="section-title">previsão de diário do mês</h2><div class="list"><button class="row" data-openprev aria-label="previsão de diário: ${pdays} ${pdays === 1 ? "dia" : "dias"}, ${brl(st.P)}">${ti("prev", true)}<span class="grow">previsão de diário <span class="pv-x num">x${pdays}</span></span><span class="val num">${brl(st.P)}</span>${I.chev}</button></div></div>`;
   return h + `</div>`;
 }
 $("#view").addEventListener("click", e => {
   const cc = e.target.closest("[data-calc]");
   if (cc) return openCalcScreen(cc.dataset.calc, miY(UI.tMonth));
+  if (e.target.closest("[data-openprev]")) return openPrevScreen();
   const ml = e.target.closest("[data-mlist]");
   if (ml) openMonthScreen(UI.tMonth, ml.dataset.mlist);
 });
@@ -2289,168 +2350,272 @@ const cardsSorted = () => [...S.cards].sort((a, b) => (a.createdAt || 0) - (b.cr
 const cardName = id => (S.cards.find(c => c.id === id) || {}).name || "";
 
 
+/* ================= telas cheias do menu (previsão, cartões, perfil, configurações) ================= */
+const SI = {
+  cardAdd: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11V7.5A2.5 2.5 0 0 0 18.5 5h-13A2.5 2.5 0 0 0 3 7.5v9A2.5 2.5 0 0 0 5.5 19H13"/><path d="M3 10h18M19 15v6M16 18h6"/></svg>',
+  moon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.5 13.4A8.5 8.5 0 1 1 10.6 3.5a6.6 6.6 0 0 0 9.9 9.9z"/></svg>',
+  grid: '<svg viewBox="0 0 24 24" fill="currentColor">' + [5, 9.7, 14.3, 19].flatMap(x => [8, 12, 16].map(y => `<rect x="${x - 1.4}" y="${y - 1.4}" width="2.8" height="2.8" rx=".6"/>`)).join("") + '</svg>',
+  reset: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 9.5A8 8 0 1 1 4 13"/><path d="M4 4.5v5h5"/></svg>',
+  check: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>',
+};
+const SCREENS = [];
+let scrOv = null;
+function screenRoot() { let r = $("#screen-root"); if (!r) { r = document.createElement("div"); r.id = "screen-root"; document.body.appendChild(r); } return r; }
+function syncScreens() {
+  SCREENS.forEach((s, i) => s.el.classList.toggle("under", i < SCREENS.length - 1));
+  if (SCREENS.length && !scrOv) { scrOv = document.createElement("div"); scrOv.className = "scr-ov"; scrOv.onclick = () => SCREENS.length && SCREENS[SCREENS.length - 1].close(); screenRoot().prepend(scrOv); }
+  if (!SCREENS.length && scrOv) { scrOv.remove(); scrOv = null; }
+}
+/* abre uma tela cheia por cima, com seta de voltar, título e um botão opcional à direita */
+function openScreen({ title, right = "", body = "", onMount, refresh }) {
+  closePopover();
+  const el = document.createElement("section");
+  el.className = "scr"; el.setAttribute("role", "dialog"); el.setAttribute("aria-label", title);
+  el.innerHTML = `<header class="scr-head"><button class="icon-btn flat" data-sback aria-label="voltar">${I.back}</button><h2 class="scr-title ellip">${esc(title)}</h2><div class="ph-right" data-sright>${right}</div></header><div class="scr-body">${body}</div>`;
+  screenRoot().appendChild(el);
+  const api = {
+    el, refresh,
+    close() {
+      const i = modals.indexOf(api); if (i >= 0) modals.splice(i, 1);
+      const j = SCREENS.indexOf(api); if (j >= 0) SCREENS.splice(j, 1);
+      closePopover(); syncScreens();
+      if (el.style.transform) { el.remove(); return; } // já saiu deslizando com o dedo
+      el.classList.add("out"); setTimeout(() => el.remove(), 340);
+    },
+    setBody(html) { $(".scr-body", el).innerHTML = html; },
+    setRight(html) { $("[data-sright]", el).innerHTML = html; },
+  };
+  $("[data-sback]", el).onclick = () => api.close();
+  modals.push(api); SCREENS.push(api); syncScreens();
+  onMount && onMount(el, api);
+  return api;
+}
+function refreshScreens() { SCREENS.forEach(s => { if (s.refresh) s.refresh(); }); }
+// linha de lista no padrão das telas: ícone, texto, valor e seta
+function srow({ attr = "", ico = "", main, sub = "", val = "", chev = true, cls = "" }) {
+  return `<button class="srow ${sub ? "stack" : ""} ${cls}" ${attr}>${ico ? `<span class="sico">${ico}</span>` : ""}<span class="grow"><span class="srow-main ellip">${main}</span>${sub ? `<span class="srow-sub">${sub}</span>` : ""}</span>${val ? `<span class="srow-val num">${val}</span>` : ""}${chev ? I.chev : ""}</button>`;
+}
+function lfield(id, label, value = "", extra = "") {
+  return `<div class="lfield"><label for="${id}">${label}</label><input id="${id}" autocomplete="off" value="${esc(value)}" ${extra}></div>`;
+}
+function lpw(id, label) {
+  return `<div class="lfield"><label for="${id}">${label}</label><div class="lf-pw"><input id="${id}" type="password" autocomplete="new-password"><button class="eye" type="button" data-eye="${id}" aria-label="mostrar senha">${I.eye}</button></div></div>`;
+}
+function bindEyes(el) {
+  el.addEventListener("click", e => {
+    const eye = e.target.closest("[data-eye]"); if (!eye) return;
+    const i = $("#" + eye.dataset.eye, el); const show = i.type === "password";
+    i.type = show ? "text" : "password"; eye.innerHTML = show ? I.eyeOff : I.eye; eye.setAttribute("aria-label", show ? "esconder senha" : "mostrar senha");
+  });
+}
+function bindMoney(el, id) {
+  el.addEventListener("input", e => { if (e.target.id === id) { const v = parseMoney(e.target.value); e.target.value = v ? fmt(v) : ""; } });
+}
+
 /* ================= menu ================= */
 const MENU = [
   ["perfil", "editar perfil", "user"],
   ["prev", "previsão de diário", null],
-  ["cartoes", "cartões", "card"],
+  ["cartoes", "cartões de crédito", "card"],
   ["config", "configurações", "gear"],
   ["sair", "sair", "out"],
 ];
 function menuHTML() {
   const p = prof();
-  const ini = ((p.nome || "?")[0] + ((p.sobrenome || "")[0] || "")).toUpperCase();
-  let h = `<div class="page menu-page"><div class="page-inner" style="max-width:720px">
-    <div class="card profile-card"><div class="avatar" aria-hidden="true">${esc(ini)}</div><div style="min-width:0;flex:1">
-      <div style="font-weight:700;font-size:18px" class="ellip">${esc(p.nome)} ${esc(p.sobrenome)}</div><div class="muted ellip">${esc(p.email)}</div></div></div><div class="list">`;
-  for (const [k, lbl, ic] of MENU) {
-    h += `<button class="row" data-menu="${k}"><span class="menu-ico ${k === "sair" ? "is-danger" : ""}">${ic ? I[ic] : ti("prev")}</span><span class="grow ${k === "sair" ? "is-danger" : ""}">${lbl}</span>${k === "sair" ? "" : I.chev}</button>`;
-  }
-  h += `</div>`;
-  return h + `</div></div>`;
+  let h = `<div class="page menu-page"><div class="page-inner mp" style="max-width:720px">
+    <div class="mp-head"><div class="mp-name ellip">${esc(p.nome) || "você"}</div><div class="mp-mail ellip">${esc(p.email)}</div></div><div class="slist2">`;
+  for (const [k, lbl, ic] of MENU)
+    h += srow({ attr: `data-menu="${k}"`, ico: ic ? I[ic] : `<span class="pv-ico" aria-hidden="true"></span>`, main: lbl, chev: k !== "sair", cls: k === "sair" ? "is-danger" : "" });
+  return h + `</div></div></div>`;
 }
 $("#view").addEventListener("click", e => {
   const b = e.target.closest("[data-menu]"); if (!b) return;
-  const k = b.dataset.menu;
-  ({
-    perfil: openProfile, prev: openPrevModal, cartoes: openCards, config: openConfig,
-    sair: signOut,
-  })[k]();
+  ({ perfil: openProfile, prev: openPrevScreen, cartoes: openCards, config: openConfig, sair: signOut })[b.dataset.menu]();
 });
 
-function pwField(id, label) {
-  return `<div class="field"><label for="${id}">${label}</label><div class="input-wrap"><input class="input" id="${id}" type="password" autocomplete="new-password"><button class="eye" type="button" data-eye="${id}" aria-label="mostrar senha">${I.eye}</button></div></div>`;
-}
+/* ===== editar perfil ===== */
 function openProfile() {
   const p = prof();
-  const m = openModal({
-    title: "editar perfil", body: `
-    <div class="two"><div class="field"><label for="pf-n">nome</label><input class="input" id="pf-n" autocomplete="off" maxlength="40" value="${esc(p.nome)}"></div>
-    <div class="field"><label for="pf-s">sobrenome</label><input class="input" id="pf-s" autocomplete="off" maxlength="60" value="${esc(p.sobrenome)}"></div></div>
-    <div class="field"><label for="pf-e">e-mail</label><input class="input" id="pf-e" value="${esc(p.email)}" readonly></div>
-    <button class="btn primary block" data-savep>salvar perfil</button>
-    <div class="msec"><h3>trocar senha</h3>
-    ${pwField("pw1", "nova senha")}${pwField("pw2", "confirmar senha")}
-    <button class="btn block" data-savepw>trocar senha</button></div>`
-  });
-  m.el.addEventListener("click", e => {
-    const eye = e.target.closest("[data-eye]");
-    if (eye) { const i = $("#" + eye.dataset.eye, m.el); const show = i.type === "password"; i.type = show ? "text" : "password"; eye.innerHTML = show ? I.eyeOff : I.eye; eye.setAttribute("aria-label", show ? "esconder senha" : "mostrar senha"); }
-    if (e.target.closest("[data-savep]")) {
-      const nome = $("#pf-n", m.el).value.trim(), sobrenome = $("#pf-s", m.el).value.trim();
-      if (!nome) { toast("coloca seu nome", true); return; }
-      saveProfile({ nome, sobrenome }); m.close();
-    }
-    if (e.target.closest("[data-savepw]")) {
-      const a = $("#pw1", m.el).value, b = $("#pw2", m.el).value;
-      if (a.length < 6) { toast("a senha precisa ter pelo menos 6 caracteres", true); return; }
-      if (a !== b) { toast("as senhas não são iguais", true); return; }
-      if (!backend.setPassword) { toast("a troca de senha só funciona com login", true); return; }
-      backend.setPassword(a).then(() => { $("#pw1", m.el).value = $("#pw2", m.el).value = ""; })
-        .catch(err => { console.warn(err); toast("não deu pra trocar a senha. tenta de novo", true); });
-    }
-  });
-}
-
-function openPrevModal() {
-  const m = openModal({ title: "previsão de diário", body: "" });
-  let draft = { value: 0, desc: "" };
-  const draw = () => {
-    const tot = prevTotal(), y = miY(CUR), mo = miM(CUR);
-    const pd = perDayPrev();
-    m.setBody(`<p class="mintro">quanto você gasta por mês no dia a dia. o total ÷ 30 vira a previsão diária, de amanhã em diante.</p>
-      <div class="field"><span class="flabel">seus gastos</span><div class="mgroup">${S.prev.length ? S.prev.map(p => `<div class="mrow">${ti("prev")}<span class="grow ellip">${esc(p.desc)}</span><span class="val num">${brl(p.value)}</span><button class="dots is-danger" data-delprev="${p.id}" aria-label="apagar ${esc(p.desc)}">${I.trash.replace("<svg", '<svg width="16" height="16"')}</button></div>`).join("") : `<div class="mrow empty-row">nenhum gasto ainda</div>`}</div>
-      ${pd ? `<span class="hint num">previsão atual: ${brl(pd)} por dia</span>` : ""}</div>
-      <div class="msec"><h3>adicionar gasto</h3><div class="two"><div class="field"><label for="pv-v">valor por mês</label><input class="input num" id="pv-v" autocomplete="off" inputmode="numeric" placeholder="0,00" value="${draft.value ? fmt(draft.value) : ""}"></div>
-      <div class="field"><label for="pv-d">descrição</label><input class="input" id="pv-d" autocomplete="off" maxlength="60" placeholder="ex.: mercado" value="${esc(draft.desc)}"></div></div>
-      <button class="btn primary block" data-addprev>adicionar gasto</button></div>`);
-  };
-  draw();
-  m.el.addEventListener("input", e => {
-    if (e.target.id === "pv-v") { draft.value = parseMoney(e.target.value); e.target.value = draft.value ? fmt(draft.value) : ""; }
-    if (e.target.id === "pv-d") draft.desc = e.target.value;
-  });
-  m.el.addEventListener("click", async e => {
-    if (e.target.closest("[data-addprev]")) {
-      if (!(draft.value > 0)) { toast("coloca um valor maior que zero", true); return; }
-      await backend.put("prev", uid("p"), { value: draft.value, desc: draft.desc.trim() || "gasto do dia a dia", createdAt: Date.now() });
-      draft = { value: 0, desc: "" }; setTimeout(draw, 60);
-    }
-    const d = e.target.closest("[data-delprev]");
-    if (d) {
-      const p = S.prev.find(x => x.id === d.dataset.delprev); if (!p) return;
-      if (!(await confirmBox({ title: "apagar gasto?", text: `"${esc(p.desc)}" vai sair da previsão de diário.`, ok: "apagar" }))) return;
-      await backend.del("prev", p.id); setTimeout(draw, 60);
-    }
-  });
-}
-
-function openCards() {
-  const m = openModal({ title: "cartões", body: "" });
-  let editing = null, draft = "";
-  const draw = () => {
-    const ed = editing && S.cards.find(c => c.id === editing);
-    m.setBody(`<p class="mintro">adiciona seus cartões pra escolher em qual cartão foi cada gasto.</p>
-      <div class="field"><span class="flabel">seus cartões</span><div class="mgroup">${S.cards.length ? cardsSorted().map(c => {
-        const n = S.txs.filter(t => t.cardId === c.id).length;
-        return `<div class="mrow">${ti("cartao")}<span class="grow"><b class="ellip">${esc(c.name)}</b><span class="hint">${n ? `${n} ${n === 1 ? "movimentação" : "movimentações"}` : "nenhuma movimentação"}</span></span>
-        <button class="dots" data-editcard="${c.id}" aria-label="editar ${esc(c.name)}">${I.pencil.replace("<svg", '<svg width="16" height="16"')}</button><button class="dots is-danger" data-delcard="${c.id}" aria-label="apagar ${esc(c.name)}">${I.trash.replace("<svg", '<svg width="16" height="16"')}</button></div>`;
-      }).join("") : `<div class="mrow empty-row">nenhum cartão ainda</div>`}</div></div>
-      <div class="msec"><h3>${ed ? "editar cartão" : "adicionar cartão"}</h3>
-      <div class="field"><label for="cc-name">nome do cartão</label><input class="input" id="cc-name" autocomplete="off" maxlength="40" placeholder="ex.: nubank" value="${esc(ed ? ed.name : draft)}"></div>
-      ${ed ? `<div class="two"><button class="btn block" data-cancelcard>cancelar</button><button class="btn primary block" data-savecc>salvar</button></div>` : `<button class="btn primary block" data-savecc>adicionar cartão</button>`}</div>`);
-  };
-  draw();
-  m.el.addEventListener("input", e => { if (e.target.id === "cc-name" && !editing) draft = e.target.value; });
-  m.el.addEventListener("click", async e => {
-    if (e.target.closest("[data-savecc]")) {
-      const name = $("#cc-name", m.el).value.trim();
-      if (!name) { toast("dá um nome pro cartão", true); $("#cc-name", m.el).focus(); return; }
-      if (S.cards.some(x => x.id !== editing && x.name.toLowerCase() === name.toLowerCase())) { toast("já tem um cartão com esse nome", true); return; }
-      const old = editing && S.cards.find(c => c.id === editing);
-      await backend.put("cards", editing || uid("c"), { name, createdAt: old ? old.createdAt || Date.now() : Date.now() });
-      editing = null; draft = ""; setTimeout(draw, 60);
-    }
-    const ed = e.target.closest("[data-editcard]"); if (ed) { editing = ed.dataset.editcard; draw(); $("#cc-name", m.el)?.focus(); }
-    if (e.target.closest("[data-cancelcard]")) { editing = null; draw(); }
-    const d = e.target.closest("[data-delcard]");
-    if (d) {
-      const c = S.cards.find(x => x.id === d.dataset.delcard); if (!c) return;
-      const n = S.txs.filter(t => t.cardId === c.id).length;
-      if (!(await confirmBox({ title: "apagar cartão?", text: n ? `"${esc(c.name)}" vai sumir. ${n === 1 ? "o gasto continua" : `os ${n} gastos continuam`}, só que sem cartão.` : `"${esc(c.name)}" vai sumir da lista.`, ok: "apagar" }))) return;
-      await backend.del("cards", c.id); if (editing === c.id) editing = null; setTimeout(draw, 60);
-    }
-  });
-}
-
-function openConfig() {
-  const m = openModal({ title: "configurações", body: "" });
-  const draw = () => {
-    const th = prof().theme || lsGet("ae.theme", null) || "dark";
-    m.setBody(`<div class="field"><span class="flabel">aparência</span><div class="mgroup">${[["light", "modo claro"], ["dark", "modo escuro"], ["system", "modo do sistema"]].map(([k, l]) => `<label class="mrow"><input type="radio" name="theme" value="${k}" ${th === k ? "checked" : ""}><span class="grow">${l}</span></label>`).join("")}</div></div>
-      <div class="msec"><h3>conta</h3><div class="mgroup">
-        <button class="mrow" data-zerar><span class="grow"><b>zerar minha conta</b><span class="hint">apaga todas as suas movimentações e marcações de dia</span></span>${I.chev}</button>
-        <button class="mrow" data-apagar><span class="grow"><b class="is-danger">apagar minha conta</b><span class="hint">apaga sua conta e todos os seus dados</span></span>${I.chev}</button></div></div>`);
-  };
-  draw();
-  m.el.addEventListener("change", e => { if (e.target.name === "theme") { lsSet("ae.theme", e.target.value); saveProfile({ theme: e.target.value }); } });
-  m.el.addEventListener("click", async e => {
-    if (e.target.closest("[data-zerar]")) {
-      if (!(await confirmBox({ title: "zerar minha conta?", text: `${S.txs.length === 1 ? "a sua movimentação vai ser apagada" : `todas as suas ${S.txs.length} movimentações vão ser apagadas`}. cartões, previsão de diário e perfil continuam como estão.`, ok: "zerar conta" }))) return;
-      await wipe(["tx"]); S.checkins = {}; backend.putCheckins({});
-    }
-    if (e.target.closest("[data-apagar]")) {
-      if (!(await confirmBox({ title: "apagar minha conta?", text: "sua conta e todos os seus dados vão ser apagados de vez.", ok: "apagar conta" }))) return;
-      m.close();
-      if (S.mode === "supabase") {
-        if (!SB || !isOnline()) { toast("sem internet. conecta pra apagar a conta", true); return; }
-        const { error } = await SB.from(SB_TABLE).delete().eq("user_id", SB_USER.id);
-        if (error) { console.warn(error); toast("não deu pra apagar a conta agora. tenta de novo", true); return; }
-        applyData(null); lsSet(CACHE_KEY, null); await SB.auth.signOut({ scope: "local" }); return;
+  openScreen({
+    title: "perfil",
+    body: `${lfield("pf-n", "nome", p.nome, 'maxlength="40"')}${lfield("pf-s", "sobrenome", p.sobrenome, 'maxlength="60"')}
+      <div class="sbtns"><button class="sbtn" data-pw>alterar senha</button><button class="sbtn solid" data-savep>salvar</button></div>`,
+    onMount: (el, s) => el.addEventListener("click", e => {
+      if (e.target.closest("[data-pw]")) return openPassword();
+      if (e.target.closest("[data-savep]")) {
+        const nome = $("#pf-n", el).value.trim(), sobrenome = $("#pf-s", el).value.trim();
+        if (!nome) { toast("coloca seu nome", true); return; }
+        saveProfile({ nome, sobrenome }); s.close();
       }
-      await wipe(["tx", "cards", "prev"]); backend.putCheckins({}); await backend.putProfile({ ...DEFAULT_PROFILE, deleted: true });
-      UI.signedOut = "deleted"; render();
-    }
+    }),
+  });
+}
+function openPassword() {
+  openScreen({
+    title: "alterar senha",
+    body: `${lpw("pw1", "nova senha")}${lpw("pw2", "confirmar senha")}<div class="sbtns"><button class="sbtn solid" data-savepw>salvar</button></div>`,
+    onMount: (el, s) => {
+      bindEyes(el);
+      el.addEventListener("click", e => {
+        if (!e.target.closest("[data-savepw]")) return;
+        const a = $("#pw1", el).value, b = $("#pw2", el).value;
+        if (a.length < 6) { toast("a senha precisa ter pelo menos 6 caracteres", true); return; }
+        if (a !== b) { toast("as senhas não são iguais", true); return; }
+        if (!backend.setPassword) { toast("a troca de senha só funciona com login", true); return; }
+        backend.setPassword(a).then(() => s.close()).catch(err => { console.warn(err); toast("não deu pra trocar a senha. tenta de novo", true); });
+      });
+    },
+  });
+}
+
+/* ===== previsão de diário ===== */
+const prevSorted = () => [...S.prev].sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0));
+function openPrevScreen() {
+  const draw = s => {
+    const list = prevSorted();
+    s.setBody(`<div class="pv-list">${list.length
+      ? list.map(p => `<button class="pv-row" data-editprev="${p.id}"><b class="ellip">${esc(p.desc)}</b><span class="num">${brl(p.value)}</span></button>`).join("")
+      : `<div class="sempty"><button class="circ" data-addprev aria-label="adicionar gasto">${I.plus}</button><span>sem gastos por aqui. toque no botão acima pra criar.</span></div>`}</div>
+      <div class="pv-foot"><div class="pv-line"><b>total mensal</b><span class="num">${brl(prevTotal())}</span></div>
+      <div class="pv-line"><b>dividido por</b><span>30 dias</span></div>
+      <div class="pv-res num" aria-label="previsão por dia: ${brl(perDayPrev())}">${brl(perDayPrev())}</div></div>`);
+  };
+  const s = openScreen({
+    title: "previsão de diário",
+    right: `<button class="icon-btn flat" data-addprev aria-label="adicionar gasto">${I.plus}</button>`,
+    onMount: el => el.addEventListener("click", e => {
+      if (e.target.closest("[data-addprev]")) return openPrevForm(null);
+      const r = e.target.closest("[data-editprev]"); if (r) openPrevForm(r.dataset.editprev);
+    }),
+    refresh: () => draw(s),
+  });
+  draw(s);
+}
+function openPrevForm(id) {
+  const p = id && S.prev.find(x => x.id === id);
+  openScreen({
+    title: p ? "editar gasto" : "novo gasto",
+    body: `${lfield("pv-v", "valor por mês", p ? fmt(p.value) : "", 'class="num" inputmode="numeric" placeholder="0,00"')}${lfield("pv-d", "descrição", p ? p.desc : "", 'maxlength="60" placeholder="ex.: mercado"')}
+      <div class="sbtns">${p ? `<button class="sbtn is-danger" data-delprev>apagar</button>` : ""}<button class="sbtn solid" data-saveprev>salvar</button></div>`,
+    onMount: (el, s) => {
+      bindMoney(el, "pv-v");
+      el.addEventListener("click", async e => {
+        if (e.target.closest("[data-saveprev]")) {
+          const value = parseMoney($("#pv-v", el).value), desc = $("#pv-d", el).value.trim();
+          if (!(value > 0)) { toast("coloca um valor maior que zero", true); return; }
+          s.close();
+          await backend.put("prev", p ? p.id : uid("p"), { value, desc: desc || "gasto do dia a dia", createdAt: p ? p.createdAt || Date.now() : Date.now() });
+        }
+        if (e.target.closest("[data-delprev]")) {
+          if (!(await confirmBox({ title: "apagar gasto?", text: `"${esc(p.desc)}" vai sair da previsão de diário.`, ok: "apagar" }))) return;
+          s.close(); await backend.del("prev", p.id);
+        }
+      });
+    },
+  });
+}
+
+/* ===== cartões ===== */
+function openCards() {
+  const draw = s => {
+    s.setBody(S.cards.length
+      ? `<div class="slist2">${cardsSorted().map(c => {
+        const n = S.txs.filter(t => t.cardId === c.id).length;
+        return srow({ attr: `data-editcard="${c.id}"`, ico: I.card, main: esc(c.name), sub: n ? `${n} ${n === 1 ? "movimentação" : "movimentações"}` : "nenhuma movimentação" });
+      }).join("")}</div>`
+      : `<div class="sempty"><button class="circ" data-addcard aria-label="adicionar cartão">${SI.cardAdd}</button><span>sem cartões por aqui. toque no botão acima pra criar.</span></div>`);
+  };
+  const s = openScreen({
+    title: "cartões",
+    right: `<button class="icon-btn flat" data-addcard aria-label="adicionar cartão">${SI.cardAdd}</button>`,
+    onMount: el => el.addEventListener("click", e => {
+      if (e.target.closest("[data-addcard]")) return openCardForm(null);
+      const r = e.target.closest("[data-editcard]"); if (r) openCardForm(r.dataset.editcard);
+    }),
+    refresh: () => draw(s),
+  });
+  draw(s);
+}
+function openCardForm(id) {
+  const c = id && S.cards.find(x => x.id === id);
+  openScreen({
+    title: c ? "editar cartão" : "novo cartão",
+    body: `${lfield("cc-name", "nome do cartão", c ? c.name : "", 'maxlength="40" placeholder="ex.: nubank"')}
+      <div class="sbtns">${c ? `<button class="sbtn is-danger" data-delcard>apagar</button>` : ""}<button class="sbtn solid" data-savecc>salvar</button></div>`,
+    onMount: (el, s) => el.addEventListener("click", async e => {
+      if (e.target.closest("[data-savecc]")) {
+        const name = $("#cc-name", el).value.trim();
+        if (!name) { toast("dá um nome pro cartão", true); $("#cc-name", el).focus(); return; }
+        if (S.cards.some(x => x.id !== id && x.name.toLowerCase() === name.toLowerCase())) { toast("já tem um cartão com esse nome", true); return; }
+        s.close();
+        await backend.put("cards", c ? c.id : uid("c"), { name, createdAt: c ? c.createdAt || Date.now() : Date.now() });
+      }
+      if (e.target.closest("[data-delcard]")) {
+        const n = S.txs.filter(t => t.cardId === c.id).length;
+        if (!(await confirmBox({ title: "apagar cartão?", text: n ? `"${esc(c.name)}" vai sumir. ${n === 1 ? "o gasto continua" : `os ${n} gastos continuam`}, só que sem cartão.` : `"${esc(c.name)}" vai sumir da lista.`, ok: "apagar" }))) return;
+        s.close(); await backend.del("cards", c.id);
+      }
+    }),
+  });
+}
+
+/* ===== configurações ===== */
+const THEMES = [["light", "modo claro"], ["dark", "modo escuro"], ["system", "modo do sistema"]];
+const curTheme = () => prof().theme || lsGet("ae.theme", null) || "dark";
+function openConfig() {
+  const draw = s => {
+    const th = (THEMES.find(([k]) => k === curTheme()) || THEMES[1])[1];
+    s.setBody(`<div class="slist2">${srow({ attr: "data-cfg-ap", ico: SI.moon, main: "aparência", sub: th })}${srow({ attr: "data-cfg-dados", ico: SI.grid, main: "meus dados" })}</div>`);
+  };
+  const s = openScreen({
+    title: "configurações",
+    onMount: el => el.addEventListener("click", e => {
+      if (e.target.closest("[data-cfg-ap]")) return openAppearance();
+      if (e.target.closest("[data-cfg-dados]")) return openMyData();
+    }),
+    refresh: () => draw(s),
+  });
+  draw(s);
+}
+function openAppearance() {
+  const draw = s => {
+    const th = curTheme();
+    s.setBody(`<div class="slist2" role="radiogroup" aria-label="aparência">${THEMES.map(([k, l]) =>
+      `<button class="srow" role="radio" aria-checked="${th === k}" data-theme-k="${k}"><span class="grow"><span class="srow-main">${l}</span></span><span class="s-check ${th === k ? "on" : ""}">${SI.check}</span></button>`).join("")}</div>`);
+  };
+  const s = openScreen({
+    title: "aparência",
+    onMount: el => el.addEventListener("click", e => {
+      const b = e.target.closest("[data-theme-k]"); if (!b) return;
+      lsSet("ae.theme", b.dataset.themeK); saveProfile({ theme: b.dataset.themeK });
+    }),
+    refresh: () => draw(s),
+  });
+  draw(s);
+}
+function openMyData() {
+  openScreen({
+    title: "meus dados",
+    body: `<div class="slist2">${srow({ attr: "data-zerar", ico: SI.reset, main: "zerar minha conta", sub: "apaga todas as movimentações e recomeça sua conta do zero", chev: false })}
+      ${srow({ attr: "data-apagar", ico: I.trash, main: "apagar minha conta", sub: "exclui permanentemente sua conta e apaga todos os seus dados no app", chev: false, cls: "danger-row" })}</div>`,
+    onMount: el => el.addEventListener("click", async e => {
+      if (e.target.closest("[data-zerar]")) {
+        if (!(await confirmBox({ title: "zerar minha conta?", text: `${S.txs.length === 1 ? "a sua movimentação vai ser apagada" : `todas as suas ${S.txs.length} movimentações vão ser apagadas`}. cartões, previsão de diário e perfil continuam como estão.`, ok: "zerar conta" }))) return;
+        await wipe(["tx"]); S.checkins = {}; backend.putCheckins({});
+      }
+      if (e.target.closest("[data-apagar]")) {
+        if (!(await confirmBox({ title: "apagar minha conta?", text: "sua conta e todos os seus dados vão ser apagados de vez.", ok: "apagar conta" }))) return;
+        if (S.mode === "supabase" && (!SB || !isOnline())) { toast("sem internet. conecta pra apagar a conta", true); return; }
+        while (SCREENS.length) SCREENS[SCREENS.length - 1].close();
+        if (S.mode === "supabase") {
+          const { error } = await SB.from(SB_TABLE).delete().eq("user_id", SB_USER.id);
+          if (error) { console.warn(error); return; }
+          applyData(null); lsSet(CACHE_KEY, null); await SB.auth.signOut({ scope: "local" }); return;
+        }
+        await wipe(["tx", "cards", "prev"]); backend.putCheckins({}); await backend.putProfile({ ...DEFAULT_PROFILE, deleted: true });
+        UI.signedOut = "deleted"; render();
+      }
+    }),
   });
 }
 async function wipe(colls) {
@@ -2460,7 +2625,7 @@ async function wipe(colls) {
 
 async function signOut() {
   if (!(await confirmBox({ title: "sair da conta?", text: "você pode entrar de novo quando quiser.", ok: "sair", danger: false }))) return;
-  closePanel();
+  closePanel(); while (SCREENS.length) SCREENS[SCREENS.length - 1].close();
   if (backend.signOut) { await backend.signOut(); return; }
   UI.signedOut = "out"; render();
 }
