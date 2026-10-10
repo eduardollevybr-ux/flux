@@ -958,6 +958,15 @@ input,textarea,[contenteditable="true"]{-webkit-user-select:text;user-select:tex
 .lrow-top b{grid-column:2;grid-row:1}
 .lrow-top .lrow-val{grid-column:3;grid-row:1}
 .lrow-sub{grid-column:2/4;grid-row:2;padding-left:0}
+
+/* ===== liga/desliga (cartão padrão) ===== */
+.sw{position:relative;flex:none;width:50px;height:30px;border-radius:99px;background:var(--surface3);transition:background-color .25s}
+.sw::after{content:"";position:absolute;top:3px;left:3px;width:24px;height:24px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.3);transition:transform .3s var(--spring)}
+.sw.on{background:var(--accent)}
+.sw.on::after{transform:translateX(20px)}
+.srow[disabled]{cursor:default}
+.srow[disabled] .sw{opacity:.55}
+.cc-def{margin-top:12px}
 </style>
 <script>try{var t=JSON.parse(localStorage.getItem("ae.theme")||"null")||"dark";if(t==="system")t=matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light";if(t==="light")document.documentElement.classList.add("light")}catch(e){}</script>
 </head><body>
@@ -1415,6 +1424,8 @@ const saldoCls = v => Math.abs(v) < 0.005 ? "s-zero" : v > 0 ? "s-pos" : (v > -N
 
 function prevTotal() { return r2(S.prev.reduce((a, p) => a + (+p.value || 0), 0)); }
 /* previsão por dia: total do mês dividido pelos dias escolhidos (28 a 31, padrão 30) */
+// cartão padrão: se só existe um, ele é o padrão; senão, o que foi marcado em "cartões"
+const defCardId = () => { if (S.cards.length === 1) return S.cards[0].id; const d = prof().defCard; return d && S.cards.some(c => c.id === d) ? d : ""; };
 const prevDiv = () => { const n = +prof().prevDias; return n >= 28 && n <= 31 ? n : 30; };
 function perDayPrev() { return r2(prevTotal() / prevDiv()); }
 /* valor exibido numa célula: real + previsão (só diário, só dias depois de hoje) */
@@ -2447,7 +2458,7 @@ function openForm({ type = "saida", date = TODAY, tx = null, occ = null } = {}) 
     value: perInst ? (oi ? oi.value : r2(tx.value / (tx.installments || 1))) : tx.value, type: tx.type, desc: tx.desc, date: occD, rep: tx.rep || "none", until: tx.until || "forever",
     count: tx.count || 2, installments: tx.installments || 2, tags: [...(tx.tags || [])], cardId: tx.cardId || "",
     mday: tx.rep === "monthly" && tx.mday ? tx.mday : "same", nth: tx.nth || 5, aday: tx.aday || (tx.date ? +tx.date.slice(8) : 1),
-  } : { value: 0, type, desc: "", date, rep: "none", until: "forever", count: 2, installments: 2, tags: [], cardId: "", mday: "same", nth: 5, aday: +date.slice(8) };
+  } : { value: 0, type, desc: "", date, rep: "none", until: "forever", count: 2, installments: 2, tags: [], cardId: type === "cartao" ? defCardId() : "", mday: "same", nth: 5, aday: +date.slice(8) };
   const isRule = () => f.rep === "monthly" && f.mday !== "same";
   /* data real conforme a regra do dia (usa o mês da data escolhida) */
   const effDate = ds => { if (f.rep !== "monthly" || f.mday === "same") return ds; const d = parse(ds); return ymd(monthDate(f.mday, d.getFullYear(), d.getMonth(), f.aday, f.nth)); };
@@ -2496,7 +2507,7 @@ function openForm({ type = "saida", date = TODAY, tx = null, occ = null } = {}) 
   el.addEventListener("click", e => {
     const t = e.target;
     const ins = t.closest("[data-inst]"); if (ins) { f.installments = Math.max(2, Math.min(120, f.installments + +ins.dataset.inst)); return draw(); }
-    if (t.closest("#f-type")) listSheet("tipo", TYPE_ORDER.map(k => [k, TYPES[k].label, "", ti(k, true)]), f.type, k => { f.type = k; draw(); });
+    if (t.closest("#f-type")) listSheet("tipo", TYPE_ORDER.map(k => [k, TYPES[k].label, "", ti(k, true)]), f.type, k => { f.type = k; if (k === "cartao" && !f.cardId) f.cardId = defCardId(); draw(); });
     if (t.closest("#f-card")) cardSheet(f.cardId, id => { f.cardId = id; draw(); });
     if (t.closest("#f-date")) datePicker(null, effDate(f.date), v => { f.date = v; f.aday = +v.slice(8); draw(); });
     if (t.closest("#f-mday")) {
@@ -2635,7 +2646,7 @@ const BI = {
 I.buscar = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>';
 Object.assign(UI, { bsQ: "", bsP: { k: "all" }, bsT: null, bsMore: {} });
 const bsNorm = s => String(s || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim();
-const BS_PER = [["all", "todo o período"], ["month", "este mês"], ["past", "só o que já aconteceu"], ["future", "só o que vai acontecer"], ["year", "este ano"], ["custom", "escolher datas"]];
+const BS_PER = [["all", "todo o período"], ["month", "este mês"], ["past", "realizadas"], ["future", "previstas"], ["year", "este ano"], ["custom", "escolher datas"]];
 const dYY = s => `${s.slice(8, 10)}/${s.slice(5, 7)}/${s.slice(2, 4)}`;
 function bsRange() {
   const P = UI.bsP, y = NOW.getFullYear();
@@ -2673,7 +2684,7 @@ function bsResultsHTML(list) {
   const past = list.filter(x => x.date <= TODAY).sort((a, b) => b.date.localeCompare(a.date));
   const allIn = list.every(x => x.tx.type === "entrada"), noIn = !list.some(x => x.tx.type === "entrada");
   const sum = arr => r2(arr.reduce((a, x) => a + (allIn || noIn ? x.value : (x.tx.type === "entrada" ? x.value : -x.value)), 0));
-  const L = allIn ? ["já recebido", "ainda vai receber", "já recebidas"] : noIn ? ["já pago", "ainda vai pagar", "já pagas"] : ["até hoje", "daqui para frente", "já aconteceram"];
+  const L = allIn ? ["recebido", "a receber", "recebidas"] : noIn ? ["pago", "a pagar", "pagas"] : ["realizado", "previsto", "realizadas"];
   let h = `<div class="bs-sum">`;
   if (past.length) h += `<div class="bs-line"><b>${L[0]}</b><span class="num">${brl(sum(past))}</span></div>`;
   const futFin = futAll.filter(x => !isInf(x.tx)), infTx = [...new Set(futAll.filter(x => isInf(x.tx)).map(x => x.tx))];
@@ -2971,7 +2982,8 @@ function openCards() {
     s.setBody(S.cards.length
       ? `<div class="slist2">${cardsSorted().map(c => {
         const n = S.txs.filter(t => t.cardId === c.id).length;
-        return srow({ attr: `data-editcard="${c.id}"`, ico: I.card, main: esc(c.name), sub: n ? `${n} ${n === 1 ? "movimentação" : "movimentações"}` : "nenhuma movimentação" });
+        const mov = n ? `${n} ${n === 1 ? "movimentação" : "movimentações"}` : "nenhuma movimentação";
+        return srow({ attr: `data-editcard="${c.id}"`, ico: I.card, main: esc(c.name), sub: c.id === defCardId() ? `cartão padrão, ${mov}` : mov });
       }).join("")}</div>`
       : `<div class="sempty"><button class="circ" data-addcard aria-label="adicionar cartão">${SI.cardAdd}</button><span>sem cartões por aqui.<br>toque no botão acima para criar.</span></div>`);
   };
@@ -2988,22 +3000,31 @@ function openCards() {
 }
 function openCardForm(id) {
   const c = id && S.cards.find(x => x.id === id);
+  const only = c ? S.cards.length === 1 : S.cards.length === 0; // único cartão: é o padrão e não dá para desmarcar
+  let def = only || (c && c.id === defCardId());
+  const defRow = () => `<button class="srow stack" role="switch" aria-checked="${def}" data-defcc ${only ? "disabled" : ""}><span class="grow"><span class="srow-main">cartão padrão</span><span class="srow-sub">${only ? "é o único cartão, então já vem escolhido nas compras no cartão" : "já vem escolhido ao lançar uma compra no cartão"}</span></span><span class="sw ${def ? "on" : ""}" aria-hidden="true"></span></button>`;
   openScreen({
     title: c ? "editar cartão" : "novo cartão",
     body: `${lfield("cc-name", "nome do cartão", c ? c.name : "", 'maxlength="40" placeholder="ex.: nubank"')}
+      <div class="slist2 cc-def">${defRow()}</div>
       <div class="sbtns">${c ? `<button class="sbtn is-danger" data-delcard>apagar</button>` : ""}<button class="sbtn solid" data-savecc>salvar</button></div>`,
     onMount: (el, s) => el.addEventListener("click", async e => {
+      if (e.target.closest("[data-defcc]") && !only) { def = !def; $(".cc-def", el).innerHTML = defRow(); return; }
       if (e.target.closest("[data-savecc]")) {
         const name = $("#cc-name", el).value.trim();
         if (!name) { toast("dá um nome para o cartão", true); $("#cc-name", el).focus(); return; }
         if (S.cards.some(x => x.id !== id && x.name.toLowerCase() === name.toLowerCase())) { toast("já tem um cartão com esse nome", true); return; }
         s.close();
-        await backend.put("cards", c ? c.id : uid("c"), { name, createdAt: c ? c.createdAt || Date.now() : Date.now() });
+        const cid = c ? c.id : uid("c");
+        if (def && !only) saveProfile({ defCard: cid });
+        else if (!def && prof().defCard === cid) saveProfile({ defCard: "" });
+        await backend.put("cards", cid, { name, createdAt: c ? c.createdAt || Date.now() : Date.now() });
       }
       if (e.target.closest("[data-delcard]")) {
         const n = S.txs.filter(t => t.cardId === c.id).length;
         if (!(await confirmBox({ title: "apagar cartão", text: "essa ação não poderá ser desfeita.", ok: "apagar" }))) return;
-        s.close(); await backend.del("cards", c.id);
+        s.close(); if (prof().defCard === c.id) saveProfile({ defCard: "" });
+        await backend.del("cards", c.id);
       }
     }),
   });
