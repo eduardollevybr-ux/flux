@@ -755,6 +755,40 @@ input,textarea,[contenteditable="true"]{-webkit-user-select:text;user-select:tex
   .card.calc{padding:20px}
   .calc h3,.calc .big{font-size:18px}
 }
+
+/* ===== ajuste fino: textos um pouco menores e calendário do tamanho do ícone do horizonte ===== */
+.m-cal{width:30px;height:34px;margin-top:3px}
+.mc-body{top:4px;padding-top:7px}
+.mc-body::before{height:6px}
+.mc-body b{font-size:13px}
+.mc-ring{width:3px;height:7px}
+.mc-ring.l{left:7px}.mc-ring.r{right:7px}
+.scr-title,.ph-title,.ph-mid.start .ph-title{font-size:22px}
+.srow{min-height:64px;padding:16px 20px;font-size:16px}
+.srow-sub{font-size:14px;margin-top:4px}
+.sico svg{width:22px;height:22px}
+.sico .pv-ico{width:20px;height:20px}
+.mp-head{padding:32px 20px 24px}
+.mp-name{font-size:34px}
+.mp-mail{font-size:15px;margin-top:8px}
+.lfield label{font-size:14px}
+.lfield input{font-size:18px}
+.sbtn{height:52px;font-size:16px}
+.sempty{font-size:16px}
+.pv-row{padding:20px;font-size:16px}
+.pv-line{font-size:16px}
+.pv-res{font-size:32px}
+.st-n{font-size:22px}
+.lrow-top b,.lrow-val{font-size:16px}
+.lrow-sub{font-size:14px}
+.crow-top b,.crow-top .num{font-size:16px}
+.pb .detail-grid dt{font-size:14px}
+.pb .detail-grid dd{font-size:16px}
+@media (max-width:700px){
+  .section-title{font-size:14px}
+  .row,.menu-page .row{font-size:16px}
+  .calc h3,.calc .big{font-size:16px}
+}
 </style>
 </head><body>
 <div id="app" class="app">
@@ -1726,7 +1760,7 @@ function renderAll() {
   renderMobileChrome();
   $("#title").textContent = TITLES[UI.tab];
   $("#period").innerHTML = periodHTML();
-  $("#top-right").innerHTML = mob ? (UI.tab === "saldos" ? `<div class="tr-row"><button class="m-grid" data-mgrid aria-label="abrir horizonte">${gridIcon()}</button></div>` : UI.tab === "horizonte" ? `<div class="tr-row"><button class="icon-btn bare" data-madd aria-label="adicionar movimentação" aria-haspopup="menu">${I.plus}</button></div>` : "") : (S.loaded ? "" : `<span>carregando…</span>`);
+  $("#top-right").innerHTML = mob ? (UI.tab === "saldos" || UI.tab === "totais" ? `<div class="tr-row"><button class="m-grid" data-mgrid aria-label="abrir horizonte">${gridIcon()}</button></div>` : UI.tab === "horizonte" ? `<div class="tr-row"><button class="icon-btn bare" data-madd aria-label="adicionar movimentação" aria-haspopup="menu">${I.plus}</button></div>` : "") : (S.loaded ? "" : `<span>carregando…</span>`);
   const v = $("#view");
   const vkey = UI.tab + (mob ? ":m" : "");
   const keep = v.dataset.tab === vkey;
