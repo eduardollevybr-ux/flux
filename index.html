@@ -915,6 +915,19 @@ input,textarea,[contenteditable="true"]{-webkit-user-select:text;user-select:tex
 
 .bs-inf-l{display:flex;flex-direction:column;gap:2px}
 .bs-inf-l small{font-size:13px;color:var(--muted);font-weight:500}
+
+/* ===== confirmações (apagar, sair): botões em contorno e "cancelar" embaixo, sem o x ===== */
+.modal.cmodal{width:min(400px,100%);border-radius:28px}
+.cmodal .modal-head{padding:32px 28px 6px}
+.cmodal .modal-head h2{font-size:22px}
+.cmodal .modal-head [data-close]{display:none}
+.cmodal .modal-body{padding:0 28px 22px}
+.cmodal .dialog-text{font-size:16px}
+.cmodal .modal-foot{flex-direction:column;gap:12px;border-top:0;padding:0 28px 22px}
+.dbtn{height:56px;width:100%;border-radius:999px;background:transparent;border:2px solid var(--line2);color:var(--text);font-size:16px;font-weight:700;transition:transform .2s var(--spring),background-color .2s}
+.dbtn.danger{color:var(--c-saida);border-color:color-mix(in srgb,var(--c-saida) 45%,transparent)}
+.dbtn:active{transform:scale(.97);background:var(--surface3)}
+.cmodal .btn-link{height:52px}
 </style>
 <script>try{var t=JSON.parse(localStorage.getItem("ae.theme")||"null")||"dark";if(t==="system")t=matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light";if(t==="light")document.documentElement.classList.add("light")}catch(e){}</script>
 </head><body>
@@ -1506,8 +1519,8 @@ function confirmBox({ title, text, ok = "confirmar", danger = true }) {
     let done = false;
     const m = openModal({
       title, body: `<p class="dialog-text">${text}</p>`,
-      foot: `<button class="btn block" data-no>cancelar</button><button class="btn block ${danger ? "solid-danger" : "primary"}" data-ok>${esc(ok)}</button>`,
-      onClose: () => { if (!done) res(false); },
+      foot: `<button class="dbtn ${danger ? "danger" : ""}" data-ok>${esc(ok)}</button><button class="btn-link" data-no>cancelar</button>`,
+      onClose: () => { if (!done) res(false); }, cls: "cmodal",
     });
     $("[data-no]", m.el).onclick = () => m.close();
     $("[data-ok]", m.el).onclick = () => { done = true; m.close(); res(true); };
@@ -2364,20 +2377,17 @@ function chooseDelScope() {
   return new Promise(res => {
     let done = false;
     const m = openModal({
-      title: "apagar repetições", body: `<p class="dialog-text">essa ação não poderá ser desfeita.</p>
-      <div class="scope-list del">
-        <button class="scope" data-s="one"><b>apagar somente esta</b></button>
-        <button class="scope" data-s="from"><b>apagar esta e as próximas</b></button>
-        <button class="scope danger" data-s="all"><b>apagar todas</b></button>
-      </div>`, onClose: () => { if (!done) res(null); }
+      title: "apagar repetições", body: `<p class="dialog-text">essa ação não poderá ser desfeita.</p>`,
+      foot: `<button class="dbtn danger" data-s="one">apagar somente esta</button><button class="dbtn danger" data-s="from">apagar esta e as próximas</button><button class="dbtn danger" data-s="all">apagar todas</button><button class="btn-link" data-no>cancelar</button>`,
+      onClose: () => { if (!done) res(null); }, cls: "cmodal"
     });
-    m.el.addEventListener("click", e => { const b = e.target.closest("[data-s]"); if (!b) return; done = true; m.close(); res(b.dataset.s); });
+    m.el.addEventListener("click", e => { if (e.target.closest("[data-no]")) return m.close(); const b = e.target.closest("[data-s]"); if (!b) return; done = true; m.close(); res(b.dataset.s); });
   });
 }
 async function deleteOcc(tx, date) {
   if (!tx) return;
   if ((tx.rep || "none") === "none") {
-    if (!(await confirmBox({ title: "apagar movimentação?", text: "essa ação não poderá ser desfeita.", ok: "apagar" }))) return;
+    if (!(await confirmBox({ title: "apagar movimentação", text: "essa ação não poderá ser desfeita.", ok: "apagar" }))) return;
     await delTx(tx.id); afterDelete(); return;
   }
   const nd = nextOccDate(tx, date);
@@ -2915,7 +2925,7 @@ function openPrevForm(id) {
           await backend.put("prev", p ? p.id : uid("p"), { value, desc: desc || "gasto do dia a dia", createdAt: p ? p.createdAt || Date.now() : Date.now() });
         }
         if (e.target.closest("[data-delprev]")) {
-          if (!(await confirmBox({ title: "apagar gasto?", text: "essa ação não poderá ser desfeita.", ok: "apagar" }))) return;
+          if (!(await confirmBox({ title: "apagar gasto", text: "essa ação não poderá ser desfeita.", ok: "apagar" }))) return;
           s.close(); await backend.del("prev", p.id);
         }
       });
@@ -2960,7 +2970,7 @@ function openCardForm(id) {
       }
       if (e.target.closest("[data-delcard]")) {
         const n = S.txs.filter(t => t.cardId === c.id).length;
-        if (!(await confirmBox({ title: "apagar cartão?", text: "essa ação não poderá ser desfeita.", ok: "apagar" }))) return;
+        if (!(await confirmBox({ title: "apagar cartão", text: "essa ação não poderá ser desfeita.", ok: "apagar" }))) return;
         s.close(); await backend.del("cards", c.id);
       }
     }),
@@ -3008,11 +3018,11 @@ function openMyData() {
       ${srow({ attr: "data-apagar", ico: I.trash, main: "apagar minha conta", sub: "exclui permanentemente sua conta e apaga todos os seus dados no app", chev: false, cls: "danger-row" })}</div>`,
     onMount: el => el.addEventListener("click", async e => {
       if (e.target.closest("[data-zerar]")) {
-        if (!(await confirmBox({ title: "zerar minha conta?", text: "essa ação não poderá ser desfeita.", ok: "zerar conta" }))) return;
+        if (!(await confirmBox({ title: "zerar minha conta", text: "essa ação não poderá ser desfeita.", ok: "zerar conta" }))) return;
         await wipe(["tx"]); S.checkins = {}; backend.putCheckins({});
       }
       if (e.target.closest("[data-apagar]")) {
-        if (!(await confirmBox({ title: "apagar minha conta?", text: "essa ação não poderá ser desfeita.", ok: "apagar conta" }))) return;
+        if (!(await confirmBox({ title: "apagar minha conta", text: "essa ação não poderá ser desfeita.", ok: "apagar conta" }))) return;
         if (S.mode === "supabase" && (!SB || !isOnline())) { toast("sem internet. conecta para apagar a conta", true); return; }
         while (SCREENS.length) SCREENS[SCREENS.length - 1].close();
         if (S.mode === "supabase") {
