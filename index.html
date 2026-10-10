@@ -850,6 +850,51 @@ input,textarea,[contenteditable="true"]{-webkit-user-select:text;user-select:tex
 .empty .plus,.sempty .circ{width:72px;height:72px}
 .empty .plus svg,.sempty .circ svg{width:24px;height:24px}
 .empty,.sempty{gap:20px}
+
+/* ===== barra inferior com 4 abas e o "+" no meio ===== */
+@media (max-width:700px){
+  .bottom-nav{grid-template-columns:repeat(5,1fr)}
+  .bn{font-size:12px}
+}
+.bn-ind{width:20%}
+.bn-add{display:grid;place-items:center;height:100%;padding:6px 0}
+.bn-add>span{width:48px;height:48px;border-radius:99px;background:var(--accent);color:#fff;display:grid;place-items:center;transition:transform .25s var(--spring)}
+.bn-add>span svg{width:24px;height:24px;transition:transform .35s var(--spring)}
+.bn-add:active>span{transform:scale(.9)}
+.bn-add:active>span svg{transform:rotate(90deg)}
+/* ===== aba buscar ===== */
+.bs{gap:0!important}
+.bs-title{margin:0;padding:4px 20px 14px;font-size:22px;font-weight:700}
+.bs-x[hidden]{display:none}
+.bs-bar{display:flex;align-items:center;gap:10px;margin:0 20px 14px;height:48px;padding:0 6px 0 16px;border-radius:999px;background:var(--surface2);border:1.5px solid transparent;transition:border-color .2s;cursor:text}
+.bs-bar:focus-within{border-color:var(--accent)}
+.bs-bar>svg{width:20px;height:20px;color:var(--muted);flex:none}
+.bs-bar input{flex:1;min-width:0;height:100%;border:0;outline:none;background:none;color:var(--text);font:inherit;font-size:16px;font-weight:600;-webkit-appearance:none;appearance:none}
+.bs-bar input::placeholder{color:var(--muted);font-weight:400}
+.bs-bar input::-webkit-search-cancel-button{display:none}
+.bs-x{width:36px;height:36px;border-radius:99px;display:grid;place-items:center;color:var(--muted);flex:none}
+.bs-x svg{width:16px;height:16px}
+.bs-pills{display:flex;gap:8px;padding:0 20px;flex-wrap:wrap}
+.bs-pills:not(:empty){padding-bottom:14px}
+.bs-pill{width:auto;gap:8px;height:36px;padding:0 14px;font-size:14px}
+.bs-pill span:not(.ti){flex:none}
+.bs-pill svg{color:var(--muted);flex:none}
+.bs-sum{border-top:1px solid var(--line)}
+.bs-line{display:flex;justify-content:space-between;align-items:center;gap:12px;min-height:56px;padding:14px 20px;border-bottom:1px solid var(--line);font-size:16px}
+.bs-line b{font-weight:700}.bs-line span{font-weight:600}
+.bs .section-title.bs-sec{margin:0;padding:28px 20px 12px;color:var(--muted);font-size:14px;font-weight:600;border-bottom:1px solid var(--line)}
+.bs-more{width:100%;min-height:52px;color:var(--accent);font-weight:700;font-size:15px;border-bottom:1px solid var(--line)}
+.bs-msg{display:flex;align-items:flex-start;gap:14px;padding:18px 20px;border-bottom:1px solid var(--line);font-size:16px;line-height:1.45}
+.bs-mi{width:32px;height:32px;border-radius:99px;display:grid;place-items:center;flex:none;background:var(--surface3);color:var(--text)}
+.bs-mi svg{width:17px;height:17px}
+.bs-mi.good{background:var(--m-pos);color:var(--m-pos-fg)}
+.bs-mi.warn{background:var(--m-neg);color:var(--m-neg-fg)}
+.bs-mt{padding-top:4px;min-width:0}
+.bs-mt b{font-weight:700}
+.bs-msg:has(.good) .bs-mt b{color:var(--m-pos-fg)}
+.bs-msg:has(.warn) .bs-mt b{color:var(--m-neg-fg)}
+.bs-none{padding:48px 32px}
+@media (min-width:701px){ .bs-title{display:none} .bs-bar{margin-top:4px} }
 </style>
 <script>try{var t=JSON.parse(localStorage.getItem("ae.theme")||"null")||"dark";if(t==="system")t=matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light";if(t==="light")document.documentElement.classList.add("light")}catch(e){}</script>
 </head><body>
@@ -1458,7 +1503,7 @@ const EDGE_W = 24;
 function backTarget() {
   if (popClose) return { el: null, go: closePopover };
   if (modals.length) { const m = modals[modals.length - 1]; return { el: m.el, go: () => m.close() }; }
-  if (PANEL.open) return { el: $("#drawer-root .drawer"), go: () => { if (PANEL.detail) { PANEL.detail = null; renderPanel(); } else if (PANEL.calcF) backToCalc(); else closePanel(); } };
+  if (PANEL.open) return { el: $("#drawer-root .drawer"), go: () => { if (PANEL.fromSearch) closePanel(); else if (PANEL.detail) { PANEL.detail = null; renderPanel(); } else if (PANEL.calcF) backToCalc(); else closePanel(); } };
   if (isMobile() && UI.tab === "horizonte") return { el: $("#view"), go: () => goTab("saldos") };
   return null;
 }
@@ -1516,10 +1561,10 @@ function applyTheme() {
 matchMedia("(prefers-color-scheme: dark)").addEventListener?.("change", applyTheme);
 new MutationObserver(applyTheme).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
 
-const TITLES = { saldos: "saldos", horizonte: "horizonte", totais: "totais", menu: "menu" };
+const TITLES = { saldos: "saldos", horizonte: "horizonte", buscar: "buscar", totais: "totais", menu: "menu" };
 function renderSidebar() {
   const nb = (tab, label) => `<button class="nav-btn ${UI.tab === tab ? "active" : ""}" data-tab="${tab}" aria-label="${label}" ${UI.tab === tab ? 'aria-current="page"' : ""}>${I[tab]}<span class="t">${label}</span></button>`;
-  $("#nav-main").innerHTML = nb("saldos", "saldos") + nb("totais", "totais") + nb("menu", "menu");
+  $("#nav-main").innerHTML = nb("saldos", "saldos") + nb("buscar", "buscar") + nb("totais", "totais") + nb("menu", "menu");
   $("#nav-short").innerHTML =
     `<button class="nav-btn" id="btn-add" aria-label="adicionar movimentação" aria-haspopup="menu">${I.add}<span class="t">adicionar</span></button>
      <button class="nav-btn" id="btn-today" aria-label="ir para hoje, dia ${NOW.getDate()}"><span class="cal-ico">${I.cal}<b>${NOW.getDate()}</b></span><span class="t">ir para hoje</span></button>` +
@@ -1608,7 +1653,7 @@ function visibleMi() {
 function rangeLabel(s) { const e = Math.min(MAX_MI, s + 11); return `${MON3[miM(s)]}/${String(miY(s)).slice(2)} – ${MON3[miM(e)]}/${String(miY(e)).slice(2)}`; }
 function periodHTML() {
   if (isMobile()) {
-    if (UI.tab === "menu" || UI.tab === "horizonte") return "";
+    if (UI.tab === "menu" || UI.tab === "horizonte" || UI.tab === "buscar") return "";
     const mi = UI.tMonth;
     return `<button class="icon-btn" data-m="-1" aria-label="mês anterior" ${mi <= MIN_MI ? "disabled" : ""}>${I.left}</button>
       <span class="period-label m-label">${MON3[miM(mi)]}/${String(miY(mi)).slice(2)}</span>
@@ -1799,15 +1844,15 @@ function renderMobileChrome() {
   document.body.classList.toggle("m-hz", hz);
   document.body.classList.toggle("d-hz", !mob && UI.tab === "horizonte");
   $("#top-left").innerHTML = hz ? `<button class="icon-btn bare" data-mback aria-label="voltar para saldos">${I.back}</button>`
-    : mob && UI.tab !== "menu" ? `<button class="m-cal" data-mtoday aria-label="ir para hoje, dia ${NOW.getDate()}"><span class="mc-body"><b class="num">${NOW.getDate()}</b></span><i class="mc-ring l"></i><i class="mc-ring r"></i></button>` : "";
-  $(".topbar").hidden = mob && UI.tab === "menu";
+    : mob && UI.tab !== "menu" && UI.tab !== "buscar" ? `<button class="m-cal" data-mtoday aria-label="ir para hoje, dia ${NOW.getDate()}"><span class="mc-body"><b class="num">${NOW.getDate()}</b></span><i class="mc-ring l"></i><i class="mc-ring r"></i></button>` : "";
+  $(".topbar").hidden = mob && (UI.tab === "menu" || UI.tab === "buscar");
   const bn = (tab, label, ic) => `<button class="bn ${UI.tab === tab || (tab === "saldos" && UI.tab === "horizonte") ? "active" : ""}" data-tab="${tab}" aria-label="${label}">${ic}<span>${label}</span></button>`;
   const nav = $("#bottom-nav");
   if (!mob) { nav.innerHTML = ""; delete nav.dataset.built; }
   else {
-    if (!nav.dataset.built) { nav.innerHTML = `<span class="bn-ind" aria-hidden="true"></span>` + bn("saldos", "saldos", I.saldos) + bn("totais", "totais", I.totais) + bn("menu", "menu", I.menu); nav.dataset.built = "1"; }
-    const idx = { saldos: 0, horizonte: 0, totais: 1, menu: 2 }[UI.tab] ?? 0;
-    $$(".bn", nav).forEach((b, i) => { const on = i === idx; if (on && !b.classList.contains("active")) { b.classList.remove("bump"); void b.offsetWidth; b.classList.add("bump"); } b.classList.toggle("active", on); });
+    if (!nav.dataset.built) { nav.innerHTML = `<span class="bn-ind" aria-hidden="true"></span>` + bn("saldos", "saldos", I.saldos) + bn("buscar", "buscar", I.buscar) + `<button class="bn-add" data-badd aria-label="adicionar movimentação" aria-haspopup="menu"><span>${I.plus}</span></button>` + bn("totais", "totais", I.totais) + bn("menu", "menu", I.menu); nav.dataset.built = "1"; }
+    const cur = UI.tab === "horizonte" ? "saldos" : UI.tab, idx = { saldos: 0, buscar: 1, totais: 3, menu: 4 }[cur] ?? 0;
+    $$(".bn", nav).forEach(b => { const on = b.dataset.tab === cur; if (on && !b.classList.contains("active")) { b.classList.remove("bump"); void b.offsetWidth; b.classList.add("bump"); } b.classList.toggle("active", on); });
     $(".bn-ind", nav).style.transform = `translateX(${idx * 100}%)`;
   }
   let fab = $("#fab");
@@ -1816,6 +1861,7 @@ function renderMobileChrome() {
   if (fab.hidden) fab.classList.remove("ready");
 }
 $("#bottom-nav").addEventListener("click", e => {
+  const a = e.target.closest("[data-badd]"); if (a) { openAddMenu(a); return; }
   const t = e.target.closest("[data-tab]"); if (t) { goTab(t.dataset.tab); return; }
 });
 matchMedia("(max-width: 700px)").addEventListener?.("change", () => { $("#view").dataset.tab = ""; render(); });
@@ -1839,7 +1885,8 @@ function renderAll() {
   const pos = keep && sc ? [sc.scrollLeft, sc.scrollTop] : null;
   v.dataset.tab = vkey;
   const isBoard = UI.tab === "saldos" || UI.tab === "horizonte";
-  v.innerHTML = isBoard ? (mob ? (UI.tab === "horizonte" ? mobileHorizonHTML() : mobileMonthHTML()) : saldosHTML(UI.tab === "horizonte")) : UI.tab === "totais" ? totaisHTML() : menuHTML();
+  if (UI.tab === "buscar" && keep && $("#bs-q", v)) updateBusca(); // não perde o que está sendo digitado
+  else v.innerHTML = isBoard ? (mob ? (UI.tab === "horizonte" ? mobileHorizonHTML() : mobileMonthHTML()) : saldosHTML(UI.tab === "horizonte")) : UI.tab === "totais" ? totaisHTML() : UI.tab === "buscar" ? buscaHTML() : menuHTML();
   fitPanes(v);
   const sc2 = $(".board,.page", v);
   if (pos && sc2) { sc2.scrollLeft = pos[0]; sc2.scrollTop = pos[1]; }
@@ -1879,6 +1926,7 @@ function stagger(els, step = 38, max = 18) {
 function enterAnim(v) {
   const sel = UI.tab === "totais" ? ".pane.cur .section-title, .pane.cur .calc, .pane.cur .list .row, .page > .page-inner .section-title, .page > .page-inner .calc, .page > .page-inner .list .row"
     : UI.tab === "menu" ? ".mp-head, .slist2 .srow"
+    : UI.tab === "buscar" ? ".bs-bar, .bs-msg, #bs-res .lrow, .bs-line"
     : isMobile() ? (UI.tab === "horizonte" ? ".pane.cur .hz-row" : ".pane.cur .m-day") : ".mcard";
   stagger($$(sel, v));
 }
@@ -2091,7 +2139,7 @@ $("#view").addEventListener("click", e => {
 /* ================= painel do dia / movimentações do mês (tela cheia) ================= */
 const PANEL = { open: false, mode: "day", date: TODAY, mi: CUR, filter: null, detail: null };
 function openPanel(date, types, detail) {
-  Object.assign(PANEL, { open: true, mode: "day", calc: null, calcF: null, date, filter: types && types.length === 1 ? types[0] : null, detail: detail || null });
+  Object.assign(PANEL, { open: true, mode: "day", calc: null, calcF: null, fromSearch: false, date, filter: types && types.length === 1 ? types[0] : null, detail: detail || null });
   renderPanel();
 }
 function openMonthScreen(mi, type) {
@@ -2215,7 +2263,7 @@ function renderPanel() {
     const dd = `<button class="pill-dd" data-pfilter aria-haspopup="menu" aria-label="filtrar por tipo, atual: ${PANEL.filter ? TYPES[PANEL.filter].col : "todas"}">${filterLabel()}<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 9l6 6 6-6"/></svg></button>`;
     const items = !S.loaded ? `<div class="skel"></div><div class="skel"></div><div class="skel"></div>`
       : list.length || prevRow ? `<div class="lrows">${list.map(itemHTML).join("")}${prevRow}</div>`
-      : `<div class="empty"><button class="plus" data-padd aria-label="adicionar movimentação">${I.plus.replace("<svg", '<svg width="26" height="26"')}</button><span>sem movimentações por aqui. toque no + para adicionar.</span></div>`;
+      : `<div class="empty"><button class="plus" data-padd aria-label="adicionar movimentação">${I.plus.replace("<svg", '<svg width="26" height="26"')}</button><span>sem movimentações por aqui.<br>toque no + para adicionar.</span></div>`;
     body = `${PANEL.calcF ? calcFilterBar(PANEL.calcF) : `<div class="pbar">${dd}</div>`}${items}`;
   }
   const fresh = !root.firstChild;
@@ -2258,7 +2306,7 @@ $("#drawer-root").addEventListener("click", e => {
     });
     return;
   }
-  if (t.closest("[data-pback]")) { PANEL.detail = null; return renderPanel(); }
+  if (t.closest("[data-pback]")) { if (PANEL.fromSearch) return closePanel(); PANEL.detail = null; return renderPanel(); }
   if (t.closest("[data-pedit]")) { const tx = S.txs.find(x => x.id === PANEL.detail.tx); return openForm({ tx, occ: PANEL.detail.date }); }
   if (t.closest("[data-pdel]")) { const tx = S.txs.find(x => x.id === PANEL.detail.tx); return deleteOcc(tx, PANEL.detail.date); }
   const it = t.closest("[data-item]");
@@ -2304,7 +2352,7 @@ async function deleteOcc(tx, date) {
   else if (s === "next") await saveTx(tx.id, { ...stripId(tx), endBefore: nd });
   afterDelete();
 }
-function afterDelete() { if (PANEL.open) { PANEL.detail = null; renderPanel(); } }
+function afterDelete() { if (PANEL.open) { if (PANEL.fromSearch) return closePanel(); PANEL.detail = null; renderPanel(); } }
 
 /* ================= formulário adicionar / editar ================= */
 function parseMoney(str) { const dg = String(str).replace(/\D/g, ""); return dg ? parseInt(dg, 10) / 100 : 0; }
@@ -2494,6 +2542,162 @@ const cardsSorted = () => [...S.cards].sort((a, b) => (a.createdAt || 0) - (b.cr
 const cardName = id => (S.cards.find(c => c.id === id) || {}).name || "";
 
 
+/* ================= aba buscar: busca de movimentações + mensagens da semana ================= */
+const BI = {
+  warn: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9v4M12 17h.01"/><path d="M10.3 3.9L1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/></svg>',
+  down: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7l6 6 4-4 8 8"/><path d="M21 11v6h-6"/></svg>',
+  up: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17l6-6 4 4 8-8"/><path d="M21 13V7h-6"/></svg>',
+  receipt: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 21V4a1 1 0 0 1 1-1h12a1 1 0 0 1 1 1v17l-3-2-2 2-2-2-2 2-2-2z"/><path d="M9 8h6M9 12h6"/></svg>',
+  piggy: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 11c0-3.3-3.1-6-7-6-1.4 0-2.7.3-3.8.9L5 4v3.6A5.6 5.6 0 0 0 3.6 10H2v4h2a7 7 0 0 0 3 3v3h3v-2h4v2h3v-3.5A5.7 5.7 0 0 0 19 11z"/><path d="M15 10h.01"/></svg>',
+  inc: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12M7 10l5 5 5-5"/><path d="M5 21h14"/></svg>',
+  wallet: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 7H5a2 2 0 0 1 0-4h13v4"/><path d="M3 5v14a2 2 0 0 0 2 2h15V7"/><path d="M16 14h.01"/></svg>',
+};
+I.buscar = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>';
+Object.assign(UI, { bsQ: "", bsP: { k: "all" }, bsT: null, bsMore: {} });
+const bsNorm = s => String(s || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim();
+const BS_PER = [["all", "todo o período"], ["month", "este mês"], ["past", "só o que já aconteceu"], ["future", "só o que vai acontecer"], ["year", "este ano"], ["custom", "escolher datas"]];
+const dYY = s => `${s.slice(8, 10)}/${s.slice(5, 7)}/${s.slice(2, 4)}`;
+function bsRange() {
+  const P = UI.bsP, y = NOW.getFullYear();
+  if (P.k === "month") return [miFirst(CUR), miLast(CUR)];
+  if (P.k === "past") return [miFirst(MIN_MI), TODAY];
+  if (P.k === "future") return [ymd(addDays(NOW, 1)), miLast(MAX_MI)];
+  if (P.k === "year") return [`${y}-01-01`, `${y}-12-31`];
+  if (P.k === "custom") return [P.from, P.to];
+  return [miFirst(MIN_MI), miLast(MAX_MI)];
+}
+const bsPerLabel = () => UI.bsP.k === "custom" ? `${dYY(UI.bsP.from)} a ${dYY(UI.bsP.to)}` : BS_PER.find(p => p[0] === UI.bsP.k)[1];
+function bsSearch() {
+  const q = bsNorm(UI.bsQ); if (!q) return null;
+  const [from, to] = bsRange(), out = [];
+  for (const tx of S.txs) {
+    if (UI.bsT && tx.type !== UI.bsT) continue;
+    if (!bsNorm(tx.desc).includes(q) && !(tx.type === "cartao" && bsNorm(cardName(tx.cardId)).includes(q))) continue;
+    expand(tx, from, to, (date, value, n, total) => { out.push({ tx, date, value, n, total }); if (out.length > 5000) return false; });
+  }
+  return out;
+}
+function bsItem(x) {
+  const r = repShort(x), yr = x.date.slice(0, 4) !== String(NOW.getFullYear());
+  const sub = [yr ? dYY(x.date) : ddmm(x.date), x.tx.type === "cartao" && cardName(x.tx.cardId) ? esc(cardName(x.tx.cardId)) : ""].filter(Boolean).join(", ");
+  return `<button class="lrow" data-item="${x.tx.id}" data-date="${x.date}" aria-label="${esc(TYPES[x.tx.type].label)}: ${esc(x.tx.desc)}, ${brl(x.value)}, ${dBR(x.date)}. ver detalhes">
+    <span class="lrow-top">${ti(x.tx.type, true)}<b class="ellip">${esc(x.tx.desc)}</b><span class="lrow-val num">${brl(x.value)}</span></span>
+    <span class="lrow-sub"><span class="num">${sub}</span>${r ? `<span class="lrow-rep num">${r}</span>` : ""}</span></button>`;
+}
+function bsResultsHTML(list) {
+  if (!list.length) return `<div class="empty bs-none"><span>nada encontrado para "${esc(UI.bsQ.trim())}".<br>tente outro nome ou outro período.</span></div>`;
+  const fut = list.filter(x => x.date > TODAY).sort((a, b) => a.date.localeCompare(b.date));
+  const past = list.filter(x => x.date <= TODAY).sort((a, b) => b.date.localeCompare(a.date));
+  const allIn = list.every(x => x.tx.type === "entrada"), noIn = !list.some(x => x.tx.type === "entrada");
+  const sum = arr => r2(arr.reduce((a, x) => a + (allIn || noIn ? x.value : (x.tx.type === "entrada" ? x.value : -x.value)), 0));
+  const L = allIn ? ["já recebido", "ainda vai receber", "já recebidas"] : noIn ? ["já pago", "ainda vai pagar", "já pagas"] : ["até hoje", "daqui para frente", "já aconteceram"];
+  let h = `<div class="bs-sum">`;
+  if (past.length) h += `<div class="bs-line"><b>${L[0]}</b><span class="num">${brl(sum(past))}</span></div>`;
+  if (fut.length) h += `<div class="bs-line"><b>${L[1]}</b><span class="num">${brl(sum(fut))}</span></div>`;
+  h += `</div>`;
+  const group = (key, title, arr, first) => {
+    if (!arr.length) return "";
+    const open = UI.bsMore[key], show = open ? arr.slice(0, 600) : arr.slice(0, first), rest = arr.length - show.length;
+    return `<h2 class="section-title bs-sec">${title}</h2><div class="lrows">${show.map(bsItem).join("")}${rest > 0 ? `<button class="bs-more" data-bsmore="${key}">ver ${open ? "mais" : `as outras ${rest}`}</button>` : ""}</div>`;
+  };
+  return h + group("fut", "próximas", fut, 2) + group("past", L[2], past, 10);
+}
+/* mensagens: valores sempre ao vivo; o assunto troca toda semana */
+function bsWeek() { return Math.floor((Date.UTC(NOW.getFullYear(), NOW.getMonth(), NOW.getDate()) / 864e5 + 3) / 7); }
+function bsInsights() {
+  const bm = v => brl(v).replace(/ /g, "\u00a0"); // valor nunca quebra no meio
+  const m = (kind, icon, html) => ({ kind, icon, html });
+  const st = monthStats(CUR), pv = monthStats(CUR - 1), mName = MONTHS[miM(CUR)], pName = MONTHS[miM(CUR - 1)];
+  let urgent = null;
+  for (let d = NOW, end = parse(miLast(CUR + 11)); d <= end; d = addDays(d, 1)) {
+    const s = ymd(d);
+    if (saldoOf(s) < -0.004) {
+      const when = s === TODAY ? "hoje" : miOf(d) === CUR ? `no dia ${d.getDate()}` : `em ${d.getDate()} de ${MONTHS[d.getMonth()]}`;
+      urgent = m("warn", BI.warn, `${when === "hoje" ? "hoje o saldo está" : `${when}, o saldo fica`} <b>negativo</b>. ainda dá tempo de ajustar.`); break;
+    }
+  }
+  const monthOcc = occs(miFirst(CUR), miLast(CUR));
+  const pool = [
+    () => { const a = st.diarioMedio, b = pv.diarioMedio; if (!(a > 0 && b > 0)) return null; const p = Math.round((a - b) / b * 100);
+      return p === 0 ? m("info", BI.wallet, `seu diário médio está igual ao de ${pName}.`) : p < 0 ? m("good", BI.down, `seu diário médio está <b>${-p}% menor</b> que em ${pName}.`) : m("info", BI.up, `seu diário médio está <b>${p}% maior</b> que em ${pName}.`); },
+    () => { const g = monthOcc.filter(x => x.tx.type === "saida" || x.tx.type === "cartao").sort((a, b) => b.value - a.value)[0]; return g ? m("info", BI.receipt, `o maior gasto de ${mName} é <b>${esc(g.tx.desc)}</b>, de ${bm(g.value)}.`) : null; },
+    () => { let best = null; for (const tx of S.txs) { if (tx.rep !== "installment") continue; let left = 0, last = null; expand(tx, ymd(addDays(NOW, 1)), miLast(MAX_MI), d => { left++; last = d; }); if (left && (!best || left > best.left)) best = { tx, left, last }; }
+      if (!best) return null; const ld = parse(best.last); return m("info", I.cal, `${best.left === 1 ? "falta <b>1 parcela</b>" : `faltam <b>${best.left} parcelas</b>`} de ${esc(best.tx.desc)}. a última é em ${MON3[ld.getMonth()]}/${String(ld.getFullYear()).slice(2)}.`); },
+    () => { const v = r2(occs(`${NOW.getFullYear()}-01-01`, TODAY).filter(x => x.tx.type === "economia").reduce((a, x) => a + x.value, 0)); return v > 0 ? m("good", BI.piggy, `você já guardou <b>${bm(v)}</b> este ano.`) : null; },
+    () => { const n = occs(ymd(addDays(NOW, 1)), miLast(CUR + 2)).filter(x => x.tx.type === "entrada").sort((a, b) => a.date.localeCompare(b.date))[0]; return n ? m("good", BI.inc, `a próxima entrada é <b>${esc(n.tx.desc)}</b>, de ${bm(n.value)}, em ${ddmm(n.date)}.`) : null; },
+    () => { if (!(st.econBase > 0)) return null; const p = st.econPct; if (st.econVal <= 0) return m("info", BI.piggy, `você ainda não guardou nada em ${mName}.`);
+      const s = p < 20 ? "abaixo do ideal" : p <= 30 ? "dentro do ideal" : "acima do ideal"; return m(p < 20 ? "info" : "good", BI.piggy, `em ${mName}, você guardou <b>${pctFmt(p)}</b> das entradas, ${s}.`); },
+    () => { const v = saldoOf(miLast(CUR)); return m(v < -0.004 ? "warn" : "good", BI.wallet, `${mName} termina com saldo de <b>${bm(v)}</b>.`); },
+    () => { if (!(st.custoBase > 0 && st.custo > 0)) return null; const p = Math.round(st.custo / st.custoBase * 100); return m(p > 100 ? "warn" : "info", BI.receipt, `seu custo de vida está em <b>${p}%</b> das entradas de ${mName}.`); },
+  ];
+  const L = S.txs.length ? pool.map(f => f()).filter(Boolean) : [];
+  const slots = 3 - (urgent ? 1 : 0), out = urgent ? [urgent] : [];
+  if (L.length) { const s0 = (bsWeek() * slots) % L.length; for (let i = 0; i < Math.min(slots, L.length); i++) out.push(L[(s0 + i) % L.length]); }
+  if (!out.length) out.push(m("info", BI.wallet, "lance suas movimentações e aqui aparecem dicas sobre o seu dinheiro."));
+  return out;
+}
+function bsMsgsHTML() {
+  return `<h2 class="section-title bs-sec">o que vale saber</h2>` + bsInsights().map(x => `<div class="bs-msg"><span class="bs-mi ${x.kind}" aria-hidden="true">${x.icon}</span><span class="bs-mt">${x.html}</span></div>`).join("");
+}
+function bsPillsHTML() {
+  const t = UI.bsT;
+  return `<button class="pill-dd bs-pill" data-bsper aria-haspopup="menu" aria-label="período: ${bsPerLabel()}">${I.cal.replace("<svg", '<svg width="16" height="16"')}<span>${bsPerLabel()}</span>${PILL_CHEV}</button>
+    <button class="pill-dd bs-pill" data-bstype aria-haspopup="menu" aria-label="tipo: ${t ? TYPES[t].col : "todas"}">${t ? ti(t) : ti("all")}<span>${t ? TYPES[t].col : "todas"}</span>${PILL_CHEV}</button>`;
+}
+const PILL_CHEV = '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 9l6 6 6-6"/></svg>';
+function buscaHTML() {
+  return `<div class="page bs-page"><div class="page-inner bs" style="max-width:720px">
+    <h1 class="bs-title">buscar</h1>
+    <label class="bs-bar">${I.buscar}<input id="bs-q" type="search" enterkeyhint="search" autocomplete="off" placeholder="buscar movimentação" aria-label="buscar movimentação" value="${esc(UI.bsQ)}"><button class="bs-x" data-bsclear type="button" aria-label="limpar busca" ${UI.bsQ ? "" : "hidden"}>${I.x}</button></label>
+    <div class="bs-pills" id="bs-pills">${UI.bsQ.trim() ? bsPillsHTML() : ""}</div>
+    <div id="bs-res">${bsBodyHTML()}</div></div></div>`;
+}
+function bsBodyHTML() { const r = bsSearch(); return r ? bsResultsHTML(r) : bsMsgsHTML(); }
+function updateBusca() {
+  const p = $("#bs-pills"), r = $("#bs-res"), x = $(".bs-x"); if (!r) return;
+  p.innerHTML = UI.bsQ.trim() ? bsPillsHTML() : ""; r.innerHTML = bsBodyHTML(); if (x) x.hidden = !UI.bsQ;
+}
+let bsT0 = null;
+$("#view").addEventListener("input", e => {
+  if (e.target.id !== "bs-q") return;
+  UI.bsQ = e.target.value; UI.bsMore = {};
+  const x = $(".bs-x"); if (x) x.hidden = !UI.bsQ;
+  clearTimeout(bsT0); bsT0 = setTimeout(updateBusca, 120);
+});
+$("#view").addEventListener("keydown", e => { if (e.target.id === "bs-q" && e.key === "Enter") e.target.blur(); });
+$("#view").addEventListener("click", e => {
+  if (UI.tab !== "buscar") return;
+  const t = e.target;
+  if (t.closest("[data-bsclear]")) { UI.bsQ = ""; UI.bsMore = {}; const i = $("#bs-q"); i.value = ""; updateBusca(); i.focus(); return; }
+  const mo = t.closest("[data-bsmore]"); if (mo) { UI.bsMore[mo.dataset.bsmore] = true; updateBusca(); return; }
+  const per = t.closest("[data-bsper]");
+  if (per) {
+    const opt = ([k, l]) => `<button class="pop-item ${UI.bsP.k === k ? "on" : ""}" data-pk="${k}" role="menuitemradio" aria-checked="${UI.bsP.k === k}">${l}</button>`;
+    openPopover(per, `<div role="menu" aria-label="período">${BS_PER.map(opt).join("")}</div>`, {
+      width: 250, onMount: el => el.addEventListener("click", ev => {
+        const b = ev.target.closest("[data-pk]"); if (!b) return; closePopover();
+        if (b.dataset.pk !== "custom") { UI.bsP = { k: b.dataset.pk }; UI.bsMore = {}; updateBusca(); return; }
+        const f0 = UI.bsP.k === "custom" ? UI.bsP.from : miFirst(CUR);
+        datePicker(per, f0, from => setTimeout(() => datePicker($("[data-bsper]") || per, from, to => {
+          if (to < from) [from, to] = [to, from];
+          UI.bsP = { k: "custom", from, to }; UI.bsMore = {}; updateBusca();
+        }), 80));
+      })
+    });
+    return;
+  }
+  const ty = t.closest("[data-bstype]");
+  if (ty) {
+    const opt = (k, lbl, ic) => `<button class="pop-item ${(UI.bsT || "all") === k ? "on" : ""}" data-tk="${k}" role="menuitemradio" aria-checked="${(UI.bsT || "all") === k}">${ic}${lbl}</button>`;
+    openPopover(ty, `<div role="menu" aria-label="tipo">${opt("all", "todas", ti("all"))}${TYPE_ORDER.map(k => opt(k, TYPES[k].col, ti(k))).join("")}</div>`, {
+      width: 220, onMount: el => el.addEventListener("click", ev => { const b = ev.target.closest("[data-tk]"); if (b) { UI.bsT = b.dataset.tk === "all" ? null : b.dataset.tk; UI.bsMore = {}; closePopover(); updateBusca(); } })
+    });
+    return;
+  }
+  const it = t.closest("[data-item]");
+  if (it) { $("#bs-q")?.blur(); openPanel(it.dataset.date, null, { tx: it.dataset.item, date: it.dataset.date }); PANEL.fromSearch = true; }
+});
+
 /* ================= telas cheias do menu (previsão, cartões, perfil, configurações) ================= */
 const SI = {
   cardAdd: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11V7.5A2.5 2.5 0 0 0 18.5 5h-13A2.5 2.5 0 0 0 3 7.5v9A2.5 2.5 0 0 0 5.5 19H13"/><path d="M3 10h18M19 15v6M16 18h6"/></svg>',
@@ -2619,7 +2823,7 @@ function openPrevScreen() {
     const list = prevSorted();
     s.setBody(`<div class="pv-list">${list.length
       ? list.map(p => `<button class="pv-row" data-editprev="${p.id}"><b class="ellip">${esc(p.desc)}</b><span class="num">${brl(p.value)}</span></button>`).join("")
-      : `<div class="sempty"><button class="circ" data-addprev aria-label="adicionar gasto">${I.plus}</button><span>sem gastos por aqui. toque no botão acima para criar.</span></div>`}</div>
+      : `<div class="sempty"><button class="circ" data-addprev aria-label="adicionar gasto">${I.plus}</button><span>sem gastos por aqui.<br>toque no botão acima para criar.</span></div>`}</div>
       <div class="pv-foot"><div class="pv-line"><b>total mensal</b><span class="num">${brl(prevTotal())}</span></div>
       <button class="pv-line pv-div" data-prevdiv aria-haspopup="dialog" aria-label="dividido por ${prevDiv()} dias, alterar"><b>dividido por</b><span class="pv-dd"><span class="num">${prevDiv()} dias</span><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></span></button>
       <div class="pv-res num" aria-label="previsão por dia: ${brl(perDayPrev())}">${brl(perDayPrev())}</div></div>`);
@@ -2680,7 +2884,7 @@ function openCards() {
         const n = S.txs.filter(t => t.cardId === c.id).length;
         return srow({ attr: `data-editcard="${c.id}"`, ico: I.card, main: esc(c.name), sub: n ? `${n} ${n === 1 ? "movimentação" : "movimentações"}` : "nenhuma movimentação" });
       }).join("")}</div>`
-      : `<div class="sempty"><button class="circ" data-addcard aria-label="adicionar cartão">${SI.cardAdd}</button><span>sem cartões por aqui. toque no botão acima para criar.</span></div>`);
+      : `<div class="sempty"><button class="circ" data-addcard aria-label="adicionar cartão">${SI.cardAdd}</button><span>sem cartões por aqui.<br>toque no botão acima para criar.</span></div>`);
   };
   const s = openScreen({
     title: "cartões",
