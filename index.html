@@ -477,13 +477,13 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
   .page-inner>.hint{padding:0 16px}
 }
 .m-cal{position:relative;width:34px;height:37px;display:block;padding:0}
-.mc-body{position:absolute;left:0;right:0;top:3px;bottom:0;border-radius:6px;background:var(--cal-bg);overflow:hidden;display:grid;place-items:center;padding-top:9px}
+.mc-body{position:absolute;left:0;right:0;top:3px;bottom:0;border-radius:0;background:var(--cal-bg);overflow:hidden;display:grid;place-items:center;padding-top:9px}
 .mc-body::before{content:"";position:absolute;top:0;left:0;right:0;height:7px;background:var(--accent)}
 .mc-body b{font-size:14px;font-weight:700;color:var(--text)}
-.mc-ring{position:absolute;top:0;width:3.5px;height:8px;border-radius:1.5px;background:var(--cal-ring)}
+.mc-ring{position:absolute;top:0;width:3.5px;height:8px;border-radius:0;background:var(--cal-ring)}
 .mc-ring.l{left:8px}.mc-ring.r{right:8px}
-:root{--cal-bg:#2A2831;--cal-ring:#000000}
-:root.light{--cal-bg:#E2E4E9;--cal-ring:#1D1F23}
+:root{--cal-bg:#2A2831;--cal-ring:#FFFFFF}
+:root.light{--cal-bg:#E2E4E9;--cal-ring:var(--text)}
 .m-grid{width:34px;height:34px;margin-top:3px;display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(3,1fr);gap:1.5px;padding:0;background:var(--bg);border-radius:6px;overflow:hidden}
 .m-grid i{border-radius:0;background:var(--m-zero)}
 .m-grid i.h-zero{background:var(--m-zero)}
@@ -703,7 +703,7 @@ input,textarea,[contenteditable="true"]{-webkit-user-select:text;user-select:tex
 .sempty{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:28px;padding:40px 44px;text-align:center;color:var(--muted);font-size:18px;line-height:1.5;min-height:320px}
 .sempty .circ{width:104px;height:104px;border-radius:99px;border:2px solid var(--line2);display:grid;place-items:center;color:var(--muted);animation:popIn .5s var(--spring)}
 .sempty .circ svg{width:30px;height:30px}
-.pv-list{flex:1;display:flex;flex-direction:column;background:var(--surface2);min-height:200px}
+.pv-list{flex:1;display:flex;flex-direction:column;background:var(--screen);min-height:200px}
 .pv-row{display:flex;align-items:center;gap:16px;width:100%;padding:24px 20px;border-bottom:1px solid var(--line2);text-align:left;color:inherit;font-size:18px}
 .pv-row b{flex:1;min-width:0}
 .pv-row span{white-space:nowrap}
@@ -717,6 +717,44 @@ input,textarea,[contenteditable="true"]{-webkit-user-select:text;user-select:tex
 .mp-head{padding:36px 20px 28px;border-bottom:1px solid var(--line)}
 .mp-name{font-size:40px;font-weight:700;line-height:1.1}
 .mp-mail{color:var(--muted);font-size:17px;margin-top:10px}
+
+/* ===== padrão de espaçamento do app inteiro (mesmo do menu): 20px nas laterais, linhas de 64px ou mais, texto 17/18px ===== */
+.pv-div{width:100%;color:inherit;text-align:left}
+.pv-dd{display:inline-flex;align-items:center;gap:6px}
+.pv-dd svg{color:var(--muted)}
+.stepper{display:flex;align-items:center;justify-content:space-between;height:66px;margin:24px 20px 16px;padding:0 10px;border:2px solid var(--line2);border-radius:999px}
+.st-b{width:48px;height:48px;border-radius:99px;display:grid;place-items:center;color:var(--text)}
+.st-b svg{width:24px;height:24px}
+.st-b:disabled{opacity:.22;cursor:default}
+.st-b:not(:disabled):active{background:var(--surface2);transform:scale(.9)}
+.st-n{font-size:24px;font-weight:600}
+.st-n.bump{animation:bump .35s var(--spring)}
+.sheet .modal-body>.st-save{margin:0 20px;width:calc(100% - 40px)}
+.srow:active,.pv-row:active{transform:scale(.98)}
+.srow,.pv-row{transition:transform .22s var(--spring),background-color .2s}
+.ph{padding:calc(12px + env(safe-area-inset-top,0px)) 12px 12px;border-bottom:1px solid var(--line)}
+.ph-title,.ph-mid.start .ph-title{font-size:24px}
+.pbar{padding:14px 20px;border-bottom:1px solid var(--line)}
+.lrow{padding:20px}
+.lrow-top b,.lrow-val{font-size:18px}
+.lrow-sub{font-size:15px}
+.crow{padding:20px}
+.crow-top b,.crow-top .num{font-size:18px}
+.cs-total{padding:24px 20px 8px}
+.cs-label{padding:28px 20px 12px}
+.pb .detail-grid{padding:0;gap:0;grid-template-columns:auto 1fr;align-items:stretch}
+.row .grow{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pb .detail-grid dt,.pb .detail-grid dd{padding:20px 0;border-bottom:1px solid var(--line);min-height:64px;display:flex;align-items:center}
+.pb .detail-grid dt{padding-left:20px;padding-right:20px;font-size:15px}
+.pb .detail-grid dd{padding-right:20px;font-size:18px;justify-content:flex-end;text-align:right}
+@media (max-width:700px){
+  .section-title{padding:28px 20px 12px;margin:0;font-size:15px}
+  .page-inner{gap:0}
+  .row,.menu-page .row{min-height:64px;padding:16px 20px;font-size:18px;gap:12px}
+  .row .val{font-weight:500}
+  .card.calc{padding:20px}
+  .calc h3,.calc .big{font-size:18px}
+}
 </style>
 </head><body>
 <div id="app" class="app">
@@ -1158,8 +1196,9 @@ const saldoOf = d => { const c = calc(); return c.saldo[d] ?? 0; };
 const saldoCls = v => Math.abs(v) < 0.005 ? "s-zero" : v > 0 ? "s-pos" : (v > -NEG_SMALL ? "s-neg1" : "s-neg2");
 
 function prevTotal() { return r2(S.prev.reduce((a, p) => a + (+p.value || 0), 0)); }
-/* previsão por dia: total do mês dividido sempre por 30 */
-function perDayPrev() { return r2(prevTotal() / 30); }
+/* previsão por dia: total do mês dividido pelos dias escolhidos (28 a 31, padrão 30) */
+const prevDiv = () => { const n = +prof().prevDias; return n >= 28 && n <= 31 ? n : 30; };
+function perDayPrev() { return r2(prevTotal() / prevDiv()); }
 /* valor exibido numa célula: real + previsão (só diário, só dias depois de hoje) */
 function cellVal(o, t, ds) { const real = o ? o[t] : 0; const fc = t === "diario" && ds > TODAY ? perDayPrev() : 0; return { v: r2(real + fc), real, fc }; }
 function prevDaysIn(mi) { const n = dim(miY(mi), miM(mi)); if (mi < CUR) return 0; if (mi > CUR) return n; return n - NOW.getDate(); }
@@ -2477,7 +2516,7 @@ function openPrevScreen() {
       ? list.map(p => `<button class="pv-row" data-editprev="${p.id}"><b class="ellip">${esc(p.desc)}</b><span class="num">${brl(p.value)}</span></button>`).join("")
       : `<div class="sempty"><button class="circ" data-addprev aria-label="adicionar gasto">${I.plus}</button><span>sem gastos por aqui. toque no botão acima pra criar.</span></div>`}</div>
       <div class="pv-foot"><div class="pv-line"><b>total mensal</b><span class="num">${brl(prevTotal())}</span></div>
-      <div class="pv-line"><b>dividido por</b><span>30 dias</span></div>
+      <button class="pv-line pv-div" data-prevdiv aria-haspopup="dialog" aria-label="dividido por ${prevDiv()} dias, alterar"><b>dividido por</b><span class="pv-dd"><span class="num">${prevDiv()} dias</span><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></span></button>
       <div class="pv-res num" aria-label="previsão por dia: ${brl(perDayPrev())}">${brl(perDayPrev())}</div></div>`);
   };
   const s = openScreen({
@@ -2485,11 +2524,24 @@ function openPrevScreen() {
     right: `<button class="icon-btn flat" data-addprev aria-label="adicionar gasto">${I.plus}</button>`,
     onMount: el => el.addEventListener("click", e => {
       if (e.target.closest("[data-addprev]")) return openPrevForm(null);
+      if (e.target.closest("[data-prevdiv]")) return openPrevDays();
       const r = e.target.closest("[data-editprev]"); if (r) openPrevForm(r.dataset.editprev);
     }),
     refresh: () => draw(s),
   });
   draw(s);
+}
+// dias do mês usados na divisão: de 28 a 31
+function openPrevDays() {
+  let n = prevDiv();
+  const m = openSheet({ title: "dias do mês", body: `<div class="stepper" role="group" aria-label="dias do mês"><button class="st-b" data-st="-1" aria-label="menos um dia"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M5 12h14"/></svg></button><span class="st-n num" aria-live="polite"></span><button class="st-b" data-st="1" aria-label="mais um dia">${I.plus}</button></div><button class="sbtn solid st-save" data-stsave>salvar</button>` });
+  const draw = () => { $(".st-n", m.el).textContent = n; $('[data-st="-1"]', m.el).disabled = n <= 28; $('[data-st="1"]', m.el).disabled = n >= 31; };
+  draw();
+  m.el.addEventListener("click", e => {
+    const b = e.target.closest("[data-st]");
+    if (b && !b.disabled) { n = Math.min(31, Math.max(28, n + +b.dataset.st)); draw(); const el = $(".st-n", m.el); el.classList.remove("bump"); void el.offsetWidth; el.classList.add("bump"); }
+    if (e.target.closest("[data-stsave]")) { saveProfile({ prevDias: n }); m.close(); }
+  });
 }
 function openPrevForm(id) {
   const p = id && S.prev.find(x => x.id === id);
