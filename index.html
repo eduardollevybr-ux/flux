@@ -920,14 +920,44 @@ input,textarea,[contenteditable="true"]{-webkit-user-select:text;user-select:tex
 .modal.cmodal{width:min(400px,100%);border-radius:28px}
 .cmodal .modal-head{padding:32px 28px 6px}
 .cmodal .modal-head h2{font-size:22px}
-.cmodal .modal-head [data-close]{display:none}
-.cmodal .modal-body{padding:0 28px 22px}
+.cmodal .cmodal .modal-body{padding:0 28px 22px}
 .cmodal .dialog-text{font-size:16px}
 .cmodal .modal-foot{flex-direction:column;gap:12px;border-top:0;padding:0 28px 22px}
 .dbtn{height:56px;width:100%;border-radius:999px;background:transparent;border:2px solid var(--line2);color:var(--text);font-size:16px;font-weight:700;transition:transform .2s var(--spring),background-color .2s}
 .dbtn.danger{color:var(--c-saida);border-color:color-mix(in srgb,var(--c-saida) 45%,transparent)}
 .dbtn:active{transform:scale(.97);background:var(--surface3)}
 .cmodal .btn-link{height:52px}
+
+/* ===== todos os pop-ups no mesmo padrão: centralizados, mesma largura, cantos de 28px, título 22px, sem o x ===== */
+.overlay.ov-sheet{place-items:center;padding:16px}
+.modal.sheet{animation:pop .5s var(--spring)!important}
+.modal:not(.form-modal){width:min(400px,100%);border-radius:28px}
+.modal:not(.form-modal) .modal-head{padding:32px 24px 8px;border-bottom:0}
+.modal:not(.form-modal) .modal-head h2{font-size:22px}
+.modal-head [data-close]{display:none}
+.modal.cmodal .modal-head{padding:32px 24px 6px}
+.modal.cmodal .modal-body{padding:0 24px 22px}
+.modal.cmodal .modal-foot{padding:0 24px 22px}
+.sheet .modal-body{padding:8px 0 0}
+.sheet .sitem{padding:18px 24px}
+.sheet .modal-body>.btn,.sheet .modal-body>.st-save{margin:8px 24px 0;width:calc(100% - 48px)}
+.sheet .sheet-new{padding:18px 24px 0}
+.sheet .sheet-hint{margin:12px 24px 0}
+.sheet-cancel{padding:8px 24px 22px;display:flex;flex-direction:column}
+.sheet-cancel .btn-link{height:52px}
+
+/* ===== ícone sempre centralizado entre as linhas de texto ao lado ===== */
+.dbtn:disabled{opacity:.4;cursor:default}
+.bs-msg{align-items:center}
+.bs-mt{padding-top:0}
+.srow.stack{align-items:center}
+.srow.stack .sico{margin-top:0}
+.lrow{display:grid;grid-template-columns:16px minmax(0,1fr) auto;column-gap:12px;row-gap:6px;align-items:center}
+.lrow-top{display:contents}
+.lrow-top .ti{grid-column:1;grid-row:1/3;align-self:center}
+.lrow-top b{grid-column:2;grid-row:1}
+.lrow-top .lrow-val{grid-column:3;grid-row:1}
+.lrow-sub{grid-column:2/4;grid-row:2;padding-left:0}
 </style>
 <script>try{var t=JSON.parse(localStorage.getItem("ae.theme")||"null")||"dark";if(t==="system")t=matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light";if(t==="light")document.documentElement.classList.add("light")}catch(e){}</script>
 </head><body>
@@ -1498,8 +1528,8 @@ function openModal({ title, body, foot, wide, onMount, onClose, headExtra, cls }
   const ov = document.createElement("div");
   ov.className = "overlay" + (cls === "sheet" ? " ov-sheet" : "") + (cls === "form-modal" ? " ov-form" : "");
   ov.innerHTML = `<div class="modal ${wide ? "wide" : ""} ${cls || ""}" role="dialog" aria-modal="true" aria-label="${esc(title)}">
-    <div class="modal-head"><h2>${esc(title)}</h2>${headExtra || ""}<button class="icon-btn" data-close aria-label="fechar janela">${I.x}</button></div>
-    <div class="modal-body">${body}</div>${foot ? `<div class="modal-foot">${foot}</div>` : ""}</div>`;
+    <div class="modal-head"><h2>${esc(title)}</h2>${headExtra || ""}</div>
+    <div class="modal-body">${body}</div>${foot ? `<div class="modal-foot">${foot}</div>` : ""}${cls === "sheet" ? `<div class="sheet-cancel"><button class="btn-link" data-close>cancelar</button></div>` : ""}</div>`;
   $("#modal-root").appendChild(ov);
   const api = {
     el: ov.firstElementChild,
@@ -1508,7 +1538,7 @@ function openModal({ title, body, foot, wide, onMount, onClose, headExtra, cls }
   };
   modals.push(api);
   ov.addEventListener("pointerdown", e => { if (e.target === ov) api.close(); });
-  $("[data-close]", ov).onclick = () => api.close();
+  ov.querySelectorAll("[data-close]").forEach(b => b.onclick = () => api.close());
   onMount && onMount(api.el, api);
   const f = $("input,textarea,select", api.el); if (f && !f.readOnly) setTimeout(() => f.focus(), 30);
   return api;
@@ -2357,31 +2387,27 @@ function occInfo(tx, date) { let r = null; expand(tx, date, date, (d, v, n, t) =
 function nextOccDate(tx, date) { let r = null; expand(tx, ymd(addDays(parse(date), 1)), miLast(MAX_MI), d => { r = d; return false; }); return r; }
 const dayDiff = (a, b) => Math.round((parse(b) - parse(a)) / 864e5);
 const shiftDate = (s, n) => ymd(addDays(parse(s), n));
-function chooseScope({ title, text, date, hasNext, danger }) {
+function chooseScope({ title, hasNext }) {
   return new Promise(res => {
     let done = false;
     const m = openModal({
-      title, body: `<p class="dialog-text">${text}</p>
-      <div class="scope-list">
-        <button class="scope" data-s="one"><b>só este</b><span>só o de ${dBR(date)}</span></button>
-        <button class="scope" data-s="from"><b>este e os próximos</b><span>de ${dBR(date)} em diante</span></button>
-        <button class="scope" data-s="next" ${hasNext ? "" : "disabled"}><b>só os próximos</b><span>${hasNext ? `depois de ${dBR(date)}, sem mexer neste` : "não tem próximos"}</span></button>
-        <button class="scope ${danger ? "danger" : ""}" data-s="all"><b>todos</b><span>todas as repetições, inclusive as que já passaram</span></button>
-      </div>`, onClose: () => { if (!done) res(null); }
+      title, body: `<p class="dialog-text">escolhe para quais repetições vale essa mudança.</p>`,
+      foot: `<button class="dbtn" data-s="one">salvar somente nesta</button><button class="dbtn" data-s="from">salvar nesta e nas próximas</button><button class="dbtn" data-s="all">salvar em todas</button><button class="btn-link" data-no>cancelar</button>`,
+      onClose: () => { if (!done) res(null); }, cls: "cmodal"
     });
-    m.el.addEventListener("click", e => { const b = e.target.closest("[data-s]"); if (!b || b.disabled) return; done = true; m.close(); res(b.dataset.s); });
+    m.el.addEventListener("click", e => { if (e.target.closest("[data-no]")) return m.close(); const b = e.target.closest("[data-s]"); if (!b || b.disabled) return; done = true; m.close(); res(b.dataset.s); });
   });
 }
 // apagar algo que se repete: três opções diretas, sem explicações
-function chooseDelScope() {
+function chooseDelScope(hasNext) {
   return new Promise(res => {
     let done = false;
     const m = openModal({
       title: "apagar repetições", body: `<p class="dialog-text">essa ação não poderá ser desfeita.</p>`,
-      foot: `<button class="dbtn danger" data-s="one">apagar somente esta</button><button class="dbtn danger" data-s="from">apagar esta e as próximas</button><button class="dbtn danger" data-s="all">apagar todas</button><button class="btn-link" data-no>cancelar</button>`,
+      foot: `<button class="dbtn danger" data-s="one">apagar somente esta</button><button class="dbtn danger" data-s="from">apagar esta e as próximas</button><button class="dbtn danger" data-s="next" ${hasNext ? "" : "disabled"}>apagar somente as próximas</button><button class="dbtn danger" data-s="all">apagar todas</button><button class="btn-link" data-no>cancelar</button>`,
       onClose: () => { if (!done) res(null); }, cls: "cmodal"
     });
-    m.el.addEventListener("click", e => { if (e.target.closest("[data-no]")) return m.close(); const b = e.target.closest("[data-s]"); if (!b) return; done = true; m.close(); res(b.dataset.s); });
+    m.el.addEventListener("click", e => { if (e.target.closest("[data-no]")) return m.close(); const b = e.target.closest("[data-s]"); if (!b || b.disabled) return; done = true; m.close(); res(b.dataset.s); });
   });
 }
 async function deleteOcc(tx, date) {
@@ -2391,7 +2417,7 @@ async function deleteOcc(tx, date) {
     await delTx(tx.id); afterDelete(); return;
   }
   const nd = nextOccDate(tx, date);
-  const s = await chooseDelScope();
+  const s = await chooseDelScope(!!nd);
   if (!s) return;
   const first = occInfo(tx, date)?.n === 1;
   if (s === "all" || (s === "from" && first)) await delTx(tx.id);
@@ -3042,7 +3068,7 @@ async function wipe(colls) {
 }
 
 async function signOut() {
-  if (!(await confirmBox({ title: "sair da conta?", text: "você pode entrar de novo quando quiser.", ok: "sair", danger: false }))) return;
+  if (!(await confirmBox({ title: "sair da conta", text: "você pode entrar de novo quando quiser.", ok: "sair", danger: false }))) return;
   closePanel(); while (SCREENS.length) SCREENS[SCREENS.length - 1].close();
   if (backend.signOut) { await backend.signOut(); return; }
   UI.signedOut = "out"; render();
@@ -3098,10 +3124,10 @@ function bindAuth(el) {
       if (mode === "signup") {
         const { data, error } = await SB.auth.signUp({ email, password: pass, options: { data: { nome: ($("#au-n", el).value || "").trim() }, emailRedirectTo: location.href.split("#")[0].split("?")[0] } });
         if (error) throw error;
-        if (!data.session) { showAuthKeepMsg("login", "pronto! confirma a conta pelo link que enviamos para o seu e-mail e depois entra aqui."); showMailSent(email); }
+        if (!data.session) { showAuthKeepMsg("login", "pronto. confirma a conta pelo link que enviamos para o seu e-mail e depois entra aqui."); showMailSent(email); }
       }
       if (mode === "forgot") { const { error } = await SB.auth.resetPasswordForEmail(email, { redirectTo: location.href.split("#")[0] }); if (error) throw error; msg("se esse e-mail tiver conta, o link já está a caminho."); }
-      if (mode === "newpass") { const { error } = await SB.auth.updateUser({ password: pass }); if (error) throw error; msg("senha salva! entrando…"); setTimeout(() => location.replace(location.href.split("#")[0]), 800); }
+      if (mode === "newpass") { const { error } = await SB.auth.updateUser({ password: pass }); if (error) throw error; msg("senha salva. entrando…"); setTimeout(() => location.replace(location.href.split("#")[0]), 800); }
     } catch (err) {
       console.warn(err);
       const m = String(err.message || "");
