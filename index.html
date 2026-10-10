@@ -996,7 +996,13 @@ const LOGO_G = "M15530 9714 c-68 -13 -138 -28 -155 -33 -16 -6 -52 -13 -80 -16 -2
 const logoSVG = (size, label) => `<svg class="logo-svg" width="${size}" height="${size}" viewBox="-140 -114 2200 2200" ${label ? 'role="img" aria-label="FLUX"' : 'aria-hidden="true"'}><g transform="translate(0,1980) scale(0.1,-0.1)"><path fill="var(--logo-b)" d="${LOGO_G}"/><path fill="var(--logo-a)" d="${LOGO_D}"/></g></svg>`;
 { const sp = document.querySelector("#splash .sp-logo"); if (sp) sp.innerHTML = logoSVG(56); }
 let SPLASH_T = setTimeout(() => hideSplash(), 12000); // segurança: nunca fica preso na abertura
+// a abertura fica pelo menos 2 segundos na tela toda vez que o app é aberto do zero
+// (voltar do segundo plano não recarrega a página, então ela não aparece de novo)
+const SPLASH_MIN = 2000;
+let SPLASH_WAIT = false;
 function hideSplash() {
+  const falta = SPLASH_MIN - performance.now();
+  if (falta > 0) { if (!SPLASH_WAIT) { SPLASH_WAIT = true; setTimeout(() => { SPLASH_WAIT = false; hideSplash(); }, falta); } return; }
   clearTimeout(SPLASH_T);
   const el = document.getElementById("splash"); if (!el || el.classList.contains("hide")) return;
   el.classList.add("hide"); setTimeout(() => el.remove(), 500);
@@ -2382,7 +2388,7 @@ $("#drawer-root").addEventListener("click", e => {
 document.addEventListener("touchstart", () => { }, { passive: true });
 function animateSlideEl(el, dir) { el.classList.remove("slide-l", "slide-r"); void el.offsetWidth; el.classList.add(dir > 0 ? "slide-l" : "slide-r"); }
 
-/* ===== repetições: escolher o alcance (só este, este e os próximos, só os próximos, todos) ===== */
+/* ===== repetições: escolher o alcance (somente esta, esta e as próximas, todas) ===== */
 function occInfo(tx, date) { let r = null; expand(tx, date, date, (d, v, n, t) => { r = { date: d, value: v, n, total: t }; }); return r; }
 function nextOccDate(tx, date) { let r = null; expand(tx, ymd(addDays(parse(date), 1)), miLast(MAX_MI), d => { r = d; return false; }); return r; }
 const dayDiff = (a, b) => Math.round((parse(b) - parse(a)) / 864e5);
@@ -2404,7 +2410,7 @@ function chooseDelScope(hasNext) {
     let done = false;
     const m = openModal({
       title: "apagar repetições", body: `<p class="dialog-text">essa ação não poderá ser desfeita.</p>`,
-      foot: `<button class="dbtn danger" data-s="one">apagar somente esta</button><button class="dbtn danger" data-s="from">apagar esta e as próximas</button><button class="dbtn danger" data-s="next" ${hasNext ? "" : "disabled"}>apagar somente as próximas</button><button class="dbtn danger" data-s="all">apagar todas</button><button class="btn-link" data-no>cancelar</button>`,
+      foot: `<button class="dbtn danger" data-s="one">apagar somente esta</button><button class="dbtn danger" data-s="from">apagar esta e as próximas</button><button class="dbtn danger" data-s="all">apagar todas</button><button class="btn-link" data-no>cancelar</button>`,
       onClose: () => { if (!done) res(null); }, cls: "cmodal"
     });
     m.el.addEventListener("click", e => { if (e.target.closest("[data-no]")) return m.close(); const b = e.target.closest("[data-s]"); if (!b || b.disabled) return; done = true; m.close(); res(b.dataset.s); });
