@@ -1107,7 +1107,15 @@ input,textarea,[contenteditable="true"]{-webkit-user-select:text;user-select:tex
 :root .mtable tr.today td{border-bottom:0}
 :root .mcols th{border-bottom:1px solid var(--line)}
 :root .hz-head{border-bottom:0}
-@media (hover:hover){:root .mtable tbody tr:hover td:not(.c-saldo):not(.c-dia){background:var(--surface2)}:root .mtable tbody tr:hover td:nth-child(2){border-radius:12px 0 0 12px}:root .mtable tbody tr:hover td:nth-last-child(2){border-radius:0 12px 12px 0}}
+@media (hover:hover){
+  /* destaque da linha: mesma altura dos blocos de dia e saldo */
+  :root .mtable tbody td.cell{position:relative;z-index:0}
+  :root .mtable tbody td.cell:hover{background:transparent}
+  :root .mtable tbody tr:hover td.cell::before{content:"";position:absolute;z-index:-1;inset:4px 0;background:var(--surface2)}
+  :root .mtable tbody tr:hover td.cell:nth-child(2)::before{border-radius:12px 0 0 12px}
+  :root .mtable tbody tr:hover td.cell:nth-last-child(2)::before{border-radius:0 12px 12px 0}
+  :root .mtable tbody tr.blank:hover td.cell::before{display:none}
+}
 
 </style>
 <script>try{var t=JSON.parse(localStorage.getItem("ae.theme")||"null")||"dark";if(t==="system")t=matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light";if(t==="light")document.documentElement.classList.add("light")}catch(e){}</script>
