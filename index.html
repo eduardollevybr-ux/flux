@@ -586,6 +586,17 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 .pager.dragging .pane{pointer-events:none}
 .pager.dragging .pane:not(.cur){opacity:1}
 .pager:not(.dragging):not([data-anim]) .pane:not(.cur){visibility:hidden}
+/* saldos no celular: dia e saldos ficam parados, só a coluna do meio desliza */
+.pager.solo .track{transform:none}
+.m-mid{position:relative;overflow:hidden;min-width:0;align-self:stretch}
+.m-headrow .m-mid{align-self:center}
+.m-strip{position:relative;height:100%;transform:translate3d(var(--dx,0px),0,0)}
+.m-strip>.m-nb{position:absolute;top:0;width:100%}
+.m-strip>.m-nb.p{left:-100%}
+.m-strip>.m-nb.n{left:100%}
+.pager.dragging .m-strip{will-change:transform}
+.pager[data-anim] .m-strip{transition:transform var(--pg-dur,480ms) cubic-bezier(.2,.85,.25,1)}
+.pager:not(.dragging):not([data-anim]) .m-nb{visibility:hidden}
 @keyframes rise{from{opacity:0;transform:translateY(22px) scale(.97)}}
 .rise{animation:rise .62s var(--ease-out) both;animation-delay:calc(var(--i,0) * 38ms)}
 .mcard.rise{animation-name:riseX;animation-duration:.7s}
@@ -1878,12 +1889,24 @@ function slidePager(pg, dir, then, dur) {
   track.addEventListener("transitionend", fin, { once: true }); setTimeout(fin, (dur || 480) + 60);
 }
 let PG = null;
+const moveTo = (p, x) => { if (p.solo) p.list.style.setProperty("--dx", `${x}px`); else p.track.style.transform = `translate3d(${-p.w + x}px,0,0)`; };
+/* saldos no celular: termina o deslize só da coluna do meio */
+function slideSolo(p, dir, then, dur) {
+  const { pg, list, w } = p;
+  pg.dataset.anim = "1"; list.style.setProperty("--pg-dur", `${dur || 480}ms`);
+  list.style.setProperty("--dx", `${dir > 0 ? -w : dir < 0 ? w : 0}px`);
+  let done = false;
+  const fin = () => { if (done) return; done = true; delete pg.dataset.anim; if (dir) then(); else list.style.removeProperty("--dx"); };
+  list.addEventListener("transitionend", e => { if (e.target.classList.contains("m-strip")) fin(); });
+  setTimeout(fin, (dur || 480) + 60);
+}
 $("#view").addEventListener("touchstart", e => {
   if (!isMobile() || e.touches.length !== 1) return;
   if (e.touches[0].clientX < EDGE_W) return;
   const pg = e.target.closest(".pager"); if (!pg || pg.dataset.anim) return;
   const t = e.touches[0], now = performance.now();
-  PG = { pg, track: pg.firstElementChild, x0: t.clientX, y0: t.clientY, dx: 0, axis: null, w: pg.clientWidth, lx: t.clientX, lt: now, v: 0 };
+  const solo = pg.classList.contains("solo"), mid = solo ? $(".m-day .m-mid", pg) : null;
+  PG = { pg, solo, list: solo ? $(".m-list", pg) : null, track: pg.firstElementChild, x0: t.clientX, y0: t.clientY, dx: 0, axis: null, w: solo ? (mid ? mid.offsetWidth : pg.clientWidth) : pg.clientWidth, lx: t.clientX, lt: now, v: 0 };
 }, { passive: true });
 $("#view").addEventListener("touchmove", e => {
   if (!PG) return;
@@ -1891,7 +1914,7 @@ $("#view").addEventListener("touchmove", e => {
   if (!PG.axis) {
     if (Math.abs(dx) + Math.abs(dy) < 8) return;
     PG.axis = Math.abs(dx) > Math.abs(dy) * 1.1 ? "x" : "y";
-    if (PG.axis === "x") { lpCancel(); alignPanes(PG.pg); PG.track.style.transition = "none"; PG.pg.classList.add("dragging"); PG.x0 = t.clientX - Math.sign(dx) * 0; }
+    if (PG.axis === "x") { lpCancel(); if (!PG.solo) { alignPanes(PG.pg); PG.track.style.transition = "none"; } PG.pg.classList.add("dragging"); PG.x0 = t.clientX - Math.sign(dx) * 0; }
   }
   if (PG.axis !== "x") return;
   e.preventDefault();
@@ -1899,14 +1922,15 @@ $("#view").addEventListener("touchmove", e => {
   let d = dx;
   if ((d > 0 && !canP) || (d < 0 && !canN)) d = Math.sign(d) * Math.pow(Math.abs(d), 0.72); // resistência na ponta
   const now = performance.now(); PG.v = (t.clientX - PG.lx) / Math.max(1, now - PG.lt); PG.lx = t.clientX; PG.lt = now;
+  if (PG.solo) d = Math.max(-PG.w, Math.min(PG.w, d));
   PG.dx = d;
-  if (!PG.raf) PG.raf = requestAnimationFrame(() => { if (PG) { PG.raf = 0; PG.track.style.transform = `translate3d(${-PG.w + PG.dx}px,0,0)`; } });
+  if (!PG.raf) PG.raf = requestAnimationFrame(() => { if (PG) { PG.raf = 0; moveTo(PG, PG.dx); } });
 }, { passive: false });
 const pgEnd = () => {
   if (!PG) return; const p = PG; PG = null;
   if (p.raf) cancelAnimationFrame(p.raf);
   if (p.axis !== "x") return;
-  p.track.style.transform = `translate3d(${-p.w + p.dx}px,0,0)`;
+  moveTo(p, p.dx);
   p.pg.classList.remove("dragging");
   const dir = p.dx < 0 ? 1 : -1, allowed = dir > 0 ? p.pg.dataset.next === "1" : p.pg.dataset.prev === "1";
   const fling = Math.abs(p.v) > 0.3 && Math.sign(p.v) === Math.sign(p.dx) && Math.abs(p.dx) > 20;
@@ -1914,7 +1938,8 @@ const pgEnd = () => {
   // duração proporcional ao que falta andar e à velocidade do dedo: parece continuar o movimento
   const rest = commit ? p.w - Math.abs(p.dx) : Math.abs(p.dx);
   const dur = Math.max(220, Math.min(520, rest / Math.max(0.9, Math.abs(p.v)) ));
-  slidePager(p.pg, commit ? dir : 0, () => applyPager(p.pg.dataset.pager, dir), dur);
+  if (p.solo) slideSolo(p, commit ? dir : 0, () => applyPager(p.pg.dataset.pager, dir), dur);
+  else slidePager(p.pg, commit ? dir : 0, () => applyPager(p.pg.dataset.pager, dir), dur);
 };
 $("#view").addEventListener("touchend", pgEnd);
 $("#view").addEventListener("touchcancel", pgEnd);
@@ -2102,27 +2127,26 @@ const mSaldoCls = v => Math.abs(v) < 0.005 ? "m-zero" : v > 0 ? "m-pos" : "m-neg
 const COL_ORDER = ["all", ...TYPE_ORDER];
 function mobileMonthHTML() {
   const i = COL_ORDER.indexOf(UI.mCol), L = COL_ORDER.length;
-  return pagerHTML("col", [COL_ORDER[(i - 1 + L) % L], UI.mCol, COL_ORDER[(i + 1) % L]], col => mMonthInner(false, col));
+  const cols = [COL_ORDER[(i - 1 + L) % L], UI.mCol, COL_ORDER[(i + 1) % L]];
+  return `<div class="page page-flush"><div class="pager solo" data-pager="col" data-prev="1" data-next="1"><div class="track"><div class="pane cur">${mMonthInner(cols)}</div></div></div></div>`;
 }
-function mMonthInner(horizon, col) {
-  const mi = UI.tMonth, y = miY(mi), m = miM(mi), n = dim(y, m), c = calc();
-  const cols = horizon ? [] : col === "all" ? TYPE_ORDER : [col];
-  const h2 = horizon ? "h2" : "";
-  const tot = { entrada: 0, saida: 0, diario: 0, economia: 0, cartao: 0 };
-  const selLabel = col === "all" ? `${ti("all")}todas` : `${ti(col)}${TYPES[col].col}`;
-  let h = `<div class="m-list"><div class="m-headrow ${h2}"><span>dia</span>${horizon ? `<span>saldos</span>` : `<button class="m-sel" id="m-col" aria-haspopup="menu" aria-label="escolher coluna, atual: ${col === "all" ? "todas" : TYPES[col].col}">${selLabel}<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M6 9l6 6 6-6"/></svg></button><span>saldos</span>`}</div>`;
+/* cols = [anterior, atual, próxima]: dia e saldos aparecem uma vez; só a coluna do meio leva as três, lado a lado */
+function mMonthInner(cols) {
+  const mi = UI.tMonth, y = miY(mi), m = miM(mi), n = dim(y, m), c = calc(), col = cols[1];
+  const types = k => k === "all" ? TYPE_ORDER : [k];
+  const nb = ["p", "", "n"];
+  const strip = f => `<div class="m-mid"><div class="m-strip">${cols.map((k, j) => j === 1 ? f(k, true) : `<div class="m-nb ${nb[j]}" aria-hidden="true" inert>${f(k, false)}</div>`).join("")}</div></div>`;
+  const sel = (k, cur) => `<button class="m-sel" ${cur ? `id="m-col" aria-haspopup="menu" aria-label="escolher coluna, atual: ${k === "all" ? "todas" : TYPES[k].col}"` : 'tabindex="-1"'}>${k === "all" ? `${ti("all")}todas` : `${ti(k)}${TYPES[k].col}`}<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M6 9l6 6 6-6"/></svg></button>`;
+  let h = `<div class="m-list"><div class="m-headrow"><span>dia</span>${strip(sel)}<span>saldos</span></div>`;
   for (let d = 1; d <= n; d++) {
     const ds = `${y}-${pad(m + 1)}-${pad(d)}`, o = c.day[ds], wd = new Date(y, m, d).getDay(), s = c.saldo[ds] ?? 0;
     const cls = [(wd === 0 || wd === 6) ? "we" : "", ds === TODAY ? "today" : ""].join(" ");
-    h += `<div class="m-day ${h2} ${cls}" data-row="${ds}"><button class="m-dia num" data-act="check" data-d="${ds}" aria-label="dia ${d} de ${MONTHS[m]}: ${S.checkins[ds] ? "desmarcar" : "marcar"} check-in">${d}${S.checkins[ds] ? `<span class="check ${UI.popCheck === ds ? "pop" : ""}" aria-hidden="true">${I.checkW}</span>` : ""}</button>`;
-    if (!horizon) {
-      h += `<div class="m-vals">`;
-      for (const t of cols) {
-        const { v, real, fc } = cellVal(o, t, ds); tot[t] = r2(tot[t] + v);
-        h += `<button class="m-cell num ${v ? "" : "z"} ${fc ? "fc" : ""}" data-act="cell" data-d="${ds}" data-t="${t}" aria-label="${TYPES[t].col} em ${d} de ${MONTHS[m]}: ${fmt(v)}${fc ? " (com previsão)" : ""}. toque para ver, segure para adicionar">${ti(fc && !real ? "prev" : t)}<span>${brl(v)}</span></button>`;
-      }
-      h += `</div>`;
-    }
+    const vals = k => `<div class="m-vals">${types(k).map(t => {
+      const { v, real, fc } = cellVal(o, t, ds);
+      return `<button class="m-cell num ${v ? "" : "z"} ${fc ? "fc" : ""}" data-act="cell" data-d="${ds}" data-t="${t}" aria-label="${TYPES[t].col} em ${d} de ${MONTHS[m]}: ${fmt(v)}${fc ? " (com previsão)" : ""}. toque para ver, segure para adicionar">${ti(fc && !real ? "prev" : t)}<span>${brl(v)}</span></button>`;
+    }).join("")}</div>`;
+    h += `<div class="m-day ${cls}" data-row="${ds}"><button class="m-dia num" data-act="check" data-d="${ds}" aria-label="dia ${d} de ${MONTHS[m]}: ${S.checkins[ds] ? "desmarcar" : "marcar"} check-in">${d}${S.checkins[ds] ? `<span class="check ${UI.popCheck === ds ? "pop" : ""}" aria-hidden="true">${I.checkW}</span>` : ""}</button>`;
+    h += strip(vals);
     h += `<button class="m-saldo num ${mSaldoCls(s)}" data-act="saldo" data-d="${ds}" aria-label="saldo em ${d} de ${MONTHS[m]}: ${fmt(s)}">${brl(s)}</button></div>`;
   }
   return h + `</div>`;
