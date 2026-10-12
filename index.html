@@ -982,6 +982,80 @@ input,textarea,[contenteditable="true"]{-webkit-user-select:text;user-select:tex
 .sitem .si-txt b{white-space:nowrap}
 .sitem .stepper{flex:none;margin:0;height:48px;padding:0 4px;gap:2px}
 .sitem .stepper b{min-width:34px}
+/* ===== como funciona (tutorial) ===== */
+.tu .scr-body{overflow:hidden}
+.tu-skip{height:40px;padding:0 12px;color:var(--muted);font-weight:600;font-size:16px;border-radius:999px}
+@media (hover:hover){.tu-skip:hover{background:var(--surface2);color:var(--text)}}
+.tu-view{position:relative;flex:1;min-height:0;overflow:hidden;touch-action:pan-y}
+.tu-track{display:flex;height:100%;transform:translate3d(calc(var(--i,0) * -100% + var(--dx,0px)),0,0);transition:transform .6s var(--spring);will-change:transform}
+.tu-track.drag{transition:none}
+.tu-slide{flex:0 0 100%;min-width:0;height:100%;overflow-y:auto;overscroll-behavior:contain;display:flex;flex-direction:column;padding:12px 24px 4px}
+.tu-art{flex:none;height:clamp(214px,36vh,340px);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;padding:8px 0 16px}
+.tu-txt{flex:none;padding-bottom:12px}
+.tu-txt h3{margin:0 0 10px;font-size:22px;font-weight:700}
+.tu-txt p{margin:0 0 8px;color:var(--muted);font-size:16px;line-height:1.5}
+.tu-txt p b{color:var(--text);font-weight:600}
+.tu-foot{flex:none;display:flex;flex-direction:column;gap:18px;padding:14px 20px calc(18px + env(safe-area-inset-bottom,0px))}
+.tu-prog{display:flex;gap:6px}
+.tu-prog i{position:relative;flex:1;height:4px;border-radius:99px;background:var(--line2);overflow:hidden}
+.tu-prog i::after{content:"";position:absolute;inset:0;background:var(--accent);transform:scaleX(0);transform-origin:left;transition:transform .45s var(--ease-out)}
+.tu-prog i.on::after{transform:scaleX(1)}
+.tu-btns{display:grid;grid-template-columns:1fr 2fr;gap:12px}
+.tu-btns.first{grid-template-columns:1fr}
+.tu-btns.first [data-tuprev]{display:none}
+.tu-btns .sbtn{height:54px}
+/* entradas das ilustrações: só quando o passo aparece */
+.tu-slide.on .tu-pop{animation:popIn .55s var(--spring) both;animation-delay:calc(var(--d,0) * 80ms + 120ms)}
+/* boas-vindas */
+.tu-logo{display:grid;place-items:center;margin-bottom:4px}
+.tu-slide.on .tu-logo{animation:tuLogo .8s var(--spring) both .1s}
+@keyframes tuLogo{from{opacity:0;transform:scale(.6) rotate(-8deg)}}
+.tu-brand{font-size:34px;font-weight:700;letter-spacing:.08em;color:var(--logo-a)}
+/* ícone grande do tipo */
+.tu-ico .ti{width:72px;height:72px}
+/* listas com linhas, sem blocos contornados */
+.tu-list{width:100%;max-width:340px;border-top:1px solid var(--line2)}
+.tu-row{display:flex;align-items:center;gap:12px;min-height:48px;padding:0 4px;border-bottom:1px solid var(--line2);font-size:15px}
+.tu-row>b{flex:1;min-width:0;font-weight:600}
+.tu-row>.num{white-space:nowrap}
+.tu-row .tu-sub{display:block;color:var(--muted);font-size:13px;font-weight:400;margin-top:2px}
+.tu-row.mut>b{color:var(--muted);font-weight:500}
+.tu-row>svg{width:20px;height:20px;flex:none}
+.tu-s{display:inline-flex;align-items:center;justify-content:flex-end;height:30px;padding:0 10px;border-radius:8px;font-weight:600;font-size:14px;white-space:nowrap;transition:background-color .3s,color .3s}
+/* mini tela de saldos */
+.tu-tab{display:grid;grid-template-columns:44px 1fr 40%;width:100%;max-width:360px;border-top:1px solid var(--line2);border-bottom:1px solid var(--line2);font-size:13px}
+.tu-c>*{height:44px;display:flex;align-items:center;border-bottom:1px solid var(--line)}
+.tu-c>*:last-child{border-bottom:0}
+.tu-c>.h{color:var(--muted);font-weight:600;border-bottom-color:var(--line2)}
+.tu-dd>*{justify-content:center;font-weight:600;font-size:14px;border-right:1px solid var(--line)}
+.tu-dd>.td{background:var(--today-bg);color:var(--today-fg)}
+.tu-ss>*{justify-content:flex-end;padding:0 6px}
+.tu-ss>.h{padding-right:10px}
+.tu-ss .tu-s{height:32px;font-size:13px;padding:0 8px}
+.tu-mid{position:relative;overflow:hidden;min-width:0}
+.tu-strip{display:flex;width:300%}
+.tu-pane{width:33.3334%}
+.tu-pane>*{padding:0 8px;justify-content:space-between;gap:6px}
+.tu-pane>.h{justify-content:flex-start}
+.tu-pill{display:inline-flex;align-items:center;gap:6px;height:28px;padding:0 10px;border:2px solid var(--line2);border-radius:999px;color:var(--text);font-weight:600;font-size:13px}
+.tu-pane .z{color:var(--zero)}
+.tu-pane .z .ti{background:var(--zero)!important;color:var(--surface)!important;opacity:.7}
+.tu-finger{position:absolute;top:50%;left:70%;width:34px;height:34px;margin:-17px 0 0 -17px;border-radius:99px;background:var(--text);opacity:0;pointer-events:none}
+.tu-slide.on .tu-strip{animation:tuCols 8s var(--ease-out) infinite .8s}
+.tu-slide.on .tu-finger{animation:tuFinger 8s ease infinite .8s}
+@keyframes tuCols{0%,20%{transform:translateX(0)}30%,50%{transform:translateX(-33.3334%)}60%,80%{transform:translateX(-66.6667%)}90%,100%{transform:translateX(0)}}
+@keyframes tuFinger{0%,14%{opacity:0;left:72%}18%{opacity:.22;left:72%}28%{opacity:.22;left:26%}31%,44%{opacity:0;left:26%}48%{opacity:.22;left:72%}58%{opacity:.22;left:26%}61%,100%{opacity:0;left:26%}}
+/* cores do saldo */
+.tu-leg .tu-s{min-width:132px}
+/* mini lançamento */
+.tu-money{display:flex;align-items:baseline;gap:8px;width:100%;max-width:340px;padding:0 4px 6px}
+.tu-money span{font-size:22px;font-weight:700}
+.tu-money b{font-size:30px;font-weight:700}
+.tu-row .ti{width:20px;height:20px}
+.tu-row .ti.ti-prev{border-width:2px}
+.tu-row em{font-style:normal;color:var(--text)}
+/* previsão */
+.tu-res{width:100%;max-width:340px;text-align:right;font-size:30px;font-weight:700;padding:10px 4px 0}
 </style>
 <script>try{var t=JSON.parse(localStorage.getItem("ae.theme")||"null")||"dark";if(t==="system")t=matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light";if(t==="light")document.documentElement.classList.add("light")}catch(e){}</script>
 </head><body>
@@ -2030,6 +2104,7 @@ function renderAll() {
     const start = () => setTimeout(() => { if (UI.tab === "saldos") scrollToToday(true); }, 450);
     (document.fonts && document.fonts.ready ? document.fonts.ready : Promise.resolve()).then(start, start);
   }
+  maybeTutorial();
 }
 /* ================= animações de entrada ================= */
 function stagger(els, step = 38, max = 18) {
@@ -2892,6 +2967,7 @@ const MENU = [
   ["perfil", "editar perfil", "user"],
   ["prev", "previsão de diário", null],
   ["cartoes", "cartões de crédito", "card"],
+  ["ajuda", "como funciona", "help"],
   ["config", "configurações", "gear"],
   ["sair", "sair", "out"],
 ];
@@ -2905,7 +2981,7 @@ function menuHTML() {
 }
 $("#view").addEventListener("click", e => {
   const b = e.target.closest("[data-menu]"); if (!b) return;
-  ({ perfil: openProfile, prev: openPrevScreen, cartoes: openCards, config: openConfig, sair: signOut })[b.dataset.menu]();
+  ({ perfil: openProfile, prev: openPrevScreen, cartoes: openCards, ajuda: () => openTutorial(false), config: openConfig, sair: signOut })[b.dataset.menu]();
 });
 
 /* ===== editar perfil ===== */
@@ -3128,6 +3204,136 @@ async function signOut() {
   UI.signedOut = "out"; render();
 }
 
+/* ===== como funciona (tutorial) ===== */
+I.help = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M9.6 9.3a2.5 2.5 0 1 1 3.4 2.6c-.6.3-1 .8-1 1.5v.4"/><path d="M12 17h.01"/></svg>';
+function tuSlides() {
+  const mob = isMobile();
+  const PEN = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg>';
+  const REP = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4.5" width="15" height="15" rx="2.5"/><path d="M3 9h15M7.5 2.5v4M13.5 2.5v4"/><path d="M21 15a4 4 0 1 1-1.2-2.8M21 11.5V14h-2.5"/></svg>';
+  const sal = (from, to) => `<span class="tu-s ${mSaldoCls(to)} num" data-cnt="${from}|${to}">${brl(to)}</span>`;
+  const row = (ico, desc, v, sub = "") => `<div class="tu-row">${ico}<b>${desc}${sub ? `<span class="tu-sub">${sub}</span>` : ""}</b>${v != null ? `<span class="num">${brl(v)}</span>` : ""}</div>`;
+  const dias = [5, 6, 7], saldos = [3000, 1800, 1760];
+  const cols = [["entrada", [3000, 0, 0]], ["saida", [0, 1200, 0]], ["diario", [0, 0, 40]]];
+  const tab = `<div class="tu-tab tu-pop">
+    <div class="tu-c tu-dd"><span class="h">dia</span>${dias.map((d, k) => `<span class="num ${k === 2 ? "td" : ""}">${d}</span>`).join("")}</div>
+    <div class="tu-mid"><div class="tu-strip">${cols.map(([t, vs]) => `<div class="tu-c tu-pane"><span class="h"><span class="tu-pill">${ti(t)}${TYPES[t].col}</span></span>${vs.map(v => `<span class="num ${v ? "" : "z"}">${ti(t)}<span>${brl(v)}</span></span>`).join("")}</div>`).join("")}</div><span class="tu-finger" aria-hidden="true"></span></div>
+    <div class="tu-c tu-ss"><span class="h">saldos</span>${saldos.map(v => `<span><span class="tu-s ${mSaldoCls(v)} num">${brl(v)}</span></span>`).join("")}</div></div>`;
+  const futuro = [[2400, "hoje"], [850, "dia 15"], [0, "dia 22"], [-320, "dia 28"]];
+  return [
+    { t: "saiba antes quanto vai ter", art: `<span class="tu-logo">${logoSVG(72, true)}</span>
+        <div class="tu-list tu-leg">${futuro.map(([v, l], k) => `<div class="tu-row tu-pop" style="--d:${k + 2}"><b>${l}</b><span class="tu-s ${mSaldoCls(v)} num">${brl(v)}</span></div>`).join("")}</div>`,
+      p: ["o FLUX mostra o saldo de cada dia antes dele chegar. você descobre com antecedência se vai sobrar ou faltar dinheiro.",
+        "assim fica fácil decidir quando dá para gastar, quando segurar e quanto dá para guardar."] },
+    { t: "saldos", art: tab,
+      p: ["cada linha é um dia. na direita, o quanto sobra no fim dele: <b>azul</b> sobra, <b>amarelo</b> zera, <b>vermelho</b> falta.",
+        mob ? "desliza para trocar de coluna e segura num dia para lançar nele." : "clique num valor para ver os detalhes ou use o botão direito para lançar naquele dia."] },
+    { t: "entradas e saídas", art: `<div class="tu-list tu-pop">${row(ti("entrada"), "salário", 3000)}${row(ti("saida"), "aluguel", 1200)}<div class="tu-row mut"><b>saldo do dia</b>${sal(3000, 1800)}</div></div>`,
+      p: ["<b>entradas:</b> aqui você coloca o que entra, como salário, freela e pix recebido.",
+        "<b>saídas:</b> aqui vão as contas com data, como aluguel, luz, internet e boleto."] },
+    { t: "diário e previsão", art: `<div class="tu-list tu-pop">${row(ti("diario"), "ontem", 58, "gasto lançado")}${row(ti("diario"), "hoje", 23, "gasto lançado")}${row(ti("prev"), "amanhã", 40, "previsão")}${row(ti("prev"), "depois de amanhã", 40, "previsão")}</div>`,
+      p: ["<b>diário:</b> aqui você coloca o que já gastou no dia a dia, como mercado, padaria e transporte.",
+        "<b>previsão de diário:</b> no menu, você diz quanto costuma gastar por mês. o FLUX divide e desconta dos dias que ainda vão chegar."] },
+    { t: "economias e cartões", art: `<div class="tu-list tu-pop">${row(ti("economia"), "reserva", 500)}${row(ti("cartao"), "jantar", 120, "nubank")}</div>`,
+      p: ["<b>economias:</b> aqui você coloca o que separa para guardar. o valor aparece no economizado, em totais.",
+        "<b>cartão:</b> aqui vão os gastos no cartão de crédito. cadastra os cartões no menu ou na hora de lançar."] },
+    { t: "como lançar", art: `<div class="tu-money tu-pop"><span>R$</span><b class="num" data-cnt="0|3000|fmt">${fmt(3000)}</b></div>
+      <div class="tu-list tu-pop" style="--d:1">${row(ti("entrada"), "entrada")}${row(PEN, "salário")}<div class="tu-row">${I.cal}<b>data</b><em class="num">${pad(5)}/${pad(NOW.getMonth() + 1)}/${NOW.getFullYear()}</em></div>${row(REP, "mensalmente")}</div>`,
+      p: [mob ? "toque no +, escolhe o tipo e preenche valor, descrição e data." : "clique em adicionar, escolhe o tipo e preenche valor, descrição e data.",
+        "se repete, como salário ou aluguel, escolhe a repetição. dá para parcelar também."] },
+  ];
+}
+// números das ilustrações contando até o valor final
+function tuCount(el) {
+  const [a, b, m] = el.dataset.cnt.split("|"), from = +a, to = +b;
+  const show = v => { el.textContent = m === "fmt" ? fmt(v) : brl(v); if (el.classList.contains("tu-s")) { el.classList.remove("m-pos", "m-zero", "m-neg"); el.classList.add(mSaldoCls(v)); } };
+  if (matchMedia("(prefers-reduced-motion: reduce)").matches) return show(to);
+  show(from);
+  setTimeout(() => {
+    const t0 = performance.now();
+    const step = now => {
+      if (!el.closest(".tu-slide.on")) return show(to);
+      const k = Math.min(1, (now - t0) / 900), e = 1 - Math.pow(1 - k, 3);
+      show(Math.round((from + (to - from) * e) * 100) / 100);
+      if (k < 1) requestAnimationFrame(step);
+    };
+    requestAnimationFrame(step);
+  }, 450);
+}
+function openTutorial(first) {
+  const list = tuSlides(), n = list.length;
+  let i = 0;
+  const s = openScreen({
+    title: "como funciona",
+    right: first ? `<button class="tu-skip" data-tuskip>pular</button>` : "",
+    body: `<div class="tu-view"><div class="tu-track">${list.map(x => `<section class="tu-slide"><div class="tu-art" aria-hidden="true">${x.art}</div><div class="tu-txt"><h3>${x.t}</h3>${x.p.map(p => `<p>${p}</p>`).join("")}</div></section>`).join("")}</div></div>
+      <div class="tu-foot"><div class="tu-prog" aria-hidden="true">${list.map(() => "<i></i>").join("")}</div><span class="sr-only" aria-live="polite" data-tustep></span>
+      <div class="tu-btns"><button class="sbtn" data-tuprev>voltar</button><button class="sbtn solid" data-tunext></button></div></div>`,
+  });
+  const el = s.el, view = $(".tu-view", el), track = $(".tu-track", el), slides = $$(".tu-slide", el);
+  el.classList.add("tu");
+  const go = k => {
+    i = Math.max(0, Math.min(n - 1, k));
+    track.style.setProperty("--i", i);
+    slides.forEach((x, j) => { x.classList.remove("on"); x.inert = j !== i; x.setAttribute("aria-hidden", j !== i); });
+    void track.offsetWidth; // reinicia as animações do passo que entrou
+    slides[i].classList.add("on"); slides[i].scrollTop = 0;
+    $$(".tu-prog i", el).forEach((b, j) => b.classList.toggle("on", j <= i));
+    $(".tu-btns", el).classList.toggle("first", i === 0);
+    $("[data-tunext]", el).textContent = i === n - 1 ? (first ? "começar" : "pronto") : "próximo";
+    $("[data-tustep]", el).textContent = `passo ${i + 1} de ${n}`;
+    $$("[data-cnt]", slides[i]).forEach(tuCount);
+  };
+  go(0);
+  el.addEventListener("click", e => {
+    if (e.target.closest("[data-tuskip]")) return s.close();
+    if (e.target.closest("[data-tuprev]")) return go(i - 1);
+    if (e.target.closest("[data-tunext]")) return i === n - 1 ? s.close() : go(i + 1);
+  });
+  el.addEventListener("keydown", e => {
+    if (e.key === "ArrowRight") { e.preventDefault(); go(i + 1); }
+    if (e.key === "ArrowLeft") { e.preventDefault(); go(i - 1); }
+  });
+  // arrastar com o dedo: os passos acompanham e assentam com mola
+  let drag = null;
+  view.addEventListener("pointerdown", e => {
+    if (e.pointerType === "mouse" && e.button !== 0) return;
+    if (isMobile() && e.clientX < EDGE_W) return; // borda esquerda continua sendo o voltar
+    drag = { x: e.clientX, y: e.clientY, dx: 0, ax: null, t: performance.now(), id: e.pointerId };
+  });
+  view.addEventListener("pointermove", e => {
+    if (!drag) return;
+    const dx = e.clientX - drag.x, dy = e.clientY - drag.y;
+    if (!drag.ax) {
+      if (Math.abs(dx) + Math.abs(dy) < 8) return;
+      drag.ax = Math.abs(dx) > Math.abs(dy) ? "x" : "y";
+      if (drag.ax === "x") { track.classList.add("drag"); try { view.setPointerCapture(drag.id); } catch { } }
+    }
+    if (drag.ax !== "x") return;
+    drag.dx = (i === 0 && dx > 0) || (i === n - 1 && dx < 0) ? dx * 0.3 : dx;
+    track.style.setProperty("--dx", drag.dx + "px");
+  });
+  const end = () => {
+    const D = drag; drag = null; if (!D || D.ax !== "x") return;
+    track.classList.remove("drag"); track.style.setProperty("--dx", "0px");
+    const w = view.clientWidth, v = D.dx / Math.max(1, performance.now() - D.t);
+    if (D.dx < -w * 0.2 || (v < -0.35 && D.dx < -30)) go(i + 1);
+    else if (D.dx > w * 0.2 || (v > 0.35 && D.dx > 30)) go(i - 1);
+  };
+  view.addEventListener("pointerup", end);
+  view.addEventListener("pointercancel", end);
+  return s;
+}
+// conta nova: o tutorial abre sozinho uma vez, depois da abertura do app
+function maybeTutorial() {
+  if (!S.loaded || UI.signedOut || $("#auth")) return;
+  const key = S.mode === "supabase" ? (SB_USER && SB_USER.id) || "" : S.mode;
+  if (!key || UI.tuKey === key) return;
+  UI.tuKey = key;
+  if (prof().tutorial || S.txs.length || S.cards.length || S.prev.length) return;
+  saveProfile({ tutorial: true });
+  setTimeout(() => { if (!$("#auth") && !UI.signedOut) openTutorial(true); }, Math.max(0, SPLASH_MIN - performance.now()) + 500);
+}
+
 /* ================= login (supabase) ================= */
 let AUTH = "login";
 function hideAuth() { const el = $("#auth"); if (el) el.remove(); $("#app").style.display = ""; const f = $("#fab"); if (f) placeFab(); }
@@ -3219,7 +3425,7 @@ function renderSignedOut() {
     <p class="muted" style="margin:0;max-width:34ch">${del ? "tudo foi apagado. se quiser, dá para começar do zero agora." : "até logo! seus dados continuam salvos."}</p>
     <button class="btn primary" id="relog">${del ? "começar do zero" : "entrar de novo"}</button>`;
   $("#relog").onclick = () => {
-    if (del) backend.putProfile({ ...DEFAULT_PROFILE });
+    if (del) { backend.putProfile({ ...DEFAULT_PROFILE }); UI.tuKey = null; }
     UI.signedOut = false; el.remove(); $("#app").style.display = ""; UI.tab = "saldos"; $("#view").dataset.tab = ""; render();
   };
 }
