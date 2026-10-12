@@ -1136,11 +1136,11 @@ input,textarea,[contenteditable="true"]{-webkit-user-select:text;user-select:tex
 
 /* 3) barra de baixo flutuante (celular): a tela corre por baixo dela */
 @media (max-width:700px){
-  :root .bottom-nav{position:fixed!important;z-index:30;left:12px;right:12px;bottom:calc(10px + env(safe-area-inset-bottom,0px));padding-bottom:0;border:0!important;border-radius:28px;background:color-mix(in srgb,var(--surface2) 82%,transparent);-webkit-backdrop-filter:blur(18px) saturate(1.4);backdrop-filter:blur(18px) saturate(1.4);box-shadow:0 10px 30px rgba(0,0,0,.35)}
+  :root .bottom-nav{position:fixed!important;z-index:30;left:12px;right:12px;bottom:max(8px,calc(env(safe-area-inset-bottom,0px) - 14px));padding-bottom:0;border:0!important;border-radius:28px;background:color-mix(in srgb,var(--surface2) 82%,transparent);-webkit-backdrop-filter:blur(18px) saturate(1.4);backdrop-filter:blur(18px) saturate(1.4);box-shadow:0 10px 30px rgba(0,0,0,.35)}
   :root .bn{padding:9px 0 8px}
   :root .bn-ind{display:none}
-  :root .page{padding-bottom:calc(104px + env(safe-area-inset-bottom,0px))}
-  :root .main::after{content:"";position:fixed;z-index:29;left:0;right:0;bottom:0;height:calc(70px + env(safe-area-inset-bottom,0px));background:linear-gradient(to bottom,transparent,var(--bg) 85%);pointer-events:none}
+  :root .page{padding-bottom:calc(96px + env(safe-area-inset-bottom,0px))}
+  :root .main::after{content:"";position:fixed;z-index:29;left:0;right:0;bottom:0;height:calc(56px + env(safe-area-inset-bottom,0px));background:linear-gradient(to bottom,transparent,var(--bg) 85%);pointer-events:none}
   :root .m-hz .main::after{display:none}
 }
 
@@ -1167,6 +1167,11 @@ input,textarea,[contenteditable="true"]{-webkit-user-select:text;user-select:tex
 :root .mtable tfoot td.cell:nth-child(2)::before{border-radius:12px 0 0 12px}
 :root .mtable tfoot td.cell:nth-last-child(2)::before{border-radius:0 12px 12px 0}
 
+/* celular: barras de rolagem escondidas (a rolagem continua funcionando) */
+@media (max-width:700px),(hover:none) and (pointer:coarse){
+  *{scrollbar-width:none!important}
+  *::-webkit-scrollbar{display:none!important;width:0!important;height:0!important}
+}
 </style>
 <script>try{var t=JSON.parse(localStorage.getItem("ae.theme")||"null")||"dark";if(t==="system")t=matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light";if(t==="light")document.documentElement.classList.add("light")}catch(e){}</script>
 </head><body>
