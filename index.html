@@ -1131,8 +1131,8 @@ input,textarea,[contenteditable="true"]{-webkit-user-select:text;user-select:tex
 
 /* 3) barra de baixo flutuante (celular): a tela corre por baixo dela */
 @media (max-width:700px){
-  :root .bottom-nav{position:fixed!important;z-index:30;left:12px;right:12px;bottom:max(8px,calc(env(safe-area-inset-bottom,0px) - 14px));padding-bottom:0;border:0!important;border-radius:28px;background:color-mix(in srgb,var(--surface2) 82%,transparent);-webkit-backdrop-filter:blur(18px) saturate(1.4);backdrop-filter:blur(18px) saturate(1.4);box-shadow:0 10px 30px rgba(0,0,0,.35)}
-  :root .bn{padding:9px 0 8px}
+  :root .bottom-nav{position:fixed!important;z-index:30;left:12px;right:12px;bottom:max(8px,calc(env(safe-area-inset-bottom,0px) - 14px));padding-bottom:0;border:0!important;border-radius:999px;padding:5px!important;background:color-mix(in srgb,var(--surface2) 82%,transparent);-webkit-backdrop-filter:blur(18px) saturate(1.4);backdrop-filter:blur(18px) saturate(1.4);box-shadow:0 10px 30px rgba(0,0,0,.35)}
+  :root .bn{padding:8px 0 7px;border-radius:999px}
   :root .bn-ind{display:none}
   :root .page{padding-bottom:calc(96px + env(safe-area-inset-bottom,0px))}
   :root .main::after{content:"";position:fixed;z-index:29;left:0;right:0;bottom:0;height:calc(56px + env(safe-area-inset-bottom,0px));background:linear-gradient(to bottom,transparent,var(--bg) 85%);pointer-events:none}
@@ -1142,8 +1142,9 @@ input,textarea,[contenteditable="true"]{-webkit-user-select:text;user-select:tex
 /* 4) seleções preenchidas: nada de contorno, a opção ativa ganha um fundo arredondado */
 :root .m-sel{border-color:transparent;background:var(--surface2)}
 :root .bn-ind{display:none}
-:root .bn svg{box-sizing:content-box;padding:4px 18px;border-radius:999px;transition:background-color .3s}
-:root .bn.active svg{background:var(--accent-soft)}
+/* aba ativa: pílula que pega ícone e nome, com as mesmas bordas da barra */
+:root .bn{border-radius:999px;transition:background-color .25s,color .2s}
+:root .bn.active{background:var(--accent-soft)}
 :root .nav-btn{margin:0 10px;width:calc(100% - 20px);padding:0 14px;border-radius:12px;overflow:hidden}
 :root .nav-btn.active{background:var(--accent-soft)}
 :root .nav-btn.active::before{display:none}
@@ -1158,11 +1159,10 @@ input,textarea,[contenteditable="true"]{-webkit-user-select:text;user-select:tex
 /* 6) totais do mês no PC: a linha de totais vira uma faixa arredondada */
 :root .mtable tfoot td{background:var(--bg)!important;border-top:0!important}
 :root .mtable tfoot td.cell{position:relative;z-index:0}
-:root .mtable tfoot td.cell::before{content:"";position:absolute;z-index:-1;inset:4px 0;background:color-mix(in srgb,var(--accent) 26%,var(--bg))}
-:root.light .mtable tfoot td.cell::before{background:color-mix(in srgb,var(--accent) 13%,var(--bg))}
+:root .mtable tfoot td.cell::before{content:"";position:absolute;z-index:-1;inset:4px 0;background:var(--bg);border:1px solid var(--text);border-left:0;border-right:0}
 :root .mtable tfoot td.cell{color:var(--text)}
-:root .mtable tfoot td.cell:nth-child(2)::before{border-radius:12px 0 0 12px}
-:root .mtable tfoot td.cell:nth-last-child(2)::before{border-radius:0 12px 12px 0}
+:root .mtable tfoot td.cell:nth-child(2)::before{border-left:1px solid var(--text);border-radius:12px 0 0 12px}
+:root .mtable tfoot td.cell:nth-last-child(2)::before{border-right:1px solid var(--text);border-radius:0 12px 12px 0}
 
 /* celular: barras de rolagem escondidas (a rolagem continua funcionando) */
 @media (max-width:700px),(hover:none) and (pointer:coarse){
