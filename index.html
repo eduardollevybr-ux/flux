@@ -1056,6 +1056,59 @@ input,textarea,[contenteditable="true"]{-webkit-user-select:text;user-select:tex
 .tu-row em{font-style:normal;color:var(--text)}
 /* previsão */
 .tu-res{width:100%;max-width:340px;text-align:right;font-size:30px;font-weight:700;padding:10px 4px 0}
+/* ===== saldos arredondados e sem linhas (opção B, 12/10/2026) ===== */
+/* base comum às 3 opções: saldo e dia de hoje viram blocos arredondados por dentro da célula */
+:root .m-saldo,:root td.c-saldo,:root .hz-v{background:transparent!important;position:relative;z-index:0}
+:root .m-saldo::before,:root td.c-saldo::before,:root .hz-v::before{content:"";position:absolute;z-index:-1;border-radius:12px;transition:background-color .2s}
+:root .m-saldo::before{inset:5px 8px auto 4px;height:34px}
+:root .m-saldo{padding-top:12px;padding-right:22px}
+:root td.c-saldo::before{inset:4px 8px}
+:root td.c-saldo{padding-right:24px!important}
+:root .hz-v::before{inset:3px 4px;border-radius:10px}
+:root .hz-v{padding-right:14px}
+:root .m-saldo.m-pos::before{background:var(--m-pos)}
+:root .m-saldo.m-zero::before{background:var(--m-zero)}
+:root .m-saldo.m-neg::before{background:var(--m-neg)}
+:root .m-saldo.m-neg2::before{background:var(--h-neg2)}
+:root td.s-pos::before{background:var(--pos)}
+:root td.s-zero::before{background:var(--zero-s)}
+:root td.s-neg1::before{background:var(--neg1)}
+:root td.s-neg2::before{background:var(--neg2)}
+:root .hz-v.h-pos::before{background:var(--h-pos)}
+:root .hz-v.h-zero::before{background:var(--m-zero)}
+:root .hz-v.h-neg1::before{background:var(--h-neg1)}
+:root .hz-v.h-neg2::before{background:var(--h-neg2)}
+:root .mtable tfoot td.c-saldo::before{display:none}
+/* dia de hoje e fim de semana: quadradinho arredondado */
+:root .m-dia,:root .mtable td.c-dia,:root .hz-d{background:transparent!important;position:relative;z-index:0}
+:root .m-dia::before,:root .mtable td.c-dia::before,:root .hz-d::before{content:"";position:absolute;z-index:-1;border-radius:12px}
+:root .m-dia::before{left:8px;right:8px;top:5px;height:34px}
+:root .mtable td.c-dia::before{inset:4px 5px}
+:root .hz-d::before{inset:3px 4px;border-radius:10px}
+:root .m-dia{padding-top:12px}
+:root .m-day.we .m-dia::before,:root .mtable tr.we td.c-dia::before,:root .hz-d.we::before{background:var(--surface2)}
+:root .m-day.today .m-dia::before,:root .mtable tr.today td.c-dia::before,:root .hz-d.today::before{background:var(--today-bg)}
+:root .mtable tr.blank td.c-dia::before{display:none}
+/* mês atual no horizonte: pílula */
+:root .hz-mh.cur{background:transparent;color:inherit;position:relative;z-index:0}
+:root .hz-mh.cur::before{content:"";position:absolute;z-index:-1;inset:4px 10px;border-radius:999px;background:var(--hz-cur)}
+:root .hz-mh.cur{color:var(--hz-cur-fg)}
+:root .mcols th.hz-mth.cur{background:transparent;position:relative;z-index:0}
+:root .mcols th.hz-mth.cur::before{content:"";position:absolute;z-index:-1;inset:4px 10px;border-radius:999px;background:var(--hz-cur)}
+
+/* sem linhas: só uma linha fina entre os dias */
+:root .m-dia,:root .hz-mh{border-right:0}
+:root .m-cell{border-bottom:0}
+:root .m-day{border-bottom:1px solid var(--line)}
+:root .m-day.today{border-bottom:1px solid var(--line)}
+:root .m-headrow{border-bottom:0}
+:root .mtable th,:root .mtable td{border-right:0}
+:root .mtable td{border-bottom:0}
+:root .mtable tr.today td{border-bottom:0}
+:root .mcols th{border-bottom:1px solid var(--line)}
+:root .hz-head{border-bottom:0}
+@media (hover:hover){:root .mtable tbody tr:hover td:not(.c-saldo):not(.c-dia){background:var(--surface2)}}
+
 </style>
 <script>try{var t=JSON.parse(localStorage.getItem("ae.theme")||"null")||"dark";if(t==="system")t=matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light";if(t==="light")document.documentElement.classList.add("light")}catch(e){}</script>
 </head><body>
