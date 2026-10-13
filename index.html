@@ -136,7 +136,7 @@ button{cursor:pointer;background:none;border:0;padding:0}
 .slist{display:flex;flex-direction:column}
 .sheet-new{display:flex;flex-direction:column;gap:12px;padding:18px 20px 0}
 .sheet .modal-body>.sheet-new>.btn{margin:0;width:100%;height:52px}
-.sitem{display:flex;align-items:center;gap:14px;width:100%;padding:18px 20px;border-bottom:1px solid var(--line2);text-align:left;cursor:pointer}
+.sitem{display:flex;align-items:center;gap:14px;width:100%;min-height:64px;padding:10px 20px;border-bottom:1px solid var(--line2);text-align:left;cursor:pointer}
 @media (hover:hover){.sitem:hover{background:var(--surface2)}}
 .sitem.on .si-txt b{color:var(--accent)}
 .si-txt{flex:1;display:flex;flex-direction:column;gap:4px;min-width:0}
@@ -945,7 +945,7 @@ input,textarea,[contenteditable="true"]{-webkit-user-select:text;user-select:tex
 .modal.cmodal .modal-body{padding:0 24px 22px}
 .modal.cmodal .modal-foot{padding:0 24px 22px}
 .sheet .modal-body{padding:8px 0 0}
-.sheet .sitem{padding:18px 24px}
+.sheet .sitem{padding:10px 24px}
 .sheet .modal-body>.btn,.sheet .modal-body>.st-save{margin:8px 24px 0;width:calc(100% - 48px)}
 .sheet .sheet-new{padding:18px 24px 0}
 .sheet .sheet-hint{margin:12px 24px 0}
@@ -975,8 +975,10 @@ input,textarea,[contenteditable="true"]{-webkit-user-select:text;user-select:tex
 .cc-def{margin-top:12px}
 
 .sitem .si-txt b{white-space:nowrap}
-.sitem .stepper{flex:none;margin:0;height:48px;padding:0 4px;gap:2px}
-.sitem .stepper b{min-width:34px}
+/* contador dentro de uma linha (parcelas, dia útil, número de repetições): cabe na altura padrão, a linha não cresce */
+.istep{display:flex;align-items:center;gap:2px;flex:none;height:36px}
+.istep .icon-btn{width:36px;height:36px}
+.istep b{min-width:34px;text-align:center;font-size:16px;font-weight:700}
 /* ===== como funciona (tutorial) ===== */
 .tu .scr-body{overflow:hidden}
 .tu-skip{height:40px;padding:0 12px;color:var(--muted);font-weight:600;font-size:16px;border-radius:999px}
@@ -2743,7 +2745,7 @@ function openForm({ type = "saida", date = TODAY, tx = null, occ = null } = {}) 
         <button class="frow" id="f-rep" aria-haspopup="dialog" aria-label="repetição: ${REP_LABEL[f.rep]}. mudar"><span class="fr-ico">${REP_ICO}</span><span class="fr-main">${REP_LABEL[f.rep]}</span>${CHEV}</button>
         ${f.rep === "monthly" ? `<button class="frow" id="f-mday" aria-haspopup="dialog" aria-label="repete no: ${MDAY_LABEL()}. mudar"><span class="fr-ico">${CAL}</span><span class="fr-main">repete no</span><span class="fr-val">${MDAY_LABEL()}</span>${CHEV}</button>` : ""}
         ${repeats ? `<button class="frow" id="f-until" aria-haspopup="dialog" aria-label="até quando: ${f.until === "count" ? `${f.count} vezes` : "sem data para acabar"}. mudar"><span class="fr-ico">${I.horizonte.replace("<svg", '<svg width="22" height="22"')}</span><span class="fr-main">até quando</span><span class="fr-val num">${f.until === "count" ? `${f.count} vezes` : "sem data para acabar"}</span>${CHEV}</button>` : ""}
-        ${inst ? `<div class="frow"><span class="fr-ico">${I.card.replace("<svg", '<svg width="22" height="22"')}</span><span class="fr-main">parcelas</span><span class="stepper"><button class="icon-btn" data-inst="-1" aria-label="menos uma parcela">−</button><b class="num" aria-live="polite">${f.installments}</b><button class="icon-btn" data-inst="1" aria-label="mais uma parcela">+</button></span></div>` : ""}
+        ${inst ? `<div class="frow"><span class="fr-ico">${I.card.replace("<svg", '<svg width="22" height="22"')}</span><span class="fr-main">parcelas</span><span class="istep"><button class="icon-btn" data-inst="-1" aria-label="menos uma parcela">−</button><b class="num" aria-live="polite">${f.installments}</b><button class="icon-btn" data-inst="1" aria-label="mais uma parcela">+</button></span></div>` : ""}
       </div>`);
     const b = $("#f-submit", el);
     b.className = `btn block btn-t-${f.type}`;
@@ -2774,7 +2776,7 @@ function openForm({ type = "saida", date = TODAY, tx = null, occ = null } = {}) 
           <button class="sitem ${f.mday === "same" ? "on" : ""}" data-md="same"><span class="si-txt"><b>dia ${day}</b></span></button>
           <button class="sitem ${f.mday === "biz" ? "on" : ""}" data-md="biz"><span class="si-txt"><b>dia ${day} ou próximo dia útil</b></span></button>
           <div class="sitem ${f.mday === "nth" ? "on" : ""}" data-md="nth" role="button" tabindex="0"><span class="si-txt"><b>dia útil do mês</b></span>
-            <span class="stepper"><button class="icon-btn" data-nc="-1" aria-label="um dia útil a menos">−</button><b class="num" id="md-n">${f.nth}º</b><button class="icon-btn" data-nc="1" aria-label="um dia útil a mais">+</button></span></div>
+            <span class="istep"><button class="icon-btn" data-nc="-1" aria-label="um dia útil a menos">−</button><b class="num" id="md-n">${f.nth}º</b><button class="icon-btn" data-nc="1" aria-label="um dia útil a mais">+</button></span></div>
         </div><button class="btn block primary" data-mdsave>confirmar</button>` });
       let mode = f.mday, n = f.nth;
       s.el.addEventListener("click", ev => {
@@ -2790,7 +2792,7 @@ function openForm({ type = "saida", date = TODAY, tx = null, occ = null } = {}) 
       const s = openSheet({ title: "até quando", body: `<div class="slist">
           <button class="sitem ${f.until === "forever" ? "on" : ""}" data-u="forever"><span class="si-txt"><b>sem data para acabar</b></span></button>
           <div class="sitem ${f.until === "count" ? "on" : ""}" data-u="count" role="button" tabindex="0"><span class="si-txt"><b>número de repetições</b></span>
-            <span class="stepper"><button class="icon-btn" data-c="-1" aria-label="menos uma" ${f.count <= 2 ? "disabled" : ""}>−</button><b class="num" id="u-n">${f.count}</b><button class="icon-btn" data-c="1" aria-label="mais uma">+</button></span></div>
+            <span class="istep"><button class="icon-btn" data-c="-1" aria-label="menos uma" ${f.count <= 2 ? "disabled" : ""}>−</button><b class="num" id="u-n">${f.count}</b><button class="icon-btn" data-c="1" aria-label="mais uma">+</button></span></div>
         </div><button class="btn block primary" data-usave>confirmar</button>` });
       let mode = f.until, cnt = f.count;
       s.el.addEventListener("click", ev => {
