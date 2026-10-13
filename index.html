@@ -3370,7 +3370,7 @@ function tuSlides() {
       p: ["o FLUX mostra o saldo de cada dia antes dele chegar. você descobre com antecedência se vai sobrar ou faltar dinheiro.",
         "assim fica fácil decidir quando dá para gastar, quando segurar e quanto dá para guardar."] },
     { t: "saldos", art: tab,
-      p: ["cada linha é um dia. na direita, o quanto sobra no fim dele: <b>azul</b> sobra, <b>amarelo</b> zera, <b>vermelho</b> falta.",
+      p: ["cada linha é um dia. na direita, fica o saldo no fim dele: <b>azul</b> sobra, <b>amarelo</b> zera, <b>vermelho</b> falta.",
         mob ? "desliza para trocar de coluna e segura num dia para lançar nele." : "clique num valor para ver os detalhes ou use o botão direito para lançar naquele dia."] },
     { t: "entradas e saídas", art: `<div class="tu-list tu-pop">${row(ti("entrada"), "salário", 3000)}${row(ti("saida"), "aluguel", 1200)}<div class="tu-row mut"><b>saldo do dia</b>${sal(3000, 1800)}</div></div>`,
       p: ["<b>entradas:</b> aqui você coloca o que entra, como salário, freela e pix recebido.",
@@ -3379,7 +3379,7 @@ function tuSlides() {
       p: ["<b>diário:</b> aqui você coloca o que já gastou no dia a dia, como mercado, padaria e transporte.",
         "<b>previsão de diário:</b> no menu, você diz quanto costuma gastar por mês. o FLUX divide e desconta dos dias que ainda vão chegar."] },
     { t: "economias e cartões", art: `<div class="tu-list tu-pop">${row(ti("economia"), "reserva", 500)}${row(ti("cartao"), "jantar", 120, "nubank")}</div>`,
-      p: ["<b>economias:</b> aqui você coloca o que separa para guardar. o valor aparece no economizado, em totais.",
+      p: ["<b>economias:</b> aqui você coloca o que já guardou ou pretende guardar. o valor aparece no economizado, em totais.",
         "<b>cartão:</b> aqui vão os gastos no cartão de crédito. cadastra os cartões no menu ou na hora de lançar."] },
     { t: "como lançar", art: `<div class="tu-money tu-pop"><span>R$</span><b class="num" data-cnt="0|3000|fmt">${fmt(3000)}</b></div>
       <div class="tu-list tu-pop" style="--d:1">${row(ti("entrada"), "entrada")}${row(PEN, "salário")}<div class="tu-row">${I.cal}<b>data</b><em class="num">${pad(5)}/${pad(NOW.getMonth() + 1)}/${NOW.getFullYear()}</em></div>${row(REP, "mensalmente")}</div>`,
