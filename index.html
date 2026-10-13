@@ -2120,6 +2120,13 @@ function slideSolo(p, dir, then, dur) {
   setTimeout(fin, (dur || 480) + 60);
 }
 $("#view").addEventListener("touchstart", e => {
+  // arrasto anterior que não terminou (a tela foi redesenhada no meio do toque): limpa antes de começar outro
+  if (PG) {
+    if (PG.raf) cancelAnimationFrame(PG.raf);
+    if (PG.pg.isConnected && !PG.pg.dataset.anim) { if (PG.solo) PG.list.style.removeProperty("--dx"); else { PG.track.style.transition = ""; PG.track.style.transform = ""; } }
+    PG = null;
+  }
+  $$("#view .pager.dragging").forEach(p => p.classList.remove("dragging"));
   if (!isMobile() || e.touches.length !== 1) return;
   if (e.touches[0].clientX < EDGE_W) return;
   const pg = e.target.closest(".pager"); if (!pg || pg.dataset.anim) return;
@@ -2372,17 +2379,21 @@ function mMonthInner(cols) {
   return h + `</div>`;
 }
 /* celular: segurar o dedo numa célula abre o lançamento daquele tipo e dia */
-let lpT = null, lpFired = false, lpXY = null;
+// lpFired vale só para o toque que segurou: zera em todo toque novo e logo no fim dele,
+// senão os toques seguintes ficavam travados (nada abria nas abas até fechar o app)
+let lpT = null, lpFired = false, lpXY = null, lpAt = 0;
 $("#view").addEventListener("touchstart", e => {
+  lpFired = false;
   const c = e.target.closest(".m-cell[data-t]"); if (!c || e.touches.length !== 1) return;
-  lpFired = false; lpXY = [e.touches[0].clientX, e.touches[0].clientY];
+  lpXY = [e.touches[0].clientX, e.touches[0].clientY];
   c.classList.add("pressing");
-  lpT = setTimeout(() => { lpFired = true; c.classList.remove("pressing"); try { navigator.vibrate && navigator.vibrate(12); } catch { } openForm({ type: c.dataset.t, date: c.dataset.d }); }, 480);
+  lpT = setTimeout(() => { lpFired = true; lpAt = Date.now(); c.classList.remove("pressing"); try { navigator.vibrate && navigator.vibrate(12); } catch { } openForm({ type: c.dataset.t, date: c.dataset.d }); }, 480);
 }, { passive: true });
 const lpCancel = () => { clearTimeout(lpT); lpT = null; $$(".m-cell.pressing").forEach(x => x.classList.remove("pressing")); };
 $("#view").addEventListener("touchmove", e => { if (lpT && lpXY && Math.hypot(e.touches[0].clientX - lpXY[0], e.touches[0].clientY - lpXY[1]) > 10) lpCancel(); }, { passive: true });
-$("#view").addEventListener("touchend", e => { lpCancel(); if (lpFired) { e.preventDefault(); } }, { passive: false });
-$("#view").addEventListener("click", e => { if (lpFired && e.target.closest(".m-cell")) { e.stopImmediatePropagation(); e.preventDefault(); lpFired = false; } }, true);
+$("#view").addEventListener("touchend", e => { lpCancel(); if (lpFired) { e.preventDefault(); lpFired = false; } }, { passive: false });
+$("#view").addEventListener("touchcancel", () => { lpCancel(); lpFired = false; });
+$("#view").addEventListener("click", e => { if (Date.now() - lpAt < 700 && e.target.closest(".m-cell")) { e.stopImmediatePropagation(); e.preventDefault(); } }, true);
 $("#view").addEventListener("contextmenu", e => { if (e.target.closest(".m-cell")) e.preventDefault(); });
 
 /* horizonte no celular: 3 meses lado a lado, só a coluna de saldos */
