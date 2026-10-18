@@ -1988,6 +1988,22 @@ $("#period").addEventListener("click", e => {
     changeMonth(d); if (isMobile()) animateSlide(".pane.cur", d);
   }
 });
+/* rodinha e touchpad: deslocamento em pixels nos dois sentidos (shift + rodinha vira horizontal) */
+const wheelPx = (e, v) => e.deltaMode === 1 ? v * 16 : e.deltaMode === 2 ? v * innerHeight : v;
+function wheelXY(e) { let x = wheelPx(e, e.deltaX), y = wheelPx(e, e.deltaY); if (e.shiftKey && !x) { x = y; y = 0; } return [x, y]; }
+/* deslize por páginas: um passo por gesto, sem contar a inércia do touchpad */
+function wheelStepper(step) {
+  let acc = 0, done = false, t = 0;
+  return (e, ok) => {
+    const [x, y] = wheelXY(e);
+    clearTimeout(t); t = setTimeout(() => { acc = 0; done = false; }, 180);
+    if (Math.abs(x) <= Math.abs(y)) return;
+    e.preventDefault();
+    if (done || !ok()) return;
+    acc += x;
+    if (Math.abs(acc) >= 40) { done = true; step(acc > 0 ? 1 : -1); }
+  };
+}
 /* PC: os dias de todos os meses rolam juntos (cada mês rola dentro do próprio quadro) */
 let VTOP = 0;
 const vBoxes = () => $$("#board .mbox");
@@ -2024,9 +2040,17 @@ function bindVScroll(board) {
     else { VTOP = t; for (const o of vBoxes()) if (o !== b) o.scrollTop = t; }
     const p = $("#vbar"); if (p) p.scrollTop = VTOP;
   }, { capture: true, passive: true });
-  board.addEventListener("wheel", e => { // rolar com o mouse no espaço entre os meses
-    if (e.target.closest(".mbox") || !e.deltaY || e.shiftKey) return;
-    e.preventDefault(); vSet(Math.max(0, Math.min(vMax(), VTOP + e.deltaY)));
+  // rolagem pelo mouse e pelo touchpad: cada gesto fica preso ao sentido em que começou
+  // horizontal (dois dedos para o lado ou shift + rodinha) anda pelos meses; vertical rola os dias
+  let wAx = null, wT = 0;
+  board.addEventListener("wheel", e => {
+    const [x, y] = wheelXY(e);
+    if (!x && !y) return;
+    clearTimeout(wT); wT = setTimeout(() => { wAx = null; }, 180);
+    if (!wAx) wAx = Math.abs(x) > Math.abs(y) ? "x" : "y";
+    if (wAx === "x") { e.preventDefault(); board.scrollLeft += x; return; }
+    if (e.target.closest(".mbox")) return; // dentro do mês a rolagem vertical continua a do navegador
+    e.preventDefault(); vSet(Math.max(0, Math.min(vMax(), VTOP + y)));
   }, { passive: false });
 }
 let extending = false;
@@ -2171,6 +2195,19 @@ const pgEnd = () => {
 };
 $("#view").addEventListener("touchend", pgEnd);
 $("#view").addEventListener("touchcancel", pgEnd);
+let wheelPg = null;
+const pagerWheel = wheelStepper(dir => {
+  const pg = wheelPg; if (!pg || !pg.isConnected || pg.dataset[dir > 0 ? "next" : "prev"] !== "1") return;
+  const go = () => applyPager(pg.dataset.pager, dir);
+  if (pg.classList.contains("solo")) { const mid = $(".m-day .m-mid", pg); slideSolo({ pg, list: $(".m-list", pg), w: mid ? mid.offsetWidth : pg.clientWidth }, dir, go); }
+  else { alignPanes(pg); slidePager(pg, dir, go); }
+});
+$("#view").addEventListener("wheel", e => {
+  if (!isMobile()) return;
+  const pg = e.target.closest(".pager"); if (!pg) return;
+  wheelPg = pg;
+  pagerWheel(e, () => !pg.dataset.anim && !PG);
+}, { passive: false });
 
 $(".topbar").addEventListener("click", e => {
   if (e.target.closest("[data-mtoday]")) goToday();
@@ -3479,6 +3516,8 @@ function openTutorial(first) {
   };
   view.addEventListener("pointerup", end);
   view.addEventListener("pointercancel", end);
+  const tuWheel = wheelStepper(dir => go(i + dir));
+  view.addEventListener("wheel", e => tuWheel(e, () => !drag), { passive: false });
   return s;
 }
 // conta nova: o tutorial abre sozinho uma vez, depois da abertura do app
