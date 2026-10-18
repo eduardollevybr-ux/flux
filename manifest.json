@@ -1,6 +1,7 @@
 {
   "name": "FLUX",
   "short_name": "FLUX",
+  "id": "/flux/?app=flux",
   "description": "Previsão financeira dia a dia",
   "lang": "pt-BR",
   "start_url": "./",
