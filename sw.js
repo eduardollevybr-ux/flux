@@ -1,5 +1,5 @@
 /* FLUX: guarda uma cópia do app no aparelho para abrir sem internet */
-const VERSION = "flux-v6";
+const VERSION = "flux-v7";
 const SHELL = ["./", "./index.html", "./manifest.json", "./icon-192.png", "./icon-512.png", "./icon-rounded-192.png", "./icon-rounded-512.png",
   "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"];
 
