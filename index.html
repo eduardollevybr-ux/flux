@@ -2040,15 +2040,20 @@ function bindVScroll(board) {
     else { VTOP = t; for (const o of vBoxes()) if (o !== b) o.scrollTop = t; }
     const p = $("#vbar"); if (p) p.scrollTop = VTOP;
   }, { capture: true, passive: true });
-  // rolagem pelo mouse e pelo touchpad: cada gesto fica preso ao sentido em que começou
+  // rolagem pelo mouse e pelo touchpad: o sentido do gesto é decidido pelo movimento somado (não pelo
+  // primeiro tremido do dedo) e, se ele vira claramente para o lado, passa a andar pelos meses
   // horizontal (dois dedos para o lado ou shift + rodinha) anda pelos meses; vertical rola os dias
-  let wAx = null, wT = 0;
+  let wg = null, wT = 0;
   board.addEventListener("wheel", e => {
     const [x, y] = wheelXY(e);
     if (!x && !y) return;
-    clearTimeout(wT); wT = setTimeout(() => { wAx = null; }, 180);
-    if (!wAx) wAx = Math.abs(x) > Math.abs(y) ? "x" : "y";
-    if (wAx === "x") { e.preventDefault(); board.scrollLeft += x; return; }
+    clearTimeout(wT); wT = setTimeout(() => { wg = null; }, 180);
+    if (!wg) wg = { sx: 0, sy: 0, ax: null };
+    wg.sx += x; wg.sy += y;
+    const ax = Math.abs(wg.sx), ay = Math.abs(wg.sy);
+    if (!wg.ax) { if (ax + ay >= 6 || e.deltaMode) wg.ax = ax > ay ? "x" : "y"; }
+    else if (wg.ax === "y" && ax > 24 && ax > ay * 1.5) wg.ax = "x";
+    if (wg.ax === "x" || (!wg.ax && Math.abs(x) > Math.abs(y))) { e.preventDefault(); board.scrollLeft += x; return; }
     if (e.target.closest(".mbox")) return; // dentro do mês a rolagem vertical continua a do navegador
     e.preventDefault(); vSet(Math.max(0, Math.min(vMax(), VTOP + y)));
   }, { passive: false });
