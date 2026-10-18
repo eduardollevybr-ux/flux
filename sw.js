@@ -1,10 +1,11 @@
 /* FLUX: guarda uma cópia do app no aparelho para abrir sem internet */
-const VERSION = "flux-v5";
+const VERSION = "flux-v6";
 const SHELL = ["./", "./index.html", "./manifest.json", "./icon-192.png", "./icon-512.png", "./icon-rounded-192.png", "./icon-rounded-512.png",
   "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"];
 
 self.addEventListener("install", e => {
-  e.waitUntil(caches.open(VERSION).then(c => Promise.all(SHELL.map(u => c.add(u).catch(() => null)))).then(() => self.skipWaiting()));
+  // busca direto da internet (ignora o cache do navegador) para nunca guardar uma versão antiga
+  e.waitUntil(caches.open(VERSION).then(c => Promise.all(SHELL.map(u => fetch(u, { cache: "reload" }).then(r => { if (r && (r.ok || r.type === "opaque")) return c.put(u, r); }).catch(() => null)))).then(() => self.skipWaiting()));
 });
 self.addEventListener("activate", e => {
   e.waitUntil(caches.keys().then(ks => Promise.all(ks.filter(k => k.startsWith("flux-") && k !== VERSION).map(k => caches.delete(k)))).then(() => self.clients.claim()));
@@ -15,6 +16,13 @@ self.addEventListener("fetch", e => {
   if (req.method !== "GET") return;
   const url = new URL(req.url);
   if (url.hostname.endsWith("supabase.co")) return; // dados e login: sempre direto na internet
+
+  // manifest: sempre a versão nova da internet; sem internet, usa a cópia guardada
+  if (url.origin === location.origin && url.pathname.endsWith("/manifest.json")) {
+    e.respondWith(fetch(req, { cache: "no-cache" }).then(r => { if (r && r.ok) { const cp = r.clone(); caches.open(VERSION).then(c => c.put("./manifest.json", cp)); } return r; })
+      .catch(() => caches.open(VERSION).then(c => c.match("./manifest.json"))));
+    return;
+  }
 
   // páginas: tenta a versão nova na internet; sem internet, usa a cópia guardada
   if (req.mode === "navigate") {
