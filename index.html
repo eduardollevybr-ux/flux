@@ -1131,16 +1131,21 @@ input,textarea,[contenteditable="true"]{-webkit-user-select:text;user-select:tex
 :root .m-headrow,:root .mtable thead th{background:var(--bg)!important;-webkit-backdrop-filter:none;backdrop-filter:none}
 :root .pv-foot{border-top:0}
 
-/* 3) barra de baixo (celular), no estilo do Nosso Lar: presa na borda de baixo, de ponta a ponta,
-   com uma pílula que desliza até a aba tocada */
+/* 3) barra de baixo (celular): cápsula flutuante só com ícones, logo acima da linha do iPhone;
+   a aba ativa fica numa bolha roxa que desliza até a aba tocada */
+:root{--nav-pill:#2E1752;--nav-ic:#BE8CFF;--nav-bar:#0C0C0E;--nav-line:rgba(255,255,255,.07);--nav-shadow:0 10px 34px rgba(0,0,0,.75)}
+:root.light{--nav-pill:#EFE2FB;--nav-ic:#820AD1;--nav-bar:#FFFFFF;--nav-line:rgba(29,31,35,.08);--nav-shadow:0 10px 30px rgba(29,31,35,.16)}
 @media (max-width:700px){
-  :root .bottom-nav{position:fixed!important;z-index:30;left:0;right:0;bottom:0;gap:4px;border:0!important;border-top:1px solid var(--line)!important;border-radius:0;padding:6px max(10px,calc((100vw - 560px)/2)) calc(6px + env(safe-area-inset-bottom,0px))!important;background:var(--bg);box-shadow:0 -6px 24px rgba(0,0,0,.07)}
-  :root .bn{z-index:1;height:62px;padding:0;gap:4px;justify-content:center;font-size:13px;border-radius:16px;color:var(--muted)}
-  :root .bn svg{width:25px;height:25px}
-  :root .bn.active{color:var(--accent)}
-  :root .bn-add{z-index:1;padding:0;height:62px}
+  :root .bottom-nav{position:fixed!important;z-index:30;left:50%;right:auto;transform:translateX(-50%);width:min(calc(100% - 24px),350px);bottom:max(8px,calc(env(safe-area-inset-bottom,0px) - 14px));display:flex;align-items:center;gap:2px;padding:5px!important;border:1px solid var(--nav-line)!important;border-radius:999px;background:var(--nav-bar);box-shadow:var(--nav-shadow)}
+  :root .bn{flex:1;min-width:0;z-index:1;height:54px;padding:0;justify-content:center;border-radius:999px;color:var(--muted)}
+  :root .bn svg{width:26px;height:26px}
+  :root .bn>span{display:none}
+  :root .bn.active{color:var(--nav-ic)}
+  :root .bn-add{flex:1;min-width:0;z-index:1;height:54px;padding:0}
   :root .bn-add>span{width:46px;height:46px}
-  :root .page{padding-bottom:calc(104px + env(safe-area-inset-bottom,0px))}
+  :root .page{padding-bottom:calc(96px + env(safe-area-inset-bottom,0px))}
+  :root .main::after{content:"";position:fixed;z-index:29;left:0;right:0;bottom:0;height:calc(70px + env(safe-area-inset-bottom,0px));background:linear-gradient(to bottom,transparent,var(--bg) 75%);pointer-events:none}
+  :root .m-hz .main::after{display:none}
 }
 
 /* 4) seleções preenchidas: nada de contorno, a opção ativa ganha um fundo arredondado */
@@ -1150,13 +1155,14 @@ input,textarea,[contenteditable="true"]{-webkit-user-select:text;user-select:tex
 :root .bn{transition:color .25s}
 :root .bn.active{background:transparent}
 @media (max-width:700px){
-  :root .bn-ind{display:block;position:absolute;z-index:0;top:6px;bottom:calc(6px + env(safe-area-inset-bottom,0px));left:0;width:0;height:auto;border-radius:16px;background:var(--accent-soft);transform:none;transition:left .4s cubic-bezier(.3,1.3,.5,1),width .4s cubic-bezier(.3,1.3,.5,1);pointer-events:none}
+  :root .bn-ind{display:block;position:absolute;z-index:0;top:5px;bottom:5px;left:0;width:0;height:auto;border-radius:999px;background:var(--nav-pill);transform:none;transition:left .4s cubic-bezier(.3,1.3,.5,1),width .4s cubic-bezier(.3,1.3,.5,1);pointer-events:none}
 }
 :root .sidebar{position:relative}
-:root .side-ind{position:absolute;z-index:0;border-radius:12px;background:var(--accent-soft);pointer-events:none;transition:top .4s cubic-bezier(.3,1.3,.5,1),left .2s ease,width .2s ease,height .4s cubic-bezier(.3,1.3,.5,1);opacity:0}
+:root .side-ind{position:absolute;z-index:0;border-radius:12px;background:var(--nav-pill);pointer-events:none;transition:top .4s cubic-bezier(.3,1.3,.5,1),left .2s ease,width .2s ease,height .4s cubic-bezier(.3,1.3,.5,1);opacity:0}
 :root .side-ind.on{opacity:1}
 :root .nav-btn{z-index:1;margin:0 10px;width:calc(100% - 20px);padding:0 14px;border-radius:12px;overflow:hidden}
 :root .nav-btn.active{background:transparent}
+:root .nav-btn.active{color:var(--nav-ic)}
 :root .nav-btn.active::before{display:none}
 :root .sidebar.collapsed .nav-btn{padding:0 15px}
 
