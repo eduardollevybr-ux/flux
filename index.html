@@ -1131,27 +1131,32 @@ input,textarea,[contenteditable="true"]{-webkit-user-select:text;user-select:tex
 :root .m-headrow,:root .mtable thead th{background:color-mix(in srgb,var(--bg) 78%,transparent)!important;-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px)}
 :root .pv-foot{border-top:0}
 
-/* 3) barra de baixo flutuante (celular): a tela corre por baixo dela */
+/* 3) barra de baixo (celular), no estilo do Nosso Lar: presa na borda de baixo, de ponta a ponta,
+   com uma pílula que desliza até a aba tocada */
 @media (max-width:700px){
-  :root .bottom-nav{position:fixed!important;z-index:30;left:12px;right:12px;bottom:max(8px,calc(env(safe-area-inset-bottom,0px) - 14px));padding-bottom:0;border:0!important;border-radius:24px;padding:4px!important;background:color-mix(in srgb,var(--surface2) 82%,transparent);-webkit-backdrop-filter:blur(18px) saturate(1.4);backdrop-filter:blur(18px) saturate(1.4);box-shadow:0 10px 30px rgba(0,0,0,.35)}
-  :root .bn{padding:6px 0 5px;gap:2px;font-size:13px;border-radius:20px}
+  :root .bottom-nav{position:fixed!important;z-index:30;left:0;right:0;bottom:0;gap:4px;border:0!important;border-top:1px solid var(--line)!important;border-radius:0;padding:6px max(10px,calc((100vw - 560px)/2)) calc(6px + env(safe-area-inset-bottom,0px))!important;background:var(--bg);box-shadow:0 -6px 24px rgba(0,0,0,.07)}
+  :root .bn{z-index:1;height:62px;padding:0;gap:4px;justify-content:center;font-size:13px;border-radius:16px;color:var(--muted)}
   :root .bn svg{width:25px;height:25px}
-  :root .bn-add{padding:0}
+  :root .bn.active{color:var(--accent)}
+  :root .bn-add{z-index:1;padding:0;height:62px}
   :root .bn-add>span{width:46px;height:46px}
-  :root .bn-ind{display:none}
-  :root .page{padding-bottom:calc(96px + env(safe-area-inset-bottom,0px))}
-  :root .main::after{content:"";position:fixed;z-index:29;left:0;right:0;bottom:0;height:calc(56px + env(safe-area-inset-bottom,0px));background:linear-gradient(to bottom,transparent,var(--bg) 85%);pointer-events:none}
-  :root .m-hz .main::after{display:none}
+  :root .page{padding-bottom:calc(104px + env(safe-area-inset-bottom,0px))}
 }
 
 /* 4) seleções preenchidas: nada de contorno, a opção ativa ganha um fundo arredondado */
 :root .m-sel{border-color:transparent;background:var(--surface2)}
 :root .bn-ind{display:none}
-/* aba ativa: pílula que pega ícone e nome, com as mesmas bordas da barra */
-:root .bn{transition:background-color .25s,color .2s}
-:root .bn.active{background:var(--accent-soft)}
-:root .nav-btn{margin:0 10px;width:calc(100% - 20px);padding:0 14px;border-radius:12px;overflow:hidden}
-:root .nav-btn.active{background:var(--accent-soft)}
+/* aba ativa: pílula que pega ícone e nome e desliza de uma aba para a outra (barra de baixo e barra lateral) */
+:root .bn{transition:color .25s}
+:root .bn.active{background:transparent}
+@media (max-width:700px){
+  :root .bn-ind{display:block;position:absolute;z-index:0;top:6px;bottom:calc(6px + env(safe-area-inset-bottom,0px));left:0;width:0;height:auto;border-radius:16px;background:var(--accent-soft);transform:none;transition:left .4s cubic-bezier(.3,1.3,.5,1),width .4s cubic-bezier(.3,1.3,.5,1);pointer-events:none}
+}
+:root .sidebar{position:relative}
+:root .side-ind{position:absolute;z-index:0;border-radius:12px;background:var(--accent-soft);pointer-events:none;transition:top .4s cubic-bezier(.3,1.3,.5,1),left .2s ease,width .2s ease,height .4s cubic-bezier(.3,1.3,.5,1);opacity:0}
+:root .side-ind.on{opacity:1}
+:root .nav-btn{z-index:1;margin:0 10px;width:calc(100% - 20px);padding:0 14px;border-radius:12px;overflow:hidden}
+:root .nav-btn.active{background:transparent}
 :root .nav-btn.active::before{display:none}
 :root .sidebar.collapsed .nav-btn{padding:0 15px}
 
@@ -1177,7 +1182,7 @@ input,textarea,[contenteditable="true"]{-webkit-user-select:text;user-select:tex
   *{scrollbar-width:none!important}
   *::-webkit-scrollbar{display:none!important;width:0!important;height:0!important}
 }
-.bn,.nav-btn{transition:background-color .2s,color .2s}
+.bn,.nav-btn{transition:background-color .2s,color .25s}
 .bn svg,.nav-btn svg,.bn-add>span,.bn-add>span svg{transform:none!important;animation:none!important}
 </style>
 <script>try{var t=JSON.parse(localStorage.getItem("ae.theme")||"null")||"dark";if(t==="system")t=matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light";if(t==="light")document.documentElement.classList.add("light")}catch(e){}</script>
@@ -1864,7 +1869,26 @@ function renderSidebar() {
      <button class="nav-btn" id="btn-today" aria-label="ir para hoje, dia ${NOW.getDate()}"><span class="cal-ico">${I.cal}<b>${NOW.getDate()}</b></span><span class="t">ir para hoje</span></button>` +
     nb("horizonte", "horizonte");
   $("#sidebar").classList.toggle("collapsed", !!UI.sideCollapsed);
+  if (!$("#side-ind")) { const d = document.createElement("span"); d.id = "side-ind"; d.className = "side-ind"; d.setAttribute("aria-hidden", "true"); $("#sidebar").prepend(d); }
   $("#btn-collapse").setAttribute("aria-label", UI.sideCollapsed ? "expandir barra lateral" : "recolher barra lateral");
+}
+// pílula da aba ativa: fica parada entre as telas e desliza até a nova aba (como no Nosso Lar)
+function placePill(pill, on, box, vertical) {
+  if (!pill) return;
+  if (!on || !on.offsetWidth) { pill.classList.remove("on"); return; }
+  const r = on.getBoundingClientRect(), b = box.getBoundingClientRect();
+  const to = { left: r.left - b.left + box.scrollLeft, top: r.top - b.top + box.scrollTop, width: r.width, height: r.height };
+  const first = !pill.classList.contains("on");
+  if (first) pill.style.transition = "none";
+  pill.style.left = to.left + "px"; pill.style.width = to.width + "px";
+  if (vertical) { pill.style.top = to.top + "px"; pill.style.height = to.height + "px"; }
+  pill.classList.add("on");
+  if (first) { pill.getBoundingClientRect(); pill.style.transition = ""; }
+}
+function placeTabPills() {
+  const nav = $("#bottom-nav"), side = $("#sidebar");
+  if (nav) placePill($(".bn-ind", nav), $(".bn.active", nav), nav, false);
+  if (side) placePill($("#side-ind"), $(".nav-btn.active", side), side, true);
 }
 $("#sidebar").addEventListener("click", e => {
   const t = e.target.closest("[data-tab]");
@@ -2233,9 +2257,9 @@ function renderMobileChrome() {
   if (!mob) { nav.innerHTML = ""; delete nav.dataset.built; }
   else {
     if (!nav.dataset.built) { nav.innerHTML = `<span class="bn-ind" aria-hidden="true"></span>` + bn("saldos", "saldos", I.saldos) + bn("buscar", "buscar", I.buscar) + `<button class="bn-add" data-badd aria-label="adicionar movimentação" aria-haspopup="menu"><span>${I.plus}</span></button>` + bn("totais", "totais", I.totais) + bn("menu", "menu", I.menu); nav.dataset.built = "1"; }
-    const cur = UI.tab === "horizonte" ? "saldos" : UI.tab, idx = { saldos: 0, buscar: 1, totais: 3, menu: 4 }[cur] ?? 0;
+    const cur = UI.tab === "horizonte" ? "saldos" : UI.tab;
     $$(".bn", nav).forEach(b => { const on = b.dataset.tab === cur; if (on && !b.classList.contains("active")) { b.classList.remove("bump"); void b.offsetWidth; b.classList.add("bump"); } b.classList.toggle("active", on); });
-    $(".bn-ind", nav).style.transform = `translateX(${idx * 100}%)`;
+    placeTabPills();
   }
   let fab = $("#fab");
   if (!fab) { fab = document.createElement("button"); fab.id = "fab"; fab.className = "fab"; fab.setAttribute("aria-label", "adicionar movimentação"); fab.setAttribute("aria-haspopup", "menu"); fab.innerHTML = I.plus; fab.onclick = () => openAddMenu(fab); document.body.appendChild(fab); }
@@ -2257,6 +2281,7 @@ function renderAll() {
   const mob = isMobile();
   renderSidebar();
   renderMobileChrome();
+  placeTabPills();
   $("#title").textContent = TITLES[UI.tab];
   $("#period").innerHTML = periodHTML();
   $("#top-right").innerHTML = mob ? (UI.tab === "saldos" || UI.tab === "totais" ? `<div class="tr-row"><button class="m-grid" data-mgrid aria-label="abrir horizonte">${gridIcon()}</button></div>` : UI.tab === "horizonte" ? `<div class="tr-row"><button class="icon-btn bare" data-madd aria-label="adicionar movimentação" aria-haspopup="menu">${I.plus}</button></div>` : "") : "";
@@ -2339,6 +2364,7 @@ function placeFab() {
   if (!fab.classList.contains("ready")) requestAnimationFrame(() => fab.classList.add("ready"));
 }
 if (window.ResizeObserver) { const ro = new ResizeObserver(() => placeFab()); requestAnimationFrame(() => { const n = $("#bottom-nav"); if (n) ro.observe(n); ro.observe($("#view")); }); }
+if (window.ResizeObserver) { const rp = new ResizeObserver(() => placeTabPills()); rp.observe($("#bottom-nav")); rp.observe($("#sidebar")); }
 window.addEventListener("resize", () => placeFab());
 
 /* ================= saldos / horizonte ================= */
