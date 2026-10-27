@@ -1136,15 +1136,17 @@ input,textarea,[contenteditable="true"]{-webkit-user-select:text;user-select:tex
 :root{--nav-pill:#2E1752;--nav-ic:#BE8CFF;--nav-bar:#0C0C0E;--nav-line:rgba(255,255,255,.07);--nav-shadow:0 10px 34px rgba(0,0,0,.75)}
 :root.light{--nav-pill:#EFE2FB;--nav-ic:#820AD1;--nav-bar:#FFFFFF;--nav-line:rgba(29,31,35,.08);--nav-shadow:0 10px 30px rgba(29,31,35,.16)}
 @media (max-width:700px){
-  :root .bottom-nav{position:fixed!important;z-index:30;left:50%;right:auto;transform:translateX(-50%);width:min(calc(100% - 24px),350px);bottom:max(8px,calc(env(safe-area-inset-bottom,0px) - 14px));display:flex;align-items:center;gap:2px;padding:5px!important;border:1px solid var(--nav-line)!important;border-radius:999px;background:var(--nav-bar);box-shadow:var(--nav-shadow)}
+  :root .bottom-nav{position:fixed!important;z-index:30;left:50%;right:auto;transform:translateX(-50%);width:min(calc(100% - 24px),350px);bottom:var(--nav-b);display:flex;align-items:center;gap:2px;padding:5px!important;border:1px solid var(--nav-line)!important;border-radius:999px;background:var(--nav-bar);box-shadow:var(--nav-shadow)}
   :root .bn{flex:1;min-width:0;z-index:1;height:54px;padding:0;justify-content:center;border-radius:999px;color:var(--muted)}
   :root .bn svg{width:26px;height:26px}
   :root .bn>span{display:none}
   :root .bn.active{color:var(--nav-ic)}
   :root .bn-add{flex:1;min-width:0;z-index:1;height:54px;padding:0}
   :root .bn-add>span{width:46px;height:46px}
-  :root .page{padding-bottom:calc(96px + env(safe-area-inset-bottom,0px))}
-  :root .main::after{content:"";position:fixed;z-index:29;left:0;right:0;bottom:0;height:calc(70px + env(safe-area-inset-bottom,0px));background:linear-gradient(to bottom,transparent,var(--bg) 75%);pointer-events:none}
+  /* o fim da rolagem para logo acima da barra: altura da barra (54 + 2x5 de respiro + 2x1 de borda) + distância do pé da tela + 4px */
+  :root{--nav-h:66px;--nav-b:max(8px,calc(env(safe-area-inset-bottom,0px) - 14px))}
+  :root .page{padding-bottom:calc(var(--nav-b) + var(--nav-h) + 4px)}
+  :root .main::after{content:"";position:fixed;z-index:29;left:0;right:0;bottom:0;height:calc(var(--nav-b) + var(--nav-h));background:linear-gradient(to bottom,transparent,var(--bg) 75%);pointer-events:none}
   :root .m-hz .main::after{display:none}
 }
 
