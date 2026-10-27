@@ -703,6 +703,7 @@ input,textarea,[contenteditable="true"]{-webkit-user-select:text;user-select:tex
 .lfield input::placeholder{color:var(--zero)}
 .lf-pw{display:flex;align-items:center;gap:8px}
 .lf-pw .eye{width:36px;height:36px;display:grid;place-items:center;color:var(--muted);flex:none}
+.pf-acc{margin-top:24px}
 .sbtns{display:flex;flex-direction:column;gap:12px;padding:32px 20px calc(24px + env(safe-area-inset-bottom,0px))}
 .sbtn{height:56px;width:100%;border-radius:999px;font-weight:700;font-size:17px;background:transparent;color:var(--text);border:2px solid var(--line2);transition:transform .15s,background-color .2s}
 .sbtn:active{transform:scale(.97)}
@@ -897,6 +898,10 @@ input,textarea,[contenteditable="true"]{-webkit-user-select:text;user-select:tex
 .bs-mi.warn{background:var(--m-neg);color:var(--m-neg-fg)}
 .bs-mt{padding-top:4px;min-width:0}
 .bs-mt b{font-weight:700}
+.bs-v,.bs-mt b{white-space:nowrap}
+.bs-mt b.bs-nm{white-space:normal}
+.bs-v,.bs-mt b{white-space:nowrap}
+.bs-mt b.bs-nm{white-space:normal}
 .bs-msg:has(.good) .bs-mt b{color:var(--m-pos-fg)}
 .bs-msg:has(.warn) .bs-mt b{color:var(--m-neg-fg)}
 .bs-none{padding:48px 32px}
@@ -3160,35 +3165,50 @@ function bsResultsHTML(list) {
 /* mensagens: valores sempre ao vivo; o assunto troca toda semana */
 function bsWeek() { return Math.floor((Date.UTC(NOW.getFullYear(), NOW.getMonth(), NOW.getDate()) / 864e5 + 3) / 7); }
 function bsInsights() {
-  const bm = v => brl(v).replace(/ /g, "\u00a0"); // valor nunca quebra no meio
+  const bm = v => `<span class="bs-v">${brl(v)}</span>`; // valor nunca quebra no meio (nem depois do sinal de menos)
   const m = (kind, icon, html) => ({ kind, icon, html });
+  const sum = arr => r2(arr.reduce((a, x) => a + x.value, 0));
+  const OUT = ["saida", "diario", "cartao"];
   const st = monthStats(CUR), pv = monthStats(CUR - 1), mName = MONTHS[miM(CUR)], pName = MONTHS[miM(CUR - 1)];
+  const tomorrow = ymd(addDays(NOW, 1)), monthEnd = miLast(CUR);
   let urgent = null;
   for (let d = NOW, end = parse(miLast(CUR + 11)); d <= end; d = addDays(d, 1)) {
     const s = ymd(d);
     if (saldoOf(s) < -0.004) {
-      const when = s === TODAY ? "hoje" : miOf(d) === CUR ? `no dia ${d.getDate()}` : `em ${d.getDate()} de ${MONTHS[d.getMonth()]}`;
-      urgent = m("warn", BI.warn, `${when === "hoje" ? "hoje o saldo está" : `${when}, o saldo fica`} <b>negativo</b>. ainda dá tempo de ajustar.`); break;
+      urgent = m("warn", BI.warn, s === TODAY ? "hoje o saldo está <b>negativo</b>." : `${miOf(d) === CUR ? `no dia ${d.getDate()}` : `em ${ddmm(s)}`}, o saldo fica <b>negativo</b>.`); break;
     }
   }
-  const monthOcc = occs(miFirst(CUR), miLast(CUR));
+  const monthOcc = occs(miFirst(CUR), monthEnd), todayOcc = occs(TODAY, TODAY);
+  const nextIn = occs(tomorrow, miLast(CUR + 2)).filter(x => x.tx.type === "entrada").sort((a, b) => a.date.localeCompare(b.date))[0];
   const pool = [
     () => { const a = st.diarioMedio, b = pv.diarioMedio; if (!(a > 0 && b > 0)) return null; const p = Math.round((a - b) / b * 100);
       return p === 0 ? m("info", BI.wallet, `seu diário médio está igual ao de ${pName}.`) : p < 0 ? m("good", BI.down, `seu diário médio está <b>${-p}% menor</b> que em ${pName}.`) : m("info", BI.up, `seu diário médio está <b>${p}% maior</b> que em ${pName}.`); },
-    () => { const g = monthOcc.filter(x => x.tx.type === "saida" || x.tx.type === "cartao").sort((a, b) => b.value - a.value)[0]; return g ? m("info", BI.receipt, `o maior gasto de ${mName} é <b>${esc(g.tx.desc)}</b>, de ${bm(g.value)}.`) : null; },
-    () => { let best = null; for (const tx of S.txs) { const fin = tx.rep === "installment" || ((tx.rep || "none") !== "none" && tx.until === "count") || ((tx.rep || "none") !== "none" && tx.endBefore); if (!fin) continue; let left = 0, last = null; expand(tx, ymd(addDays(NOW, 1)), miLast(MAX_MI), d => { left++; last = d; }); if (left && (!best || left > best.left)) best = { tx, left, last }; }
-      if (!best) return null; const ld = parse(best.last); return m("info", I.cal, `${best.left === 1 ? `falta <b>1 ${best.tx.rep === "installment" ? "parcela" : "pagamento"}</b>` : `faltam <b>${best.left} ${best.tx.rep === "installment" ? "parcelas" : (best.tx.type === "entrada" ? "recebimentos" : "pagamentos")}</b>`} de ${esc(best.tx.desc)}. a última é em ${MON3[ld.getMonth()]}/${String(ld.getFullYear()).slice(2)}.`); },
-    () => { const v = r2(occs(`${NOW.getFullYear()}-01-01`, TODAY).filter(x => x.tx.type === "economia").reduce((a, x) => a + x.value, 0)); return v > 0 ? m("good", BI.piggy, `você já guardou <b>${bm(v)}</b> este ano.`) : null; },
-    () => { const n = occs(ymd(addDays(NOW, 1)), miLast(CUR + 2)).filter(x => x.tx.type === "entrada").sort((a, b) => a.date.localeCompare(b.date))[0]; return n ? m("good", BI.inc, `a próxima entrada é <b>${esc(n.tx.desc)}</b>, de ${bm(n.value)}, em ${ddmm(n.date)}.`) : null; },
+    () => { const g = monthOcc.filter(x => x.tx.type === "saida" || x.tx.type === "cartao").sort((a, b) => b.value - a.value)[0]; return g ? m("info", BI.receipt, `o maior gasto de ${mName} é <b class="bs-nm">${esc(g.tx.desc)}</b>, de <b>${bm(g.value)}</b>.`) : null; },
+    () => { let best = null; for (const tx of S.txs) { const fin = tx.rep === "installment" || ((tx.rep || "none") !== "none" && tx.until === "count") || ((tx.rep || "none") !== "none" && tx.endBefore); if (!fin) continue; let left = 0, last = null; expand(tx, tomorrow, miLast(MAX_MI), d => { left++; last = d; }); if (left && (!best || left > best.left)) best = { tx, left, last }; }
+      if (!best) return null; const ld = parse(best.last), parc = best.tx.rep === "installment", w = parc ? ["parcela", "parcelas"] : best.tx.type === "entrada" ? ["recebimento", "recebimentos"] : ["pagamento", "pagamentos"];
+      return m("info", I.cal, `${best.left === 1 ? `falta <b>1 ${w[0]}</b>` : `faltam <b>${best.left} ${w[1]}</b>`} de ${esc(best.tx.desc)}. ${parc ? "a última" : "o último"} é em ${MON3[ld.getMonth()]}/${String(ld.getFullYear()).slice(2)}.`); },
+    () => { const v = sum(occs(`${NOW.getFullYear()}-01-01`, TODAY).filter(x => x.tx.type === "economia")); return v > 0 ? m("good", BI.piggy, `você já guardou <b>${bm(v)}</b> este ano.`) : null; },
+    () => nextIn ? m("good", BI.inc, `a próxima entrada é <b class="bs-nm">${esc(nextIn.tx.desc)}</b>, de <b>${bm(nextIn.value)}</b>, em ${ddmm(nextIn.date)}.`) : null,
     () => { if (!(st.econBase > 0)) return null; const p = st.econPct; if (st.econVal <= 0) return m("info", BI.piggy, `você ainda não guardou nada em ${mName}.`);
       const s = p < 20 ? "abaixo do ideal" : p <= 30 ? "dentro do ideal" : "acima do ideal"; return m(p < 20 ? "info" : "good", BI.piggy, `em ${mName}, você guardou <b>${pctFmt(p)}</b> das entradas, ${s}.`); },
-    () => { const v = saldoOf(miLast(CUR)); return m(v < -0.004 ? "warn" : "good", BI.wallet, `${mName} termina com saldo de <b>${bm(v)}</b>.`); },
+    () => { const v = saldoOf(monthEnd); return m(v < -0.004 ? "warn" : "good", BI.wallet, `${mName} termina com saldo de <b>${bm(v)}</b>.`); },
     () => { if (!(st.custoBase > 0 && st.custo > 0)) return null; const p = Math.round(st.custo / st.custoBase * 100); return m(p > 100 ? "warn" : "info", BI.receipt, `seu custo de vida está em <b>${p}%</b> das entradas de ${mName}.`); },
+    () => { const g = todayOcc.filter(x => x.tx.type === "saida" || x.tx.type === "cartao").sort((a, b) => b.value - a.value)[0]; return g ? m("info", BI.receipt, `hoje sai <b class="bs-nm">${esc(g.tx.desc)}</b>, de <b>${bm(g.value)}</b>.`) : null; },
+    () => { const g = todayOcc.filter(x => x.tx.type === "entrada").sort((a, b) => b.value - a.value)[0]; return g ? m("good", BI.inc, `hoje entra <b class="bs-nm">${esc(g.tx.desc)}</b>, de <b>${bm(g.value)}</b>.`) : null; },
+    () => { if (tomorrow > monthEnd) return null; const v = sum(occs(tomorrow, monthEnd).filter(x => OUT.includes(x.tx.type))); return v > 0 ? m("info", BI.up, `ainda saem <b>${bm(v)}</b> até o fim de ${mName}.`) : null; },
+    () => { if (tomorrow > monthEnd) return null; const v = sum(occs(tomorrow, monthEnd).filter(x => x.tx.type === "entrada")); return v > 0 ? m("good", BI.inc, `ainda entram <b>${bm(v)}</b> até o fim de ${mName}.`) : null; },
+    () => { if (!nextIn) return null; const n = Math.round((parse(nextIn.date) - parse(TODAY)) / 864e5); return n > 0 ? m("info", I.cal, n === 1 ? "falta <b>1 dia</b> para a próxima entrada." : `faltam <b>${n} dias</b> para a próxima entrada.`) : null; },
+    () => { const prev = prevTotal(), d = sum(occs(miFirst(CUR), TODAY).filter(x => x.tx.type === "diario")); if (!(prev > 0 && d > 0)) return null;
+      return d <= prev ? m("info", BI.wallet, `o diário de ${mName} está em <b>${bm(d)}</b>, de uma previsão de <b>${bm(prev)}</b>.`) : m("warn", BI.wallet, `o diário de ${mName} passou da previsão em <b>${bm(r2(d - prev))}</b>.`); },
+    () => { let best = null; for (let mi = CUR + 1; mi <= CUR + 11; mi++) { const v = saldoOf(miLast(mi)); if (!best || v > best.v) best = { mi, v }; }
+      return best && best.v > 0.004 ? m("good", BI.wallet, `o melhor mês pela frente é <b>${MONTHS[miM(best.mi)]}</b>, com saldo de <b>${bm(best.v)}</b>.`) : null; },
+    () => { const v = sum(monthOcc.filter(x => x.tx.type === "cartao")); return v > 0 ? m("info", I.card, `em ${mName}, <b>${bm(v)}</b> foram no cartão.`) : null; },
+    () => urgent ? null : m("good", BI.wallet, "nenhum dia com saldo <b>negativo</b> nos próximos 12 meses."),
   ];
   const L = S.txs.length ? pool.map(f => f()).filter(Boolean) : [];
   const slots = 3 - (urgent ? 1 : 0), out = urgent ? [urgent] : [];
   if (L.length) { const s0 = (bsWeek() * slots) % L.length; for (let i = 0; i < Math.min(slots, L.length); i++) out.push(L[(s0 + i) % L.length]); }
-  if (!out.length) out.push(m("info", BI.wallet, "lance suas movimentações e aqui aparecem dicas sobre o seu dinheiro."));
+  if (!out.length) out.push(m("info", BI.wallet, "lance suas movimentações para ver as dicas aqui."));
   return out;
 }
 function bsMsgsHTML() {
@@ -3253,7 +3273,7 @@ $("#view").addEventListener("click", e => {
   if (it) { $("#bs-q")?.blur(); openPanel(it.dataset.date, null, { tx: it.dataset.item, date: it.dataset.date }); PANEL.fromSearch = true; }
 });
 
-/* ================= telas cheias do menu (previsão, cartões, perfil, configurações) ================= */
+/* ================= telas cheias do menu (previsão, cartões, perfil, aparência) ================= */
 const SI = {
   cardAdd: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11V7.5A2.5 2.5 0 0 0 18.5 5h-13A2.5 2.5 0 0 0 3 7.5v9A2.5 2.5 0 0 0 5.5 19H13"/><path d="M3 10h18M19 15v6M16 18h6"/></svg>',
   moon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.5 13.4A8.5 8.5 0 1 1 10.6 3.5a6.6 6.6 0 0 0 9.9 9.9z"/></svg>',
@@ -3320,8 +3340,8 @@ const MENU = [
   ["perfil", "editar perfil", "user"],
   ["prev", "previsão de diário", null],
   ["cartoes", "cartões de crédito", "card"],
+  ["aparencia", "aparência", "moon"],
   ["ajuda", "como funciona", "help"],
-  ["config", "configurações", "gear"],
   ["sair", "sair", "out"],
 ];
 function menuHTML() {
@@ -3329,12 +3349,12 @@ function menuHTML() {
   let h = `<div class="page menu-page"><div class="page-inner mp" style="max-width:720px">
     <div class="mp-head"><div class="mp-name ellip">${esc(p.nome) || "você"}</div><div class="mp-mail ellip">${esc(p.email)}</div></div><div class="slist2">`;
   for (const [k, lbl, ic] of MENU)
-    h += srow({ attr: `data-menu="${k}"`, ico: ic ? I[ic] : `<span class="pv-ico" aria-hidden="true"></span>`, main: lbl, chev: k !== "sair", cls: k === "sair" ? "is-danger" : "" });
+    h += srow({ attr: `data-menu="${k}"`, ico: ic ? (I[ic] || SI[ic]) : `<span class="pv-ico" aria-hidden="true"></span>`, main: lbl, chev: k !== "sair", cls: k === "sair" ? "is-danger" : "" });
   return h + `</div></div></div>`;
 }
 $("#view").addEventListener("click", e => {
   const b = e.target.closest("[data-menu]"); if (!b) return;
-  ({ perfil: openProfile, prev: openPrevScreen, cartoes: openCards, ajuda: () => openTutorial(false), config: openConfig, sair: signOut })[b.dataset.menu]();
+  ({ perfil: openProfile, prev: openPrevScreen, cartoes: openCards, aparencia: openAppearance, ajuda: () => openTutorial(false), sair: signOut })[b.dataset.menu]();
 });
 
 /* ===== editar perfil ===== */
@@ -3343,8 +3363,10 @@ function openProfile() {
   openScreen({
     title: "perfil",
     body: `${lfield("pf-n", "nome", p.nome, 'maxlength="40"')}${lfield("pf-s", "sobrenome", p.sobrenome, 'maxlength="60"')}
+      ${accountRowsHTML()}
       <div class="sbtns"><button class="sbtn" data-pw>alterar senha</button><button class="sbtn solid" data-savep>salvar</button></div>`,
     onMount: (el, s) => el.addEventListener("click", e => {
+      if (e.target.closest("[data-zerar], [data-apagar]")) return accountAction(e);
       if (e.target.closest("[data-pw]")) return openPassword();
       if (e.target.closest("[data-savep]")) {
         const nome = $("#pf-n", el).value.trim(), sobrenome = $("#pf-s", el).value.trim();
@@ -3486,24 +3508,9 @@ function openCardForm(id) {
   });
 }
 
-/* ===== configurações ===== */
+/* ===== aparência ===== */
 const THEMES = [["light", "modo claro"], ["dark", "modo escuro"], ["system", "modo do sistema"]];
 const curTheme = () => prof().theme || lsGet("ae.theme", null) || "dark";
-function openConfig() {
-  const draw = s => {
-    const th = (THEMES.find(([k]) => k === curTheme()) || THEMES[1])[1];
-    s.setBody(`<div class="slist2">${srow({ attr: "data-cfg-ap", ico: SI.moon, main: "aparência", sub: th })}${srow({ attr: "data-cfg-dados", ico: SI.grid, main: "meus dados" })}</div>`);
-  };
-  const s = openScreen({
-    title: "configurações",
-    onMount: el => el.addEventListener("click", e => {
-      if (e.target.closest("[data-cfg-ap]")) return openAppearance();
-      if (e.target.closest("[data-cfg-dados]")) return openMyData();
-    }),
-    refresh: () => draw(s),
-  });
-  draw(s);
-}
 function openAppearance() {
   const draw = s => {
     const th = curTheme();
@@ -3520,12 +3527,11 @@ function openAppearance() {
   });
   draw(s);
 }
-function openMyData() {
-  openScreen({
-    title: "meus dados",
-    body: `<div class="slist2">${srow({ attr: "data-zerar", ico: SI.reset, main: "zerar minha conta", chev: false })}
-      ${srow({ attr: "data-apagar", ico: I.trash, main: "apagar minha conta", chev: false, cls: "danger-row" })}</div>`,
-    onMount: el => el.addEventListener("click", async e => {
+function accountRowsHTML() {
+  return `<div class="slist2 pf-acc">${srow({ attr: "data-zerar", ico: SI.reset, main: "zerar minha conta", chev: false })}
+      ${srow({ attr: "data-apagar", ico: I.trash, main: "apagar minha conta", chev: false, cls: "danger-row" })}</div>`;
+}
+async function accountAction(e) {
       if (e.target.closest("[data-zerar]")) {
         if (!(await confirmBox({ title: "zerar minha conta", text: "essa ação não poderá ser desfeita.", ok: "zerar conta" }))) return;
         await wipe(["tx"]); S.checkins = {}; backend.putCheckins({});
@@ -3542,9 +3548,7 @@ function openMyData() {
         await wipe(["tx", "cards", "prev"]); backend.putCheckins({}); await backend.putProfile({ ...DEFAULT_PROFILE, deleted: true });
         UI.signedOut = "deleted"; render();
       }
-    }),
-  });
-}
+    }
 async function wipe(colls) {
   const K = { tx: "txs", tags: "tags", cards: "cards", prev: "prev" };
   for (const c of colls) for (const x of [...S[K[c]]]) await backend.del(c, x.id);
