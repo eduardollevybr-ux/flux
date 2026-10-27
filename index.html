@@ -1200,6 +1200,27 @@ input,textarea,[contenteditable="true"]{-webkit-user-select:text;user-select:tex
   :root .bottom-nav.dragging .bn.active:not(.hot){color:var(--muted)}
   :root .bottom-nav.dragging .bn.hot{color:var(--nav-ic)}
 }
+
+/* ===== escolher o tipo: pilha que sai do botão ===== */
+.stk{position:fixed;inset:0;z-index:75}
+.stk-scrim{position:absolute;inset:0;background:var(--overlay);animation:stkFade .22s ease both}
+.stk.out .stk-scrim{animation:stkFadeOut .2s ease both}
+.stk-box{position:fixed;display:flex;flex-direction:column;align-items:center;gap:10px}
+.stk-right .stk-box{align-items:flex-start}
+.stk-end .stk-box{align-items:flex-end}
+.stk-i{display:flex;align-items:center;gap:12px;height:50px;padding:0 22px 0 18px;border-radius:999px;background:var(--pop-bg);color:var(--text);font-size:16px;font-weight:600;white-space:nowrap;box-shadow:var(--shadow);transition:transform .15s,background-color .2s;animation:stkUp .48s var(--spring) both;animation-delay:calc(var(--i) * 40ms)}
+.stk-down .stk-i{animation-name:stkDown}
+.stk-right .stk-i{animation-name:stkRight}
+.stk.out .stk-i{animation:stkOut .18s ease both}
+.stk-i:active{transform:scale(.95)}
+@media (hover:hover){.stk-i:hover{background:var(--surface2)}}
+body.stk-open .bottom-nav{z-index:76!important}
+@keyframes stkFade{from{opacity:0}}
+@keyframes stkFadeOut{to{opacity:0}}
+@keyframes stkUp{from{opacity:0;transform:translateY(36px) scale(.7)}}
+@keyframes stkDown{from{opacity:0;transform:translateY(-36px) scale(.7)}}
+@keyframes stkRight{from{opacity:0;transform:translateX(-24px) scale(.8)}}
+@keyframes stkOut{to{opacity:0;transform:scale(.85)}}
 </style>
 <script>try{var t=JSON.parse(localStorage.getItem("ae.theme")||"null")||"dark";if(t==="system")t=matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light";if(t==="light")document.documentElement.classList.add("light")}catch(e){}</script>
 </head><body>
@@ -1973,12 +1994,48 @@ function scrollToToday(smooth, delay = 0) {
   setTimeout(() => glide(() => VTOP, v => vSet(v), top, dur), delay);
 }
 function openAddMenu(anchor) {
-  const html = TYPE_ORDER.map(t => `<button class="pop-item" data-type="${t}" role="menuitem">${ti(t)}<span>${TYPES[t].label}</span></button>`).join("");
-  openPopover(anchor, `<div role="menu" aria-label="escolhe o tipo">${html}</div>`, {
-    width: 240, align: "right",
-    onMount: el => el.addEventListener("click", e => { const b = e.target.closest("[data-type]"); if (b) { closePopover(); openForm({ type: b.dataset.type, date: TODAY }); } }),
+  openTypeStack(anchor, TYPE_ORDER, t => openForm({ type: t, date: TODAY }));
+}
+/* ===== escolher o tipo: pilha que sai do botão que foi tocado =====
+   botão na metade de baixo da tela: a pilha sobe; na metade de cima: desce; na barra lateral do PC: abre ao lado.
+   a ordem é sempre a mesma (entrada no topo, cartão embaixo) e a animação começa pelo item mais perto do botão */
+let STK = null;
+function closeStack() {
+  if (!STK) return;
+  const { el, anchor } = STK; STK = null;
+  el.classList.add("out"); anchor.classList.remove("stk-on"); document.body.classList.remove("stk-open");
+  setTimeout(() => el.remove(), 220);
+}
+function openTypeStack(anchor, types, onPick) {
+  if (STK && STK.anchor === anchor) { closeStack(); return; } // tocar de novo no mesmo botão fecha
+  closeStack(); closePopover();
+  const r = anchor.getBoundingClientRect();
+  const side = !isMobile() && anchor.closest(".sidebar") ? "right" : (r.top + r.height / 2 > innerHeight / 2 ? "up" : "down");
+  const n = types.length, el = document.createElement("div");
+  el.className = "stk stk-" + side;
+  el.innerHTML = `<div class="stk-scrim"></div><div class="stk-box" role="menu" aria-label="escolhe o tipo">${types.map((t, j) =>
+    `<button class="stk-i" role="menuitem" data-stk="${t}" style="--i:${side === "up" ? n - 1 - j : j}">${ti(t)}<span>${TYPES[t].label}</span></button>`).join("")}</div>`;
+  document.body.appendChild(el);
+  const box = $(".stk-box", el), w = box.offsetWidth, h = box.offsetHeight, m = 12;
+  if (side === "right") { box.style.left = (r.right + 10) + "px"; box.style.top = Math.max(m, Math.min(r.top, innerHeight - h - m)) + "px"; }
+  else {
+    // botão no topo e do lado direito (lista do dia, horizonte): a pilha alinha pela direita do botão; nos outros casos, centraliza nele
+    const end = side === "down" && r.left + r.width / 2 > innerWidth / 2;
+    if (end) el.classList.add("stk-end");
+    box.style.left = Math.max(m, Math.min(innerWidth - w - m, end ? r.right - w : r.left + r.width / 2 - w / 2)) + "px";
+    if (side === "up") box.style.bottom = (innerHeight - r.top + 12) + "px"; else box.style.top = (r.bottom + 10) + "px";
+  }
+  STK = { el, anchor };
+  anchor.classList.add("stk-on");
+  if (anchor.closest("#bottom-nav")) document.body.classList.add("stk-open"); // a barra fica por cima do escurecido: o + fecha e as abas seguem tocáveis
+  el.addEventListener("click", e => {
+    const b = e.target.closest("[data-stk]");
+    if (b) { closeStack(); onPick(b.dataset.stk); } else if (e.target.closest(".stk-scrim")) closeStack();
   });
 }
+document.addEventListener("keydown", e => { if (e.key === "Escape" && STK) closeStack(); });
+addEventListener("resize", () => closeStack());
+document.addEventListener("click", e => { if (STK && !e.target.closest(".stk") && !STK.anchor.contains(e.target)) closeStack(); }, true);
 
 function visibleMi() {
   const board = $("#board"); if (!board) return UI.bStart;
@@ -2784,9 +2841,7 @@ $("#drawer-root").addEventListener("click", e => {
     const date = PANEL.mode === "day" ? PANEL.date : (PANEL.mi === CUR ? TODAY : miFirst(PANEL.mi));
     const types = PANEL.calcF ? CALC_TYPES[PANEL.calcF] : PANEL.filter ? [PANEL.filter] : TYPE_ORDER;
     if (types.length === 1) return openForm({ type: types[0], date });
-    openPopover(add, `<div role="menu" aria-label="escolhe o tipo">${types.map(k => `<button class="pop-item" data-nt="${k}">${ti(k)}<span>${TYPES[k].label}</span></button>`).join("")}</div>`, {
-      width: 240, onMount: el => el.addEventListener("click", ev => { const b = ev.target.closest("[data-nt]"); if (b) { closePopover(); openForm({ type: b.dataset.nt, date }); } })
-    });
+    openTypeStack(add, types, k => openForm({ type: k, date }));
     return;
   }
   if (t.closest("[data-pback]")) { if (PANEL.fromSearch) return closePanel(); PANEL.detail = null; return renderPanel(); }
@@ -2891,6 +2946,7 @@ function openForm({ type = "saida", date = TODAY, tx = null, occ = null } = {}) 
     b.textContent = edit ? "salvar alterações" : TYPES[f.type].btn;
   }
   draw();
+  if (!edit) $("#f-val", el)?.focus({ preventScroll: true }); // ao abrir um lançamento novo, o teclado já vem no valor
   el.addEventListener("input", e => {
     if (e.target.id === "f-val") {
       f.value = parseMoney(e.target.value);
