@@ -1392,7 +1392,7 @@ const prof = () => ({ ...DEFAULT_PROFILE, ...(S.profile || {}) });
 let backend = null;
 const chains = {};
 function queue(key, fn) { chains[key] = (chains[key] || Promise.resolve()).then(fn, fn); return chains[key]; }
-function onErr(e) { console.warn(e); toast("não deu para salvar agora. tenta de novo em instantes", true); }
+function onErr(e) { console.warn(e); toast("não deu para salvar agora. tente de novo em instantes", true); }
 
 /* ===== supabase: cole aqui a URL e a chave "anon public" do seu projeto ===== */
 const SUPABASE_URL = "https://ccxiuaqirickchmrowrz.supabase.co";
@@ -1431,7 +1431,7 @@ let NET = { offline: !isOnline(), dirty: false, relogin: false };
 function setNet(p) { Object.assign(NET, p); renderNet(); }
 function renderNet() {
   let el = document.getElementById("net-pill");
-  const txt = NET.offline ? "sem internet · salvo no aparelho" : NET.relogin ? "toca aqui para entrar de novo e sincronizar" : "";
+  const txt = NET.offline ? "sem internet · salvo no aparelho" : NET.relogin ? "toque aqui para entrar de novo e sincronizar" : "";
   if (!txt) { if (el) el.remove(); return; }
   if (!el) { el = document.createElement("div"); el.id = "net-pill"; el.setAttribute("role", "status"); document.body.appendChild(el); el.addEventListener("click", () => { if (NET.relogin && !NET.offline && window.fluxRelogin) window.fluxRelogin(); }); }
   el.className = NET.offline ? "off" : NET.relogin ? "relog" : "sync";
@@ -1460,18 +1460,18 @@ async function initSupabase() {
     let error = null;
     try { ({ error } = await SB.from(SB_TABLE).upsert(row)); } catch (e) { error = e; }
     saving = false;
-    if (error) { console.warn(error); if (isOnline()) toast("não deu para salvar agora. tenta de novo em instantes", true); return false; }
+    if (error) { console.warn(error); if (isOnline()) toast("não deu para salvar agora. tente de novo em instantes", true); return false; }
     lastSaved = row.updated_at; writeCache(false); return true;
   };
   const schedulePush = () => { clearTimeout(saveT); saveT = setTimeout(push, 600); };
   backend = memBackend(() => { writeCache(true); schedulePush(); });
   backend.setPassword = async pw => {
-    if (!SB || !isOnline()) throw new Error("sem internet. conecta para trocar a senha");
+    if (!SB || !isOnline()) throw new Error("sem internet. conecte-se para trocar a senha");
     const { error } = await SB.auth.updateUser({ password: pw }); if (error) throw error;
   };
   backend.signOut = async () => {
     clearTimeout(saveT);
-    if (cache && cache.dirty && !(await push())) { toast(NET.relogin ? "entra de novo para sincronizar antes de sair" : "sem internet. conecta para sair sem perder o que você adicionou", true); return; }
+    if (cache && cache.dirty && !(await push())) { toast(NET.relogin ? "entre de novo para sincronizar antes de sair" : "sem internet. conecte-se para sair sem perder o que você adicionou", true); return; }
     lsSet(CACHE_KEY, null); cache = null;
     if (SB) await SB.auth.signOut({ scope: "local" });
     else { SB_USER = null; S.loaded = false; applyData(null); showAuth("login"); }
@@ -1490,7 +1490,7 @@ async function initSupabase() {
   try { await loadScript("https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"); }
   catch {
     if (cache) { window.addEventListener("online", () => location.reload(), { once: true }); return; }
-    toast("não deu para conectar agora. confere sua internet", true); initLocal(); return;
+    toast("não deu para conectar agora. verifique sua internet", true); initLocal(); return;
   }
   SB = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, { auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true, storageKey: "flux-auth" } });
 
@@ -1503,7 +1503,7 @@ async function initSupabase() {
     if (!isOnline() || NET.relogin) { if (!S.loaded && cache && cache.uid === SB_USER.id) openFromCache(); return; }
     let data = null, error = null;
     try { ({ data, error } = await SB.from(SB_TABLE).select("data,updated_at").eq("user_id", SB_USER.id).maybeSingle()); } catch (e) { error = e; }
-    if (error) { console.warn(error); if (!S.loaded) toast("não deu para carregar seus dados. tenta de novo", true); return; }
+    if (error) { console.warn(error); if (!S.loaded) toast("não deu para carregar seus dados. tente de novo", true); return; }
     let imported = false;
     if (data) { applyData(data.data); lastSaved = data.updated_at; }
     else { const loc = lsGet("ae.data", null); applyData(loc); imported = !!(loc && ((loc.txs || []).length || (loc.prev || []).length)); }
@@ -2013,7 +2013,7 @@ function openTypeStack(anchor, types, onPick) {
   const side = !isMobile() && anchor.closest(".sidebar") ? "right" : (r.top + r.height / 2 > innerHeight / 2 ? "up" : "down");
   const n = types.length, el = document.createElement("div");
   el.className = "stk stk-" + side;
-  el.innerHTML = `<div class="stk-scrim"></div><div class="stk-box" role="menu" aria-label="escolhe o tipo">${types.map((t, j) =>
+  el.innerHTML = `<div class="stk-scrim"></div><div class="stk-box" role="menu" aria-label="escolha o tipo">${types.map((t, j) =>
     `<button class="stk-i" role="menuitem" data-stk="${t}" style="--i:${side === "up" ? n - 1 - j : j}">${ti(t)}<span>${TYPES[t].label}</span></button>`).join("")}</div>`;
   document.body.appendChild(el);
   const box = $(".stk-box", el), w = box.offsetWidth, h = box.offsetHeight, m = 12;
@@ -2863,7 +2863,7 @@ function chooseScope({ title, hasNext }) {
   return new Promise(res => {
     let done = false;
     const m = openModal({
-      title, body: `<p class="dialog-text">escolhe para quais repetições vale essa mudança.</p>`,
+      title, body: `<p class="dialog-text">escolha para quais repetições vale essa mudança.</p>`,
       foot: `<button class="dbtn" data-s="one">salvar somente nesta</button><button class="dbtn" data-s="from">salvar nesta e nas próximas</button><button class="dbtn" data-s="all">salvar em todas</button><button class="btn-link" data-no>cancelar</button>`,
       onClose: () => { if (!done) res(null); }, cls: "cmodal"
     });
@@ -3002,8 +3002,8 @@ function openForm({ type = "saida", date = TODAY, tx = null, occ = null } = {}) 
     if (t.closest("#f-cancel")) m.close();
   });
   async function submit() {
-    if (!(f.value > 0)) { toast("coloca um valor maior que zero", true); $("#f-val", el)?.focus(); return; }
-    if (f.type === "cartao" && !(f.cardId && cardName(f.cardId))) { toast("escolhe o cartão desse gasto", true); cardSheet(f.cardId, id => { f.cardId = id; draw(); }); return; }
+    if (!(f.value > 0)) { toast("informe um valor maior que zero", true); $("#f-val", el)?.focus(); return; }
+    if (f.type === "cartao" && !(f.cardId && cardName(f.cardId))) { toast("escolha o cartão desse gasto", true); cardSheet(f.cardId, id => { f.cardId = id; draw(); }); return; }
     if (f.date < miFirst(MIN_MI) || f.date > miLast(MAX_MI)) { toast("a data precisa estar dentro de 5 anos para trás ou para frente", true); return; }
     const desc = f.desc.trim() || TYPES[f.type].label;
     const rule = isRule();
@@ -3072,13 +3072,13 @@ function datePicker(anchor, value, onPick) {
 // escolher o cartão do lançamento (ou cadastrar um na hora, só com o nome)
 function cardSheet(cur, onPick) {
   const s = openSheet({ title: "cartão", body: `${S.cards.length ? `<div class="slist">${cardsSorted().map(c => `<button class="sitem ${c.id === cur ? "on" : ""}" data-card="${c.id}"><span class="si-ico">${ti("cartao", true)}</span><span class="si-txt"><b class="ellip">${esc(c.name)}</b></span></button>`).join("")}</div>` : ""}
-    <div class="sheet-new"><div class="field"><label for="nc-name">${S.cards.length ? "ou adiciona um novo" : "adiciona seu primeiro cartão"}</label><input class="input" id="nc-name" autocomplete="off" maxlength="40" placeholder="ex.: nubank"></div>
+    <div class="sheet-new"><div class="field"><label for="nc-name">${S.cards.length ? "ou adicione um novo" : "adicione seu primeiro cartão"}</label><input class="input" id="nc-name" autocomplete="off" maxlength="40" placeholder="ex.: nubank"></div>
     <button class="btn block primary" data-savecard>adicionar e usar</button></div>` });
   s.el.addEventListener("click", async e => {
     const c = e.target.closest("[data-card]"); if (c) { s.close(); onPick(c.dataset.card); return; }
     if (e.target.closest("[data-savecard]")) {
       const name = $("#nc-name", s.el).value.trim();
-      if (!name) { toast("dá um nome para o cartão", true); $("#nc-name", s.el).focus(); return; }
+      if (!name) { toast("informe um nome para o cartão", true); $("#nc-name", s.el).focus(); return; }
       if (S.cards.some(x => x.name.toLowerCase() === name.toLowerCase())) { toast("já tem um cartão com esse nome", true); return; }
       const id = uid("c"); await backend.put("cards", id, { name, createdAt: Date.now() }); s.close(); onPick(id);
     }
@@ -3348,7 +3348,7 @@ function openProfile() {
       if (e.target.closest("[data-pw]")) return openPassword();
       if (e.target.closest("[data-savep]")) {
         const nome = $("#pf-n", el).value.trim(), sobrenome = $("#pf-s", el).value.trim();
-        if (!nome) { toast("coloca seu nome", true); return; }
+        if (!nome) { toast("informe seu nome", true); return; }
         saveProfile({ nome, sobrenome }); s.close();
       }
     }),
@@ -3366,7 +3366,7 @@ function openPassword() {
         if (a.length < 6) { toast("a senha precisa ter pelo menos 6 caracteres", true); return; }
         if (a !== b) { toast("as senhas não são iguais", true); return; }
         if (!backend.setPassword) { toast("a troca de senha só funciona com login", true); return; }
-        backend.setPassword(a).then(() => s.close()).catch(err => { console.warn(err); toast("não deu para trocar a senha. tenta de novo", true); });
+        backend.setPassword(a).then(() => s.close()).catch(err => { console.warn(err); toast("não deu para trocar a senha. tente de novo", true); });
       });
     },
   });
@@ -3419,7 +3419,7 @@ function openPrevForm(id) {
       el.addEventListener("click", async e => {
         if (e.target.closest("[data-saveprev]")) {
           const value = parseMoney($("#pv-v", el).value), desc = $("#pv-d", el).value.trim();
-          if (!(value > 0)) { toast("coloca um valor maior que zero", true); return; }
+          if (!(value > 0)) { toast("informe um valor maior que zero", true); return; }
           s.close();
           await backend.put("prev", p ? p.id : uid("p"), { value, desc: desc || "gasto do dia a dia", createdAt: p ? p.createdAt || Date.now() : Date.now() });
         }
@@ -3468,7 +3468,7 @@ function openCardForm(id) {
       if (e.target.closest("[data-defcc]") && !only) { def = !def; $(".cc-def", el).innerHTML = defRow(); return; }
       if (e.target.closest("[data-savecc]")) {
         const name = $("#cc-name", el).value.trim();
-        if (!name) { toast("dá um nome para o cartão", true); $("#cc-name", el).focus(); return; }
+        if (!name) { toast("informe um nome para o cartão", true); $("#cc-name", el).focus(); return; }
         if (S.cards.some(x => x.id !== id && x.name.toLowerCase() === name.toLowerCase())) { toast("já tem um cartão com esse nome", true); return; }
         s.close();
         const cid = c ? c.id : uid("c");
@@ -3532,7 +3532,7 @@ function openMyData() {
       }
       if (e.target.closest("[data-apagar]")) {
         if (!(await confirmBox({ title: "apagar minha conta", text: "essa ação não poderá ser desfeita.", ok: "apagar conta" }))) return;
-        if (S.mode === "supabase" && (!SB || !isOnline())) { toast("sem internet. conecta para apagar a conta", true); return; }
+        if (S.mode === "supabase" && (!SB || !isOnline())) { toast("sem internet. conecte-se para apagar a conta", true); return; }
         while (SCREENS.length) SCREENS[SCREENS.length - 1].close();
         if (S.mode === "supabase") {
           const { error } = await SB.from(SB_TABLE).delete().eq("user_id", SB_USER.id);
@@ -3579,20 +3579,20 @@ function tuSlides() {
         "assim fica fácil decidir quando dá para gastar, quando segurar e quanto dá para guardar."] },
     { t: "saldos", art: tab,
       p: ["cada linha é um dia. na direita, fica o saldo no fim dele: <b>azul</b> sobra, <b>amarelo</b> zera, <b>vermelho</b> falta.",
-        mob ? "desliza para trocar de coluna e segura num dia para lançar nele." : "clique num valor para ver os detalhes ou use o botão direito para lançar naquele dia."] },
+        mob ? "deslize para trocar de coluna e segure um dia para lançar nele." : "clique num valor para ver os detalhes ou use o botão direito para lançar naquele dia."] },
     { t: "entradas e saídas", art: `<div class="tu-list tu-pop">${row(ti("entrada"), "salário", 3000)}${row(ti("saida"), "aluguel", 1200)}<div class="tu-row mut"><b>saldo do dia</b>${sal(3000, 1800)}</div></div>`,
-      p: ["<b>entradas:</b> aqui você coloca o que entra, como salário, freela e pix recebido.",
+      p: ["<b>entradas:</b> aqui você lança o que entra, como salário, freela e pix recebido.",
         "<b>saídas:</b> aqui vão as contas com data, como aluguel, luz, internet e boleto."] },
     { t: "diário e previsão", art: `<div class="tu-list tu-pop">${row(ti("diario"), "ontem", 58, "gasto lançado")}${row(ti("diario"), "hoje", 23, "gasto lançado")}${row(ti("prev"), "amanhã", 40, "previsão")}${row(ti("prev"), "depois de amanhã", 40, "previsão")}</div>`,
-      p: ["<b>diário:</b> aqui você coloca o que já gastou no dia a dia, como mercado, padaria e transporte.",
+      p: ["<b>diário:</b> aqui você lança o que já gastou no dia a dia, como mercado, padaria e transporte.",
         "<b>previsão de diário:</b> no menu, você diz quanto costuma gastar por mês. o FLUX divide e desconta dos dias que ainda vão chegar."] },
     { t: "economias e cartões", art: `<div class="tu-list tu-pop">${row(ti("economia"), "reserva", 500)}${row(ti("cartao"), "jantar", 120, "nubank")}</div>`,
-      p: ["<b>economias:</b> aqui você coloca o que já guardou ou pretende guardar. o valor aparece no economizado, em totais.",
-        "<b>cartão:</b> aqui vão os gastos no cartão de crédito. cadastra os cartões no menu ou na hora de lançar."] },
+      p: ["<b>economias:</b> aqui você lança o que já guardou ou pretende guardar. o valor aparece no economizado, em totais.",
+        "<b>cartão:</b> aqui vão os gastos no cartão de crédito. cadastre os cartões no menu ou na hora de lançar."] },
     { t: "como lançar", art: `<div class="tu-money tu-pop"><span>R$</span><b class="num" data-cnt="0|3000|fmt">${fmt(3000)}</b></div>
       <div class="tu-list tu-pop" style="--d:1">${row(ti("entrada"), "entrada")}${row(PEN, "salário")}<div class="tu-row">${I.cal}<b>data</b><em class="num">${pad(5)}/${pad(NOW.getMonth() + 1)}/${NOW.getFullYear()}</em></div>${row(REP, "mensalmente")}</div>`,
-      p: [mob ? "toque no +, escolhe o tipo e preenche valor, descrição e data." : "clique em adicionar, escolhe o tipo e preenche valor, descrição e data.",
-        "se repete, como salário ou aluguel, escolhe a repetição. dá para parcelar também."] },
+      p: [mob ? "toque no +, escolha o tipo e preencha valor, descrição e data." : "clique em adicionar, escolha o tipo e preencha valor, descrição e data.",
+        "se repete, como salário ou aluguel, escolha a repetição. dá para parcelar também."] },
   ];
 }
 // números das ilustrações contando até o valor final
@@ -3702,17 +3702,17 @@ function showAuth(mode, opt) {
   if (!el) { el = document.createElement("div"); el.id = "auth"; el.className = "auth"; document.body.appendChild(el); bindAuth(el); }
   const pw = (id, label, ac) => `<div class="field"><label for="${id}">${label}</label><div class="input-wrap"><input class="input" id="${id}" type="password" autocomplete="${ac}"><button class="eye" type="button" data-eye="${id}" aria-label="mostrar senha">${I.eye}</button></div></div>`;
   const T = {
-    login: ["entrar", "entra com seu e-mail e senha.", `<div class="field"><label for="au-e">e-mail</label><input class="input" id="au-e" type="email" autocomplete="email" inputmode="email"></div>${pw("au-p", "senha", "current-password")}
+    login: ["entrar", "entre com seu e-mail e senha.", `<div class="field"><label for="au-e">e-mail</label><input class="input" id="au-e" type="email" autocomplete="email" inputmode="email"></div>${pw("au-p", "senha", "current-password")}
       <button class="btn primary block" data-au="login">entrar</button>
       <div class="auth-links"><button data-go="forgot">esqueci minha senha</button>${opt.back ? `<button data-back>voltar para o app</button>` : `<button data-go="signup">criar conta</button>`}</div>`],
     signup: ["criar conta", "leva menos de um minuto.", `<div class="field"><label for="au-n">nome</label><input class="input" id="au-n" autocomplete="given-name"></div>
       <div class="field"><label for="au-e">e-mail</label><input class="input" id="au-e" type="email" autocomplete="email" inputmode="email"></div>${pw("au-p", "senha", "new-password")}${pw("au-p2", "confirmar senha", "new-password")}
       <button class="btn primary block" data-au="signup">criar conta</button>
       <div class="auth-links"><button data-go="login">já tenho conta</button></div>`],
-    forgot: ["esqueci minha senha", "a gente envia um link para o seu e-mail para você criar uma senha nova.", `<div class="field"><label for="au-e">e-mail</label><input class="input" id="au-e" type="email" autocomplete="email" inputmode="email"></div>
+    forgot: ["esqueci minha senha", "enviamos um link para o seu e-mail para você criar uma senha nova.", `<div class="field"><label for="au-e">e-mail</label><input class="input" id="au-e" type="email" autocomplete="email" inputmode="email"></div>
       <button class="btn primary block" data-au="forgot">enviar link</button>
       <div class="auth-links"><button data-go="login">voltar para entrar</button></div>`],
-    newpass: ["nova senha", "escolhe a senha nova da sua conta.", `${pw("au-p", "nova senha", "new-password")}${pw("au-p2", "confirmar senha", "new-password")}
+    newpass: ["nova senha", "escolha a senha nova da sua conta.", `${pw("au-p", "nova senha", "new-password")}${pw("au-p2", "confirmar senha", "new-password")}
       <button class="btn primary block" data-au="newpass">salvar senha</button>`],
   }[mode];
   el.innerHTML = `<form class="auth-card" novalidate>${logoSVG(64, true)}<h2>${T[0]}</h2>${T[1] ? `<p class="muted">${T[1]}</p>` : ""}${T[2]}<p class="auth-msg" id="au-msg" role="alert"></p></form>`;
@@ -3730,7 +3730,7 @@ function bindAuth(el) {
     const msg = t => { $("#au-msg", el).textContent = t; };
     const email = ($("#au-e", el)?.value || "").trim(), pass = $("#au-p", el)?.value || "", pass2 = $("#au-p2", el)?.value || "";
     const mode = b.dataset.au;
-    if (mode !== "newpass" && !/^\S+@\S+\.\S+$/.test(email)) return msg("confere o e-mail");
+    if (mode !== "newpass" && !/^\S+@\S+\.\S+$/.test(email)) return msg("verifique o e-mail");
     if ((mode === "login" || mode === "signup" || mode === "newpass") && pass.length < 6) return msg("a senha precisa ter pelo menos 6 caracteres");
     if ((mode === "signup" || mode === "newpass") && pass !== pass2) return msg("as senhas não são iguais");
     b.disabled = true; msg("");
@@ -3739,14 +3739,14 @@ function bindAuth(el) {
       if (mode === "signup") {
         const { data, error } = await SB.auth.signUp({ email, password: pass, options: { data: { nome: ($("#au-n", el).value || "").trim() }, emailRedirectTo: location.href.split("#")[0].split("?")[0] } });
         if (error) throw error;
-        if (!data.session) { showAuthKeepMsg("login", "pronto. confirma a conta pelo link que enviamos para o seu e-mail e depois entra aqui."); showMailSent(email); }
+        if (!data.session) { showAuthKeepMsg("login", "pronto. confirme a conta pelo link que enviamos para o seu e-mail e depois entre aqui."); showMailSent(email); }
       }
       if (mode === "forgot") { const { error } = await SB.auth.resetPasswordForEmail(email, { redirectTo: location.href.split("#")[0] }); if (error) throw error; msg("se esse e-mail tiver conta, o link já está a caminho."); }
       if (mode === "newpass") { const { error } = await SB.auth.updateUser({ password: pass }); if (error) throw error; msg("senha salva. entrando…"); setTimeout(() => location.replace(location.href.split("#")[0]), 800); }
     } catch (err) {
       console.warn(err);
       const m = String(err.message || "");
-      msg(/invalid login/i.test(m) ? "e-mail ou senha errados" : /already registered/i.test(m) ? "esse e-mail já tem conta. é só entrar" : /rate|seconds/i.test(m) ? "muitas tentativas. espera um pouquinho e tenta de novo" : "não deu para continuar. tenta de novo");
+      msg(/invalid login/i.test(m) ? "e-mail ou senha errados" : /already registered/i.test(m) ? "esse e-mail já tem conta. é só entrar" : /rate|seconds/i.test(m) ? "muitas tentativas. aguarde um momento e tente de novo" : "não deu para continuar. tente de novo");
     } finally { const bb = $("[data-au]", el); if (bb) bb.disabled = false; }
   });
 }
@@ -3756,9 +3756,9 @@ function showMailSent(email) {
   ov.className = "mail-ov";
   ov.innerHTML = `<div class="mail-box" role="dialog" aria-modal="true" aria-labelledby="mail-t">
     <div class="mail-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="3"/><path d="m4 7 8 6 8-6"/></svg></div>
-    <h2 id="mail-t">confirma seu e-mail</h2>
-    <p>enviamos um link de confirmação para<span class="mail-to">${esc(email)}</span>abre ele para ativar sua conta e depois é só entrar aqui.</p>
-    <p class="mail-tip">não chegou? dá uma olhada na caixa de spam ou lixo eletrônico.</p>
+    <h2 id="mail-t">confirme seu e-mail</h2>
+    <p>enviamos um link de confirmação para<span class="mail-to">${esc(email)}</span>abra o link para ativar sua conta e depois é só entrar aqui.</p>
+    <p class="mail-tip">não chegou? verifique a caixa de spam ou lixo eletrônico.</p>
     <button class="btn primary block" type="button" data-mail-ok>entendi</button>
   </div>`;
   document.body.appendChild(ov);
