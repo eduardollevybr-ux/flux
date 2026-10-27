@@ -1192,48 +1192,6 @@ input,textarea,[contenteditable="true"]{-webkit-user-select:text;user-select:tex
 }
 .bn,.nav-btn{transition:background-color .2s,color .25s}
 .bn svg,.nav-btn svg,.bn-add>span,.bn-add>span svg{transform:none!important;animation:none!important}
-/* barra de baixo (celular): encolhe ao rolar para baixo e volta ao rolar para cima.
-   a barra inteira diminui por escala (presa pelo pé), o que roda liso no celular;
-   encolher desacelera macio, voltar usa uma mola leve quase sem passar do ponto */
-:root{--nav-grow:cubic-bezier(.22,1,.36,1);--nav-shrink:cubic-bezier(.32,.72,0,1)}
-@supports (transition-timing-function:linear(0,1)){:root{--nav-grow:linear(0,0.031,0.106,0.204,0.311,0.419,0.519,0.61,0.69,0.758,0.815,0.861,0.898,0.928,0.95,0.967,0.98,0.989,0.995,1,1.002,1.004,1.005,1.005,1.005,1.004,1.004,1.003,1)}}
-@media (max-width:700px){
-  :root .bottom-nav{transform-origin:50% 100%;will-change:transform;backface-visibility:hidden;transition:transform .55s var(--nav-grow),background-color .35s ease,border-color .35s ease}
-  :root body.nav-min .bottom-nav{transform:translateX(-50%) translateY(4px) scale(.72);transition:transform .5s var(--nav-shrink),background-color .35s ease,border-color .35s ease}
-  /* deslizar o dedo na barra: a pílula vira uma lente que segue o dedo e a aba troca ao soltar */
-  :root .bottom-nav{touch-action:none;-webkit-user-select:none;user-select:none}
-  :root .bottom-nav .bn-ind{transition:left .4s cubic-bezier(.3,1.3,.5,1),width .4s cubic-bezier(.3,1.3,.5,1),transform .3s var(--spring),box-shadow .25s}
-  :root .bottom-nav.dragging .bn-ind{transition:transform .14s ease-out,box-shadow .25s;box-shadow:0 6px 22px rgba(0,0,0,.45),inset 0 0 0 1px color-mix(in srgb,var(--nav-ic) 35%,transparent)}
-  :root .bottom-nav.dragging .bn.active:not(.hot){color:var(--muted)}
-  :root .bottom-nav.dragging .bn.hot{color:var(--nav-ic)}
-}
-
-/* ===== escolher o tipo: pilha que sai do botão ===== */
-.stk{position:fixed;inset:0;z-index:75}
-.stk-scrim{position:absolute;inset:0;background:var(--overlay);animation:stkFade .22s ease both}
-.stk.out .stk-scrim{animation:stkFadeOut .2s ease both}
-.stk-box{position:fixed;display:flex;flex-direction:column;align-items:center;gap:10px}
-.stk-right .stk-box{align-items:flex-start}
-.stk-end .stk-box{align-items:flex-end}
-.stk-i{display:flex;align-items:center;gap:12px;height:50px;padding:0 22px 0 18px;border-radius:999px;background:var(--pop-bg);color:var(--text);font-size:16px;font-weight:600;white-space:nowrap;box-shadow:var(--shadow);transition:transform .15s,background-color .2s;animation:stkUp .48s var(--spring) both;animation-delay:calc(var(--i) * 40ms)}
-.stk-down .stk-i{animation-name:stkDown}
-.stk-right .stk-i{animation-name:stkRight}
-.stk.out .stk-i{animation:stkOut .18s ease both}
-.stk-i:active{transform:scale(.95)}
-@media (hover:hover){.stk-i:hover{background:var(--surface2)}}
-body.stk-open .bottom-nav{z-index:76!important}
-@keyframes stkFade{from{opacity:0}}
-@keyframes stkFadeOut{to{opacity:0}}
-@keyframes stkUp{from{opacity:0;transform:translateY(36px) scale(.7)}}
-@keyframes stkDown{from{opacity:0;transform:translateY(-36px) scale(.7)}}
-@keyframes stkRight{from{opacity:0;transform:translateX(-24px) scale(.8)}}
-@keyframes stkOut{to{opacity:0;transform:scale(.85)}}
-/* ===== formulário: tipos em pílulas ===== */
-.tp-pills{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px;padding:0 20px 18px}
-.tp-pills button{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px;min-width:0;height:64px;border-radius:16px;background:color-mix(in srgb,var(--text) 7%,transparent);color:var(--muted);font-size:12px;font-weight:600;transition:background-color .2s,color .2s,transform .15s}
-.tp-pills button span{max-width:100%;padding:0 2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.tp-pills button:active{transform:scale(.94)}
-.tp-pills button.on{background:color-mix(in srgb,var(--tc) 22%,transparent);color:var(--text)}
 </style>
 <script>try{var t=JSON.parse(localStorage.getItem("ae.theme")||"null")||"dark";if(t==="system")t=matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light";if(t==="light")document.documentElement.classList.add("light")}catch(e){}</script>
 </head><body>
@@ -1927,8 +1885,7 @@ function placePill(pill, on, box, vertical) {
   if (!pill) return;
   if (!on || !on.offsetWidth) { pill.classList.remove("on"); return; }
   const r = on.getBoundingClientRect(), b = box.getBoundingClientRect();
-  const to = vertical ? { left: r.left - b.left + box.scrollLeft, top: r.top - b.top + box.scrollTop, width: r.width, height: r.height }
-    : { left: on.offsetLeft, top: on.offsetTop, width: on.offsetWidth, height: on.offsetHeight }; // a barra de baixo pode estar encolhida (escala), então mede por dentro dela
+  const to = { left: r.left - b.left + box.scrollLeft, top: r.top - b.top + box.scrollTop, width: r.width, height: r.height };
   const first = !pill.classList.contains("on");
   if (first) pill.style.transition = "none";
   pill.style.left = to.left + "px"; pill.style.width = to.width + "px";
@@ -1938,7 +1895,7 @@ function placePill(pill, on, box, vertical) {
 }
 function placeTabPills() {
   const nav = $("#bottom-nav"), side = $("#sidebar");
-  if (nav && !nav.classList.contains("dragging")) placePill($(".bn-ind", nav), $(".bn.active", nav), nav, false);
+  if (nav) placePill($(".bn-ind", nav), $(".bn.active", nav), nav, false);
   if (side) placePill($("#side-ind"), $(".nav-btn.active", side), side, true);
 }
 $("#sidebar").addEventListener("click", e => {
@@ -1955,7 +1912,6 @@ function resetBoard() { UI.bStart = CUR; UI.bEnd = CUR + 11; UI.hzS = CUR; }
 
 function goTab(tab) {
   const from = UI.tab;
-  setNavMin(false);
   UI.tab = tab; closePopover(); resetBoard(); $("#view").dataset.tab = ""; render();
   // saldos ⇄ horizonte: a tela entra com um leve zoom e as linhas sobem em sequência
   if ((from === "saldos" && tab === "horizonte") || (from === "horizonte" && tab === "saldos")) {
@@ -2008,48 +1964,12 @@ function scrollToToday(smooth, delay = 0) {
   setTimeout(() => glide(() => VTOP, v => vSet(v), top, dur), delay);
 }
 function openAddMenu(anchor) {
-  openTypeStack(anchor, TYPE_ORDER, t => openForm({ type: t, date: TODAY }));
-}
-/* ===== escolher o tipo: pilha que sai do botão que foi tocado =====
-   botão na metade de baixo da tela: a pilha sobe; na metade de cima: desce; na barra lateral do PC: abre ao lado.
-   a ordem é sempre a mesma (entrada no topo, cartão embaixo) e a animação começa pelo item mais perto do botão */
-let STK = null;
-function closeStack() {
-  if (!STK) return;
-  const { el, anchor } = STK; STK = null;
-  el.classList.add("out"); anchor.classList.remove("stk-on"); document.body.classList.remove("stk-open");
-  setTimeout(() => el.remove(), 220);
-}
-function openTypeStack(anchor, types, onPick) {
-  if (STK && STK.anchor === anchor) { closeStack(); return; } // tocar de novo no mesmo botão fecha
-  closeStack(); closePopover();
-  const r = anchor.getBoundingClientRect();
-  const side = !isMobile() && anchor.closest(".sidebar") ? "right" : (r.top + r.height / 2 > innerHeight / 2 ? "up" : "down");
-  const n = types.length, el = document.createElement("div");
-  el.className = "stk stk-" + side;
-  el.innerHTML = `<div class="stk-scrim"></div><div class="stk-box" role="menu" aria-label="escolhe o tipo">${types.map((t, j) =>
-    `<button class="stk-i" role="menuitem" data-stk="${t}" style="--i:${side === "up" ? n - 1 - j : j}">${ti(t)}<span>${TYPES[t].label}</span></button>`).join("")}</div>`;
-  document.body.appendChild(el);
-  const box = $(".stk-box", el), w = box.offsetWidth, h = box.offsetHeight, m = 12;
-  if (side === "right") { box.style.left = (r.right + 10) + "px"; box.style.top = Math.max(m, Math.min(r.top, innerHeight - h - m)) + "px"; }
-  else {
-    // botão no topo e do lado direito (lista do dia, horizonte): a pilha alinha pela direita do botão; nos outros casos, centraliza nele
-    const end = side === "down" && r.left + r.width / 2 > innerWidth / 2;
-    if (end) el.classList.add("stk-end");
-    box.style.left = Math.max(m, Math.min(innerWidth - w - m, end ? r.right - w : r.left + r.width / 2 - w / 2)) + "px";
-    if (side === "up") box.style.bottom = (innerHeight - r.top + 12) + "px"; else box.style.top = (r.bottom + 10) + "px";
-  }
-  STK = { el, anchor };
-  anchor.classList.add("stk-on");
-  if (anchor.closest("#bottom-nav")) document.body.classList.add("stk-open"); // a barra fica por cima do escurecido: o + fecha e as abas seguem tocáveis
-  el.addEventListener("click", e => {
-    const b = e.target.closest("[data-stk]");
-    if (b) { closeStack(); onPick(b.dataset.stk); } else if (e.target.closest(".stk-scrim")) closeStack();
+  const html = TYPE_ORDER.map(t => `<button class="pop-item" data-type="${t}" role="menuitem">${ti(t)}<span>${TYPES[t].label}</span></button>`).join("");
+  openPopover(anchor, `<div role="menu" aria-label="escolhe o tipo">${html}</div>`, {
+    width: 240, align: "right",
+    onMount: el => el.addEventListener("click", e => { const b = e.target.closest("[data-type]"); if (b) { closePopover(); openForm({ type: b.dataset.type, date: TODAY }); } }),
   });
 }
-document.addEventListener("keydown", e => { if (e.key === "Escape" && STK) closeStack(); });
-addEventListener("resize", () => closeStack());
-document.addEventListener("click", e => { if (STK && !e.target.closest(".stk") && !STK.anchor.contains(e.target)) closeStack(); }, true);
 
 function visibleMi() {
   const board = $("#board"); if (!board) return UI.bStart;
@@ -2355,91 +2275,10 @@ function renderMobileChrome() {
   if (fab.hidden) fab.classList.remove("ready");
 }
 $("#bottom-nav").addEventListener("click", e => {
-  if (performance.now() < navDrag.suppress) { e.preventDefault(); e.stopPropagation(); return; }
   const a = e.target.closest("[data-badd]"); if (a) { openAddMenu(a); return; }
   const t = e.target.closest("[data-tab]"); if (t) { goTab(t.dataset.tab); return; }
 });
 matchMedia("(max-width: 700px)").addEventListener?.("change", () => { $("#view").dataset.tab = ""; render(); });
-
-/* barra de baixo (celular): encolhe ao rolar para baixo, volta ao rolar para cima ou chegar no topo.
-   só reage à rolagem feita com o dedo (rolagens automáticas, como ir para hoje, não encolhem a barra) */
-function setNavMin(on) {
-  on = !!on && isMobile();
-  if (document.body.classList.contains("nav-min") === on) return;
-  document.body.classList.toggle("nav-min", on);
-}
-(() => {
-  let fingerUntil = 0, acc = 0;
-  const lastTop = new WeakMap();
-  addEventListener("touchmove", () => { fingerUntil = performance.now() + 1500; }, { passive: true, capture: true });
-  addEventListener("touchend", () => { fingerUntil = Math.max(fingerUntil, performance.now() + 1200); }, { passive: true, capture: true });
-  document.addEventListener("scroll", e => {
-    const el = e.target;
-    if (!isMobile() || !el || el.nodeType !== 1 || !$("#view").contains(el)) return;
-    const y = el.scrollTop, prev = lastTop.has(el) ? lastTop.get(el) : y;
-    lastTop.set(el, y);
-    const dy = y - prev;
-    if (!dy) return; // rolagem só para os lados (colunas de saldos) não mexe na barra
-    if (y < 24) { acc = 0; setNavMin(false); return; }
-    if (performance.now() > fingerUntil) return;
-    acc = (Math.sign(dy) === Math.sign(acc) ? acc : 0) + dy;
-    if (acc > 28) setNavMin(true);
-    else if (acc < -28) setNavMin(false);
-  }, { passive: true, capture: true });
-  matchMedia("(max-width: 700px)").addEventListener?.("change", () => setNavMin(false));
-})();
-
-/* deslizar o dedo na barra de baixo: a pílula vira uma lente que segue o dedo (pulando o +),
-   a aba debaixo dela acende e a tela troca quando o dedo solta */
-const navDrag = { g: null, suppress: 0 };
-(() => {
-  const nav = $("#bottom-nav");
-  nav.addEventListener("pointerdown", e => {
-    if (!isMobile() || e.button > 0 || e.target.closest("[data-badd]")) { navDrag.g = null; return; }
-    navDrag.g = { id: e.pointerId, x0: e.clientX, x: e.clientX, t: performance.now(), v: 0, drag: false, r: nav.getBoundingClientRect(), hot: null };
-  });
-  nav.addEventListener("pointermove", e => {
-    const g = navDrag.g;
-    if (!g || e.pointerId !== g.id) return;
-    const now = performance.now(), dx = e.clientX - g.x;
-    g.v = g.v * .6 + (dx / Math.max(1, now - g.t)) * .4; g.x = e.clientX; g.t = now;
-    const pill = $(".bn-ind", nav), list = $$(".bn", nav), on = $(".bn.active", nav) || list[0];
-    if (!pill || !list.length) return;
-    if (!g.drag) {
-      if (Math.abs(e.clientX - g.x0) < 6) return;
-      g.drag = true;
-      try { nav.setPointerCapture(e.pointerId); } catch (_) {}
-      nav.classList.add("dragging");
-      closePopover();
-    }
-    const k = g.r.width / nav.offsetWidth || 1, w = on.offsetWidth;
-    const first = list[0].offsetLeft, last = list[list.length - 1].offsetLeft;
-    const left = Math.min(last, Math.max(first, (e.clientX - g.r.left) / k - w / 2));
-    pill.style.left = left + "px"; pill.style.width = w + "px";
-    pill.style.transform = `scale(${1.12 + Math.min(.22, Math.abs(g.v) * .12)},1.14)`;
-    const cx = left + w / 2;
-    let near = list[0], bd = 1e9;
-    list.forEach(b => { const d = Math.abs(b.offsetLeft + b.offsetWidth / 2 - cx); if (d < bd) { bd = d; near = b; } });
-    if (near !== g.hot) {
-      g.hot && g.hot.classList.remove("hot");
-      near.classList.add("hot"); g.hot = near;
-      if (navigator.vibrate) try { navigator.vibrate(6); } catch (_) {}
-    }
-  });
-  const end = () => {
-    const g = navDrag.g; navDrag.g = null;
-    if (!g || !g.drag) return;
-    const pill = $(".bn-ind", nav), t = g.hot;
-    nav.classList.remove("dragging");
-    if (pill) pill.style.transform = "";
-    $$(".bn.hot", nav).forEach(b => b.classList.remove("hot"));
-    navDrag.suppress = performance.now() + 400;
-    if (t && t.dataset.tab !== (UI.tab === "horizonte" ? "saldos" : UI.tab)) goTab(t.dataset.tab);
-    else placeTabPills();
-  };
-  nav.addEventListener("pointerup", end);
-  nav.addEventListener("pointercancel", end);
-})();
 
 function renderAll() {
   lsSet("flux.mcol", UI.mCol); // abre sempre na última coluna escolhida
@@ -2882,7 +2721,9 @@ $("#drawer-root").addEventListener("click", e => {
     const date = PANEL.mode === "day" ? PANEL.date : (PANEL.mi === CUR ? TODAY : miFirst(PANEL.mi));
     const types = PANEL.calcF ? CALC_TYPES[PANEL.calcF] : PANEL.filter ? [PANEL.filter] : TYPE_ORDER;
     if (types.length === 1) return openForm({ type: types[0], date });
-    openTypeStack(add, types, k => openForm({ type: k, date }));
+    openPopover(add, `<div role="menu" aria-label="escolhe o tipo">${types.map(k => `<button class="pop-item" data-nt="${k}">${ti(k)}<span>${TYPES[k].label}</span></button>`).join("")}</div>`, {
+      width: 240, onMount: el => el.addEventListener("click", ev => { const b = ev.target.closest("[data-nt]"); if (b) { closePopover(); openForm({ type: b.dataset.nt, date }); } })
+    });
     return;
   }
   if (t.closest("[data-pback]")) { if (PANEL.fromSearch) return closePanel(); PANEL.detail = null; return renderPanel(); }
@@ -2972,8 +2813,8 @@ function openForm({ type = "saida", date = TODAY, tx = null, occ = null } = {}) 
       <div class="f-money"><span class="flabel sr-only" id="lbl-val">${pi ? "valor da parcela" : inst ? "valor total" : "valor"}</span>
         <span class="f-cur">R$</span><input id="f-val" autocomplete="off" inputmode="numeric" aria-labelledby="lbl-val" class="num" placeholder="0,00" value="${f.value ? fmt(f.value) : ""}"></div>
       ${inst ? `<p class="f-hint num">${pi ? `valor de cada parcela` : `${f.installments}x de ${brl(f.value / f.installments)}`}</p>` : ""}
-      <div class="tp-pills" role="radiogroup" aria-label="tipo">${TYPE_ORDER.map(k => `<button type="button" role="radio" aria-checked="${f.type === k}" class="${f.type === k ? "on" : ""}" data-tp="${k}" style="--tc:var(--c-${k})">${ti(k)}<span>${TYPES[k].label}</span></button>`).join("")}</div>
       <div class="frows">
+        <button class="frow" id="f-type" aria-haspopup="dialog" aria-label="tipo: ${TYPES[f.type].label}. mudar"><span class="fr-ico">${ti(f.type, true)}</span><span class="fr-main">${TYPES[f.type].label}</span>${CHEV}</button>
         <label class="frow"><span class="fr-ico">${PEN}</span><input class="fr-input" id="f-desc" autocomplete="off" maxlength="80" placeholder="descrição" aria-label="descrição" value="${esc(f.desc)}"></label>
         ${f.type === "cartao" ? `<button class="frow" id="f-card" aria-haspopup="dialog" aria-label="cartão: ${f.cardId && cardName(f.cardId) ? esc(cardName(f.cardId)) : "nenhum escolhido"}. ${f.cardId && cardName(f.cardId) ? "mudar" : "escolher"}"><span class="fr-ico">${I.card.replace("<svg", '<svg width="22" height="22"')}</span><span class="fr-main ellip ${f.cardId && cardName(f.cardId) ? "" : "fr-ph"}">${f.cardId && cardName(f.cardId) ? esc(cardName(f.cardId)) : "qual cartão?"}</span>${CHEV}</button>` : ""}
         <button class="frow" id="f-date" aria-haspopup="dialog" aria-label="data: ${dBR(effDate(f.date))}. mudar"><span class="fr-ico">${CAL}</span><span class="fr-main">data</span><span class="fr-val num">${dBR(effDate(f.date))}</span>${CHEV}</button>
@@ -2987,7 +2828,6 @@ function openForm({ type = "saida", date = TODAY, tx = null, occ = null } = {}) 
     b.textContent = edit ? "salvar alterações" : TYPES[f.type].btn;
   }
   draw();
-  if (!edit) $("#f-val", el)?.focus({ preventScroll: true }); // ao abrir um lançamento novo, o teclado já vem no valor
   el.addEventListener("input", e => {
     if (e.target.id === "f-val") {
       f.value = parseMoney(e.target.value);
@@ -3003,13 +2843,7 @@ function openForm({ type = "saida", date = TODAY, tx = null, occ = null } = {}) 
   el.addEventListener("click", e => {
     const t = e.target;
     const ins = t.closest("[data-inst]"); if (ins) { f.installments = Math.max(2, Math.min(120, f.installments + +ins.dataset.inst)); return draw(); }
-    const tp = t.closest("[data-tp]");
-    if (tp) {
-      if (tp.dataset.tp === f.type) return;
-      f.type = tp.dataset.tp; if (f.type === "cartao" && !f.cardId) f.cardId = defCardId();
-      draw(); if (!edit) $("#f-val", el)?.focus({ preventScroll: true });
-      return;
-    }
+    if (t.closest("#f-type")) listSheet("tipo", TYPE_ORDER.map(k => [k, TYPES[k].label, "", ti(k, true)]), f.type, k => { f.type = k; if (k === "cartao" && !f.cardId) f.cardId = defCardId(); draw(); });
     if (t.closest("#f-card")) cardSheet(f.cardId, id => { f.cardId = id; draw(); });
     if (t.closest("#f-date")) datePicker(null, effDate(f.date), v => { f.date = v; f.aday = +v.slice(8); draw(); });
     if (t.closest("#f-mday")) {
