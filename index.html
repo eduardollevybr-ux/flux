@@ -3962,6 +3962,9 @@ function undoPill(msg, fn) {
   el = document.createElement("div"); el.id = "px-undo"; el.setAttribute("role", "status");
   el.innerHTML = `<span>${esc(msg)}</span><button data-undo>desfazer</button>`;
   document.body.appendChild(el);
+  // no celular fica logo acima da barra de baixo, onde quer que ela esteja
+  const nav = $("#bottom-nav");
+  if (isMobile() && nav && nav.offsetHeight) el.style.bottom = Math.round(innerHeight - nav.getBoundingClientRect().top + 10) + "px";
   const hide = () => { clearTimeout(UNDO_T); el.classList.add("out"); setTimeout(() => el.remove(), 260); };
   $("[data-undo]", el).onclick = async () => { hide(); await fn(); };
   UNDO_T = setTimeout(hide, 5000);
