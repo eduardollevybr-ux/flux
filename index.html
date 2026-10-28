@@ -1247,9 +1247,9 @@ body.stk-open .bottom-nav{z-index:76!important}
 @keyframes pqDone{to{opacity:0;transform:translateY(-14px) scale(.96)}}
 .px-quick.pq-done{animation:pqDone .38s cubic-bezier(.2,.8,.2,1) forwards}
 /* desfazer */
-#px-undo{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom,0px) + 104px);transform:translateX(-50%);z-index:96;display:flex;align-items:center;gap:18px;padding:0 8px 0 20px;height:52px;border-radius:999px;background:var(--surface3);color:var(--text);font-weight:600;font-size:15px;white-space:nowrap;box-shadow:var(--shadow);overflow:hidden;animation:undoIn .38s cubic-bezier(.2,.9,.25,1.2)}
-#px-undo button{height:40px;padding:0 16px;border-radius:999px;color:var(--accent);font-weight:700}
-#px-undo button:active{background:var(--accent-soft)}
+#px-undo{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom,0px) + 104px);transform:translateX(-50%);z-index:96;display:flex;align-items:center;gap:8px;padding:0 20px;height:48px;border-radius:999px;background:var(--nav-bar);border:1px solid var(--nav-line);color:var(--nav-ic);font-weight:700;font-size:15px;white-space:nowrap;box-shadow:var(--nav-shadow);cursor:pointer;animation:undoIn .38s cubic-bezier(.2,.9,.25,1.2)}
+#px-undo svg{width:20px;height:20px;flex:none}
+#px-undo:active{transform:translateX(-50%) scale(.95)}
 #px-undo.out{animation:undoOut .26s ease forwards}
 @media (min-width:701px){#px-undo{bottom:28px}}
 @keyframes undoIn{from{opacity:0;transform:translate(-50%,24px) scale(.9)}}
@@ -3956,17 +3956,20 @@ async function deleteUndo(tx, date) {
   undoPill(s === "one" ? "repetição apagada" : "repetições apagadas", restore);
 }
 let UNDO_T = null;
+const UNDO_ICO = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 14L4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11"/></svg>';
+// botão "desfazer" no estilo da barra de baixo
 function undoPill(msg, fn) {
   let el = $("#px-undo"); if (el) el.remove();
   clearTimeout(UNDO_T);
-  el = document.createElement("div"); el.id = "px-undo"; el.setAttribute("role", "status");
-  el.innerHTML = `<span>${esc(msg)}</span><button data-undo>desfazer</button>`;
+  el = document.createElement("button"); el.id = "px-undo";
+  el.setAttribute("aria-label", msg + ". desfazer");
+  el.innerHTML = `${UNDO_ICO}<span>desfazer</span>`;
   document.body.appendChild(el);
   // no celular fica logo acima da barra de baixo, onde quer que ela esteja
   const nav = $("#bottom-nav");
   if (isMobile() && nav && nav.offsetHeight) el.style.bottom = Math.round(innerHeight - nav.getBoundingClientRect().top + 10) + "px";
   const hide = () => { clearTimeout(UNDO_T); el.classList.add("out"); setTimeout(() => el.remove(), 260); };
-  $("[data-undo]", el).onclick = async () => { hide(); await fn(); };
+  el.onclick = async () => { hide(); await fn(); };
   UNDO_T = setTimeout(hide, 5000);
 }
 
