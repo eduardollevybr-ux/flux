@@ -1226,6 +1226,34 @@ body.stk-open .bottom-nav{z-index:76!important}
 @keyframes stkDown{from{opacity:0;transform:translateY(-36px) scale(.7)}}
 @keyframes stkRight{from{opacity:0;transform:translateX(-24px) scale(.8)}}
 @keyframes stkOut{to{opacity:0;transform:scale(.85)}}
+/* ===================== melhorias de 28/10/2026 ===================== */
+/* destaque do que foi lançado */
+@keyframes pxFlash{0%{box-shadow:inset 0 0 0 999px color-mix(in srgb,var(--fl) 0%,transparent)}18%{box-shadow:inset 0 0 0 999px color-mix(in srgb,var(--fl) 55%,transparent);transform:scale(1.05)}45%{transform:scale(1)}100%{box-shadow:inset 0 0 0 999px color-mix(in srgb,var(--fl) 0%,transparent)}}
+.px-flash{animation:pxFlash 1.7s cubic-bezier(.2,.8,.2,1);border-radius:12px}
+:root .m-saldo.px-flash,:root td.c-saldo.px-flash,:root .hz-v.px-flash{animation:none}
+:root .m-saldo.px-flash::before,:root td.c-saldo.px-flash::before,:root .hz-v.px-flash::before{animation:pxFlash 1.7s cubic-bezier(.2,.8,.2,1)}
+/* frases do buscar que levam ao assunto */
+.bs-msg.go{width:100%;text-align:left;color:inherit;transition:transform .22s var(--spring),background-color .2s}
+.bs-msg.go .bs-mt{flex:1;min-width:0}
+.bs-msg.go>svg.chev{width:20px;height:20px;color:var(--muted);flex:none;align-self:center}
+@media (hover:hover){.bs-msg.go:hover{background:var(--surface2)}}
+.bs-msg.go:active{background:var(--surface2);transform:scale(.98)}
+/* lançar pela busca */
+.px-quick .pq-type{display:grid;place-items:center;border-radius:99px;flex:none}
+.px-quick .pq-type:active{transform:scale(.9)}
+.px-quick .lrow-sub{align-items:center}
+.pq-add{height:34px;padding:0 18px;border-radius:999px;font-weight:700;font-size:14px;flex:none;transition:transform .15s}
+.pq-add:active{transform:scale(.94)}
+@keyframes pqDone{to{opacity:0;transform:translateY(-14px) scale(.96)}}
+.px-quick.pq-done{animation:pqDone .38s cubic-bezier(.2,.8,.2,1) forwards}
+/* desfazer */
+#px-undo{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom,0px) + 104px);transform:translateX(-50%);z-index:96;display:flex;align-items:center;gap:18px;padding:0 8px 0 20px;height:52px;border-radius:999px;background:var(--surface3);color:var(--text);font-weight:600;font-size:15px;white-space:nowrap;box-shadow:var(--shadow);overflow:hidden;animation:undoIn .38s cubic-bezier(.2,.9,.25,1.2)}
+#px-undo button{height:40px;padding:0 16px;border-radius:999px;color:var(--accent);font-weight:700}
+#px-undo button:active{background:var(--accent-soft)}
+#px-undo.out{animation:undoOut .26s ease forwards}
+@media (min-width:701px){#px-undo{bottom:28px}}
+@keyframes undoIn{from{opacity:0;transform:translate(-50%,24px) scale(.9)}}
+@keyframes undoOut{to{opacity:0;transform:translate(-50%,16px) scale(.95)}}
 </style>
 <script>try{var t=JSON.parse(localStorage.getItem("ae.theme")||"null")||"dark";if(t==="system")t=matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light";if(t==="light")document.documentElement.classList.add("light")}catch(e){}</script>
 </head><body>
@@ -2459,6 +2487,7 @@ function renderAll() {
     (document.fonts && document.fonts.ready ? document.fonts.ready : Promise.resolve()).then(start, start);
   }
   maybeTutorial();
+  pxApplyFlash();
 }
 /* ================= animações de entrada ================= */
 function stagger(els, step = 38, max = 18) {
@@ -2880,7 +2909,7 @@ function chooseDelScope(hasNext) {
   return new Promise(res => {
     let done = false;
     const m = openModal({
-      title: "apagar repetições", body: `<p class="dialog-text">essa ação não poderá ser desfeita.</p>`,
+      title: "apagar repetições", body: "",
       foot: `<button class="dbtn danger" data-s="one">apagar somente esta</button><button class="dbtn danger" data-s="from">apagar esta e as próximas</button><button class="dbtn danger" data-s="all">apagar todas</button><button class="btn-link" data-no>cancelar</button>`,
       onClose: () => { if (!done) res(null); }, cls: "cmodal"
     });
@@ -2889,6 +2918,7 @@ function chooseDelScope(hasNext) {
 }
 async function deleteOcc(tx, date) {
   if (!tx) return;
+  return deleteUndo(tx, date);
   if ((tx.rep || "none") === "none") {
     if (!(await confirmBox({ title: "apagar movimentação", text: "essa ação não poderá ser desfeita.", ok: "apagar" }))) return;
     await delTx(tx.id); afterDelete(); return;
@@ -3017,7 +3047,7 @@ function openForm({ type = "saida", date = TODAY, tx = null, occ = null } = {}) 
     const stored = (v, rep, n) => rep === "installment" && perInst ? r2(v * n) : r2(v);
     if (!recurring) {
       const data = { ...base, value: r2(f.value), date: fDate, createdAt: edit ? tx.createdAt || Date.now() : Date.now() };
-      m.close(); await saveTx(edit ? tx.id : uid("t"), data); if (PANEL.open) renderPanel(); return;
+      m.close(); pxTrail(fDate, f.type); await saveTx(edit ? tx.id : uid("t"), data); if (PANEL.open) renderPanel(); return;
     }
     const nd = nextOccDate(tx, occD);
     const s = await chooseScope({ title: "salvar alterações", text: `"${esc(tx.desc)}" se repete. para quais repetições vale essa mudança?`, date: occD, hasNext: !!nd });
@@ -3041,6 +3071,7 @@ function openForm({ type = "saida", date = TODAY, tx = null, occ = null } = {}) 
       await saveTx(tx.id, { ...old, endBefore: cut });
       await saveTx(uid("t"), { ...base, count: cnt, installments: ins, value: stored(f.value, f.rep, ins), date: rule ? effDate(shiftDate(cut, delta)) : shiftDate(cut, delta), createdAt: now, skip: (tx.skip || []).filter(x => x > cut) });
     }
+    pxTrail(fDate, f.type);
     if (PANEL.open) { PANEL.detail = null; renderPanel(); }
   }
 }
@@ -3119,7 +3150,8 @@ function bsRange() {
 }
 const bsPerLabel = () => UI.bsP.k === "custom" ? `${dYY(UI.bsP.from)} a ${dYY(UI.bsP.to)}` : BS_PER.find(p => p[0] === UI.bsP.k)[1];
 function bsSearch() {
-  const q = bsNorm(UI.bsQ); if (!q) return null;
+  const qk = bsQuick();
+  const q = bsNorm(qk ? qk.desc : UI.bsQ); if (!q) return null;
   const [from, to] = bsRange(), out = [];
   for (const tx of S.txs) {
     if (UI.bsT && tx.type !== UI.bsT) continue;
@@ -3166,7 +3198,7 @@ function bsResultsHTML(list) {
 function bsWeek() { return Math.floor((Date.UTC(NOW.getFullYear(), NOW.getMonth(), NOW.getDate()) / 864e5 + 3) / 7); }
 function bsInsights() {
   const bm = v => `<span class="bs-v">${brl(v)}</span>`; // valor nunca quebra no meio (nem depois do sinal de menos)
-  const m = (kind, icon, html) => ({ kind, icon, html });
+  const m = (kind, icon, html, go) => ({ kind, icon, html, go });
   const sum = arr => r2(arr.reduce((a, x) => a + x.value, 0));
   const OUT = ["saida", "diario", "cartao"];
   const st = monthStats(CUR), pv = monthStats(CUR - 1), mName = MONTHS[miM(CUR)], pName = MONTHS[miM(CUR - 1)];
@@ -3175,35 +3207,36 @@ function bsInsights() {
   for (let d = NOW, end = parse(miLast(CUR + 11)); d <= end; d = addDays(d, 1)) {
     const s = ymd(d);
     if (saldoOf(s) < -0.004) {
-      urgent = m("warn", BI.warn, s === TODAY ? "hoje o saldo está <b>negativo</b>." : `${miOf(d) === CUR ? `no dia ${d.getDate()}` : `em ${ddmm(s)}`}, o saldo fica <b>negativo</b>.`); break;
+      urgent = m("warn", BI.warn, s === TODAY ? "hoje o saldo está <b>negativo</b>." : `${miOf(d) === CUR ? `no dia ${d.getDate()}` : `em ${ddmm(s)}`}, o saldo fica <b>negativo</b>.`, { day: s }); break;
     }
   }
   const monthOcc = occs(miFirst(CUR), monthEnd), todayOcc = occs(TODAY, TODAY);
   const nextIn = occs(tomorrow, miLast(CUR + 2)).filter(x => x.tx.type === "entrada").sort((a, b) => a.date.localeCompare(b.date))[0];
   const pool = [
     () => { const a = st.diarioMedio, b = pv.diarioMedio; if (!(a > 0 && b > 0)) return null; const p = Math.round((a - b) / b * 100);
-      return p === 0 ? m("info", BI.wallet, `seu diário médio está igual ao de ${pName}.`) : p < 0 ? m("good", BI.down, `seu diário médio está <b>${-p}% menor</b> que em ${pName}.`) : m("info", BI.up, `seu diário médio está <b>${p}% maior</b> que em ${pName}.`); },
-    () => { const g = monthOcc.filter(x => x.tx.type === "saida" || x.tx.type === "cartao").sort((a, b) => b.value - a.value)[0]; return g ? m("info", BI.receipt, `o maior gasto de ${mName} é <b class="bs-nm">${esc(g.tx.desc)}</b>, de <b>${bm(g.value)}</b>.`) : null; },
+      return p === 0 ? m("info", BI.wallet, `seu diário médio está igual ao de ${pName}.`, { calc: "diarioMedio" }) : p < 0 ? m("good", BI.down, `seu diário médio está <b>${-p}% menor</b> que em ${pName}.`, { calc: "diarioMedio" }) : m("info", BI.up, `seu diário médio está <b>${p}% maior</b> que em ${pName}.`, { calc: "diarioMedio" }); },
+    () => { const g = monthOcc.filter(x => x.tx.type === "saida" || x.tx.type === "cartao").sort((a, b) => b.value - a.value)[0]; return g ? m("info", BI.receipt, `o maior gasto de ${mName} é <b class="bs-nm">${esc(g.tx.desc)}</b>, de <b>${bm(g.value)}</b>.`, { item: g }) : null; },
     () => { let best = null; for (const tx of S.txs) { const fin = tx.rep === "installment" || ((tx.rep || "none") !== "none" && tx.until === "count") || ((tx.rep || "none") !== "none" && tx.endBefore); if (!fin) continue; let left = 0, last = null; expand(tx, tomorrow, miLast(MAX_MI), d => { left++; last = d; }); if (left && (!best || left > best.left)) best = { tx, left, last }; }
       if (!best) return null; const ld = parse(best.last), parc = best.tx.rep === "installment", w = parc ? ["parcela", "parcelas"] : best.tx.type === "entrada" ? ["recebimento", "recebimentos"] : ["pagamento", "pagamentos"];
-      return m("info", I.cal, `${best.left === 1 ? `falta <b>1 ${w[0]}</b>` : `faltam <b>${best.left} ${w[1]}</b>`} de ${esc(best.tx.desc)}. ${parc ? "a última" : "o último"} é em ${MON3[ld.getMonth()]}/${String(ld.getFullYear()).slice(2)}.`); },
-    () => { const v = sum(occs(`${NOW.getFullYear()}-01-01`, TODAY).filter(x => x.tx.type === "economia")); return v > 0 ? m("good", BI.piggy, `você já guardou <b>${bm(v)}</b> este ano.`) : null; },
-    () => nextIn ? m("good", BI.inc, `a próxima entrada é <b class="bs-nm">${esc(nextIn.tx.desc)}</b>, de <b>${bm(nextIn.value)}</b>, em ${ddmm(nextIn.date)}.`) : null,
-    () => { if (!(st.econBase > 0)) return null; const p = st.econPct; if (st.econVal <= 0) return m("info", BI.piggy, `você ainda não guardou nada em ${mName}.`);
-      const s = p < 20 ? "abaixo do ideal" : p <= 30 ? "dentro do ideal" : "acima do ideal"; return m(p < 20 ? "info" : "good", BI.piggy, `em ${mName}, você guardou <b>${pctFmt(p)}</b> das entradas, ${s}.`); },
-    () => { const v = saldoOf(monthEnd); return m(v < -0.004 ? "warn" : "good", BI.wallet, `${mName} termina com saldo de <b>${bm(v)}</b>.`); },
-    () => { if (!(st.custoBase > 0 && st.custo > 0)) return null; const p = Math.round(st.custo / st.custoBase * 100); return m(p > 100 ? "warn" : "info", BI.receipt, `seu custo de vida está em <b>${p}%</b> das entradas de ${mName}.`); },
-    () => { const g = todayOcc.filter(x => x.tx.type === "saida" || x.tx.type === "cartao").sort((a, b) => b.value - a.value)[0]; return g ? m("info", BI.receipt, `hoje sai <b class="bs-nm">${esc(g.tx.desc)}</b>, de <b>${bm(g.value)}</b>.`) : null; },
-    () => { const g = todayOcc.filter(x => x.tx.type === "entrada").sort((a, b) => b.value - a.value)[0]; return g ? m("good", BI.inc, `hoje entra <b class="bs-nm">${esc(g.tx.desc)}</b>, de <b>${bm(g.value)}</b>.`) : null; },
-    () => { if (tomorrow > monthEnd) return null; const v = sum(occs(tomorrow, monthEnd).filter(x => OUT.includes(x.tx.type))); return v > 0 ? m("info", BI.up, `ainda saem <b>${bm(v)}</b> até o fim de ${mName}.`) : null; },
-    () => { if (tomorrow > monthEnd) return null; const v = sum(occs(tomorrow, monthEnd).filter(x => x.tx.type === "entrada")); return v > 0 ? m("good", BI.inc, `ainda entram <b>${bm(v)}</b> até o fim de ${mName}.`) : null; },
-    () => { if (!nextIn) return null; const n = Math.round((parse(nextIn.date) - parse(TODAY)) / 864e5); return n > 0 ? m("info", I.cal, n === 1 ? "falta <b>1 dia</b> para a próxima entrada." : `faltam <b>${n} dias</b> para a próxima entrada.`) : null; },
+      return m("info", I.cal, `${best.left === 1 ? `falta <b>1 ${w[0]}</b>` : `faltam <b>${best.left} ${w[1]}</b>`} de ${esc(best.tx.desc)}. ${parc ? "a última" : "o último"} é em ${MON3[ld.getMonth()]}/${String(ld.getFullYear()).slice(2)}.`, { item: { tx: best.tx, date: best.last } }); },
+    () => { const v = sum(occs(`${NOW.getFullYear()}-01-01`, TODAY).filter(x => x.tx.type === "economia")); return v > 0 ? m("good", BI.piggy, `você já guardou <b>${bm(v)}</b> este ano.`, { calc: "economizado" }) : null; },
+    () => nextIn ? m("good", BI.inc, `a próxima entrada é <b class="bs-nm">${esc(nextIn.tx.desc)}</b>, de <b>${bm(nextIn.value)}</b>, em ${ddmm(nextIn.date)}.`, { item: nextIn }) : null,
+    () => { if (!(st.econBase > 0)) return null; const p = st.econPct; if (st.econVal <= 0) return m("info", BI.piggy, `você ainda não guardou nada em ${mName}.`, { calc: "economizado" });
+      const s = p < 20 ? "abaixo do ideal" : p <= 30 ? "dentro do ideal" : "acima do ideal"; return m(p < 20 ? "info" : "good", BI.piggy, `em ${mName}, você guardou <b>${pctFmt(p)}</b> das entradas, ${s}.`, { calc: "economizado" }); },
+    () => { const v = saldoOf(monthEnd); return m(v < -0.004 ? "warn" : "good", BI.wallet, `${mName} termina com saldo de <b>${bm(v)}</b>.`, { day: monthEnd }); },
+    () => { if (!(st.custoBase > 0 && st.custo > 0)) return null; const p = Math.round(st.custo / st.custoBase * 100); return m(p > 100 ? "warn" : "info", BI.receipt, `seu custo de vida está em <b>${p}%</b> das entradas de ${mName}.`, { calc: "custo" }); },
+    () => { const g = todayOcc.filter(x => x.tx.type === "saida" || x.tx.type === "cartao").sort((a, b) => b.value - a.value)[0]; return g ? m("info", BI.receipt, `hoje sai <b class="bs-nm">${esc(g.tx.desc)}</b>, de <b>${bm(g.value)}</b>.`, { item: g }) : null; },
+    () => { const g = todayOcc.filter(x => x.tx.type === "entrada").sort((a, b) => b.value - a.value)[0]; return g ? m("good", BI.inc, `hoje entra <b class="bs-nm">${esc(g.tx.desc)}</b>, de <b>${bm(g.value)}</b>.`, { item: g }) : null; },
+    () => { if (tomorrow > monthEnd) return null; const v = sum(occs(tomorrow, monthEnd).filter(x => OUT.includes(x.tx.type))); return v > 0 ? m("info", BI.up, `ainda saem <b>${bm(v)}</b> até o fim de ${mName}.`, { month: "all" }) : null; },
+    () => { if (tomorrow > monthEnd) return null; const v = sum(occs(tomorrow, monthEnd).filter(x => x.tx.type === "entrada")); return v > 0 ? m("good", BI.inc, `ainda entram <b>${bm(v)}</b> até o fim de ${mName}.`, { month: "entrada" }) : null; },
+    () => { if (!nextIn) return null; const n = Math.round((parse(nextIn.date) - parse(TODAY)) / 864e5); return n > 0 ? m("info", I.cal, n === 1 ? "falta <b>1 dia</b> para a próxima entrada." : `faltam <b>${n} dias</b> para a próxima entrada.`, { item: nextIn }) : null; },
     () => { const prev = prevTotal(), d = sum(occs(miFirst(CUR), TODAY).filter(x => x.tx.type === "diario")); if (!(prev > 0 && d > 0)) return null;
-      return d <= prev ? m("info", BI.wallet, `o diário de ${mName} está em <b>${bm(d)}</b>, de uma previsão de <b>${bm(prev)}</b>.`) : m("warn", BI.wallet, `o diário de ${mName} passou da previsão em <b>${bm(r2(d - prev))}</b>.`); },
+      return d <= prev ? m("info", BI.wallet, `o diário de ${mName} está em <b>${bm(d)}</b>, de uma previsão de <b>${bm(prev)}</b>.`, { month: "diario" }) : m("warn", BI.wallet, `o diário de ${mName} passou da previsão em <b>${bm(r2(d - prev))}</b>.`, { month: "diario" }); },
     () => { let best = null; for (let mi = CUR + 1; mi <= CUR + 11; mi++) { const v = saldoOf(miLast(mi)); if (!best || v > best.v) best = { mi, v }; }
-      return best && best.v > 0.004 ? m("good", BI.wallet, `o melhor mês pela frente é <b>${MONTHS[miM(best.mi)]}</b>, com saldo de <b>${bm(best.v)}</b>.`) : null; },
-    () => { const v = sum(monthOcc.filter(x => x.tx.type === "cartao")); return v > 0 ? m("info", I.card, `em ${mName}, <b>${bm(v)}</b> foram no cartão.`) : null; },
-    () => urgent ? null : m("good", BI.wallet, "nenhum dia com saldo <b>negativo</b> nos próximos 12 meses."),
+      return best && best.v > 0.004 ? m("good", BI.wallet, `o melhor mês pela frente é <b>${MONTHS[miM(best.mi)]}</b>, com saldo de <b>${bm(best.v)}</b>.`, { day: miLast(best.mi) }) : null; },
+    () => { const v = sum(monthOcc.filter(x => x.tx.type === "cartao")); return v > 0 ? m("info", I.card, `em ${mName}, <b>${bm(v)}</b> foram no cartão.`, { month: "cartao" }) : null; },
+    () => urgent ? null : m("good", BI.wallet, "nenhum dia com saldo <b>negativo</b> nos próximos 12 meses.", { tab: "horizonte" }),
+
   ];
   const L = S.txs.length ? pool.map(f => f()).filter(Boolean) : [];
   const slots = 3 - (urgent ? 1 : 0), out = urgent ? [urgent] : [];
@@ -3212,7 +3245,10 @@ function bsInsights() {
   return out;
 }
 function bsMsgsHTML() {
-  return `<h2 class="section-title bs-sec">o que vale saber</h2>` + bsInsights().map(x => `<div class="bs-msg"><span class="bs-mi ${x.kind}" aria-hidden="true">${x.icon}</span><span class="bs-mt">${x.html}</span></div>`).join("");
+  const L = UI.bsIns = bsInsights();
+  return `<h2 class="section-title bs-sec">o que vale saber</h2>` + L.map((x, i) => x.go
+    ? `<button class="bs-msg go" data-bsgo="${i}"><span class="bs-mi ${x.kind}" aria-hidden="true">${x.icon}</span><span class="bs-mt">${x.html}</span>${I.chev}</button>`
+    : `<div class="bs-msg"><span class="bs-mi ${x.kind}" aria-hidden="true">${x.icon}</span><span class="bs-mt">${x.html}</span></div>`).join("");
 }
 function bsPillsHTML() {
   const t = UI.bsT;
@@ -3223,11 +3259,11 @@ const PILL_CHEV = '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" s
 function buscaHTML() {
   return `<div class="page bs-page"><div class="page-inner bs" style="max-width:720px">
     <h1 class="bs-title">buscar</h1>
-    <label class="bs-bar">${I.buscar}<input id="bs-q" type="search" enterkeyhint="search" autocomplete="off" placeholder="buscar movimentação" aria-label="buscar movimentação" value="${esc(UI.bsQ)}"><button class="bs-x" data-bsclear type="button" aria-label="limpar busca" ${UI.bsQ ? "" : "hidden"}>${I.x}</button></label>
+    <label class="bs-bar">${I.buscar}<input id="bs-q" type="search" enterkeyhint="search" autocomplete="off" placeholder="buscar ou lançar" aria-label="buscar movimentação" value="${esc(UI.bsQ)}"><button class="bs-x" data-bsclear type="button" aria-label="limpar busca" ${UI.bsQ ? "" : "hidden"}>${I.x}</button></label>
     <div class="bs-pills" id="bs-pills">${UI.bsQ.trim() ? bsPillsHTML() : ""}</div>
     <div id="bs-res">${bsBodyHTML()}</div></div></div>`;
 }
-function bsBodyHTML() { const r = bsSearch(); return r ? bsResultsHTML(r) : bsMsgsHTML(); }
+function bsBodyHTML() { const qk = bsQuick(), r = bsSearch(); if (qk) return bsQuickHTML(qk) + (r && r.length ? bsResultsHTML(r) : ""); return r ? bsResultsHTML(r) : bsMsgsHTML(); }
 function updateBusca() {
   const p = $("#bs-pills"), r = $("#bs-res"), x = $(".bs-x"); if (!r) return;
   p.innerHTML = UI.bsQ.trim() ? bsPillsHTML() : ""; r.innerHTML = bsBodyHTML(); if (x) x.hidden = !UI.bsQ;
@@ -3243,7 +3279,10 @@ $("#view").addEventListener("keydown", e => { if (e.target.id === "bs-q" && e.ke
 $("#view").addEventListener("click", e => {
   if (UI.tab !== "buscar") return;
   const t = e.target;
-  if (t.closest("[data-bsclear]")) { UI.bsQ = ""; UI.bsMore = {}; const i = $("#bs-q"); i.value = ""; updateBusca(); i.focus(); return; }
+  const go = t.closest("[data-bsgo]"); if (go && UI.bsIns) { $("#bs-q")?.blur(); return bsGoTo(UI.bsIns[+go.dataset.bsgo].go); }
+  const qt = t.closest("[data-bsqtype]"); if (qt) { openTypeStack(qt, TYPE_ORDER, k => { UI.bsQT = k; updateBusca(); }); return; }
+  if (t.closest("[data-bsqadd]")) return bsQuickAdd(t.closest("[data-bsqadd]"));
+  if (t.closest("[data-bsclear]")) { UI.bsQT = null; UI.bsQ = ""; UI.bsMore = {}; const i = $("#bs-q"); i.value = ""; updateBusca(); i.focus(); return; }
   const mo = t.closest("[data-bsmore]"); if (mo) { UI.bsMore[mo.dataset.bsmore] = true; updateBusca(); return; }
   const per = t.closest("[data-bsper]");
   if (per) {
@@ -3820,6 +3859,114 @@ if ("ontouchstart" in window || navigator.maxTouchPoints > 0) {
   document.addEventListener("contextmenu", e => { if (!e.target.closest("input,textarea")) e.preventDefault(); });
   document.addEventListener("selectstart", e => { if (!e.target.closest || !e.target.closest("input,textarea")) e.preventDefault(); });
 })();
+
+/* =====================================================================
+   melhorias de 28/10/2026: frases do buscar, lançar pela busca, destaque do lançamento e desfazer
+   ===================================================================== */
+
+/* ===== frases do buscar: cada uma leva ao que fala ===== */
+function bsGoTo(g) {
+  if (!g) return;
+  if (g.calc) return openCalcScreen(g.calc, NOW.getFullYear());
+  if (g.item) { openPanel(g.item.date, null, { tx: g.item.tx.id, date: g.item.date }); PANEL.fromSearch = true; return; }
+  if (g.month) return openMonthScreen(CUR, g.month);
+  if (g.day) return goToDay(g.day);
+  if (g.tab) { if (g.tab === "totais") UI.tMonth = CUR; return goTab(g.tab); }
+}
+// abre os saldos no dia e destaca o saldo dele
+function goToDay(ds) {
+  UI.tMonth = miOf(parse(ds));
+  UI.flash = { d: ds, t: null, scroll: true };
+  goTab("saldos");
+}
+
+/* ===== lançar pela busca: "padaria 12,50" vira um lançamento de hoje ===== */
+function bsQuick() {
+  const q = (UI.bsQ || "").trim();
+  const mm = q.match(/^(.*?)\s*(?:r\$\s*)?(\d{1,3}(?:\.\d{3})+(?:,\d{1,2})?|\d+(?:,\d{1,2})?)$/i);
+  if (!mm) return null;
+  const value = r2(parseFloat(mm[2].replace(/\./g, "").replace(",", ".")));
+  if (!(value > 0)) return null;
+  const desc = mm[1].trim(), key = bsNorm(desc);
+  let ref = null; // a última movimentação com a mesma descrição define o tipo (e o cartão)
+  if (key) for (const t of S.txs) if (bsNorm(t.desc) === key && (!ref || (t.createdAt || 0) >= (ref.createdAt || 0))) ref = t;
+  const type = UI.bsQT || (ref ? ref.type : "diario");
+  const cardId = type === "cartao" ? ((ref && ref.type === "cartao" && ref.cardId) || defCardId()) : "";
+  return { desc, value, type, cardId };
+}
+function bsQuickHTML(k) {
+  const card = k.type === "cartao" && cardName(k.cardId) ? `, ${esc(cardName(k.cardId))}` : "";
+  return `<h2 class="section-title bs-sec">lançar</h2><div class="lrows"><div class="lrow px-quick">
+    <span class="lrow-top"><button class="pq-type" data-bsqtype aria-haspopup="menu" aria-label="tipo: ${TYPES[k.type].label}. mudar">${ti(k.type, true)}</button><b class="ellip">${esc(k.desc || TYPES[k.type].label)}</b><span class="lrow-val num">${brl(k.value)}</span></span>
+    <span class="lrow-sub"><span>hoje, ${TYPES[k.type].label}${card}</span><button class="pq-add btn-t-${k.type}" data-bsqadd>lançar</button></span></div></div>`;
+}
+async function bsQuickAdd(btn) {
+  const k = bsQuick(); if (!k) return;
+  if (k.type === "cartao" && !(k.cardId && cardName(k.cardId))) { cardSheet("", id => { UI.bsQCard = id; bsQuickSave({ ...k, cardId: id }, btn); }); return; }
+  bsQuickSave(k, btn);
+}
+async function bsQuickSave(k, btn) {
+  const id = uid("t");
+  const row = btn && btn.closest(".px-quick"); if (row) row.classList.add("pq-done");
+  await new Promise(r => setTimeout(r, row ? 380 : 0));
+  UI.bsQ = ""; UI.bsQT = null; const i = $("#bs-q"); if (i) i.value = "";
+  await saveTx(id, { type: k.type, desc: k.desc || TYPES[k.type].label, value: k.value, date: TODAY, rep: "none", until: "forever", count: 2, installments: 2, tags: [], cardId: k.type === "cartao" ? k.cardId : "", skip: [], endBefore: null, mday: "same", nth: null, aday: null, createdAt: Date.now() });
+  updateBusca();
+  undoPill("movimentação lançada", () => delTx(id));
+}
+
+/* ===== destaque do que foi lançado: os saldos vão até o dia e a célula acende na cor do tipo ===== */
+function pxTrail(ds, t) {
+  if (PANEL.open || !["saldos", "horizonte"].includes(UI.tab)) return;
+  if (isMobile() && UI.tab === "saldos") UI.tMonth = miOf(parse(ds));
+  UI.flash = { d: ds, t, scroll: true };
+}
+function pxApplyFlash() {
+  const f = UI.flash; if (!f) return; UI.flash = null;
+  const v = $("#view");
+  requestAnimationFrame(() => requestAnimationFrame(() => {
+    const live = el => !el.closest(".m-nb") && !el.closest(".pane:not(.cur)");
+    const els = $$(`[data-act="saldo"][data-d="${f.d}"]${f.t ? `, [data-act="cell"][data-d="${f.d}"][data-t="${f.t}"]` : ""}`, v).filter(live);
+    if (!els.length) return;
+    let wait = 0;
+    if (f.scroll && isMobile()) {
+      const sc = $(".page", v), r = els[0].getBoundingClientRect(), b = sc && sc.getBoundingClientRect();
+      if (sc && (r.top < b.top + 80 || r.bottom > b.bottom - 120)) {
+        const top = sc.scrollTop + r.top - b.top - b.height / 2 + r.height / 2, far = Math.abs(top - sc.scrollTop) > sc.clientHeight * 1.5;
+        if (far) sc.scrollTop = top; else { sc.scrollTo({ top, behavior: "smooth" }); wait = 320; }
+      }
+    }
+    setTimeout(() => els.forEach(el => { el.style.setProperty("--fl", f.t ? `var(--c-${f.t})` : "var(--accent)"); el.classList.remove("px-flash"); void el.offsetWidth; el.classList.add("px-flash"); el.addEventListener("animationend", () => el.classList.remove("px-flash"), { once: true }); }), wait);
+  }));
+}
+
+/* ===== desfazer ao apagar: apaga na hora e oferece desfazer por alguns segundos ===== */
+async function deleteUndo(tx, date) {
+  const old = JSON.parse(JSON.stringify(tx));
+  const restore = () => saveTx(old.id, stripId(old));
+  if ((tx.rep || "none") === "none") { await delTx(tx.id); afterDelete(); undoPill("movimentação apagada", restore); return; }
+  const nd = nextOccDate(tx, date);
+  const s = await chooseDelScope(!!nd);
+  if (!s) return;
+  const first = occInfo(tx, date)?.n === 1;
+  if (s === "all" || (s === "from" && first)) await delTx(tx.id);
+  else if (s === "one") await saveTx(tx.id, { ...stripId(tx), skip: [...(tx.skip || []), date] });
+  else if (s === "from") await saveTx(tx.id, { ...stripId(tx), endBefore: date });
+  afterDelete();
+  undoPill(s === "one" ? "repetição apagada" : "repetições apagadas", restore);
+}
+let UNDO_T = null;
+function undoPill(msg, fn) {
+  let el = $("#px-undo"); if (el) el.remove();
+  clearTimeout(UNDO_T);
+  el = document.createElement("div"); el.id = "px-undo"; el.setAttribute("role", "status");
+  el.innerHTML = `<span>${esc(msg)}</span><button data-undo>desfazer</button>`;
+  document.body.appendChild(el);
+  const hide = () => { clearTimeout(UNDO_T); el.classList.add("out"); setTimeout(() => el.remove(), 260); };
+  $("[data-undo]", el).onclick = async () => { hide(); await fn(); };
+  UNDO_T = setTimeout(hide, 5000);
+}
+
 
 /* ================= início ================= */
 if ("serviceWorker" in navigator && /^https?:$/.test(location.protocol) && !(window.claude && window.claude.use)) {
