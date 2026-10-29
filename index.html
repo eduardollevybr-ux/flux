@@ -1348,12 +1348,16 @@ function holidays(y) {
 }
 const isBiz = d => { const w = d.getDay(); return w !== 0 && w !== 6 && !holidays(d.getFullYear()).has(ymd(d)); };
 const nextBiz = d => { while (!isBiz(d)) d = addDays(d, 1); return d; };
+const prevBiz = d => { while (!isBiz(d)) d = addDays(d, -1); return d; };
+/* aplica a regra do dia: "biz" = próximo dia útil, "prev" = dia útil anterior */
+const shiftBiz = (d, mode) => mode === "biz" ? nextBiz(d) : mode === "prev" ? prevBiz(d) : d;
+const WDL = ["domingo", "segunda", "terça", "quarta", "quinta", "sexta", "sábado"];
+const everyWD = w => `${w === 0 || w === 6 ? "todo" : "toda"} ${WDL[w]}`;
 function nthBiz(y, m0, n) { let c = 0, lastB = null; for (let day = 1, L = dim(y, m0); day <= L; day++) { const d = new Date(y, m0, day); if (isBiz(d)) { c++; lastB = d; if (c === n) return d; } } return lastB; }
-/* data da repetição mensal conforme a regra do dia: mesmo dia, dia X ou próximo dia útil, ou Nº dia útil */
+/* data da repetição mensal conforme a regra do dia: mesmo dia, dia X ou próximo dia útil, dia X ou dia útil anterior, ou Nº dia útil */
 function monthDate(mode, y, m0, day, nth) {
   if (mode === "nth") return nthBiz(y, m0, nth || 5);
-  const d = new Date(y, m0, Math.min(day, dim(y, m0)));
-  return mode === "biz" ? nextBiz(d) : d;
+  return shiftBiz(new Date(y, m0, Math.min(day, dim(y, m0))), mode);
 }
 const fmt = v => (Math.abs(v) < 0.005 ? 0 : v).toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 const brl = v => (v < -0.004 ? "- R$ " : "R$ ") + fmt(Math.abs(v));
@@ -1640,36 +1644,64 @@ function tagMap() { const m = {}; for (const t of S.tags) m[t.id] = t; return m;
 function ignores(tx, part, tm) { return (tx.tags || []).some(id => tm[id] && tm[id].ignore && tm[id].ignore[part]); }
 
 /* percorre as ocorrências de um lançamento dentro de [from, to] */
+/* regra do dia do lançamento: "same", "biz" (próximo útil; no diário, somente dias úteis), "prev" (útil anterior) ou "nth" (Nº dia útil) */
+function txRule(tx) {
+  const rep = tx.rep || "none", m = tx.mday || "same";
+  if (rep === "none" || rep === "installment" && !tx.mday) return "same";
+  if (rep === "daily") return m === "biz" ? "biz" : "same";
+  if (m === "nth") return rep === "monthly" || rep === "installment" ? "nth" : "same";
+  return m === "biz" || m === "prev" ? m : "same";
+}
+/* data-base da primeira repetição (antes de passar para o dia útil) */
+function txBase(tx) {
+  const start = parse(tx.date), rule = txRule(tx);
+  if ((rule === "biz" || rule === "prev") && tx.rep !== "daily") {
+    if (tx.bdate) return parse(tx.bdate);
+    if (tx.aday) return new Date(start.getFullYear(), start.getMonth(), Math.min(tx.aday, dim(start.getFullYear(), start.getMonth())));
+  }
+  return start;
+}
+/* percorre as ocorrências de um lançamento dentro de [from, to]; o 5º valor do retorno é a data-base da ocorrência */
 function expand(tx, from, to, cb) {
   if (!tx.date) return;
-  const start = parse(tx.date), od = start.getDate();
+  const start = parse(tx.date), rule = txRule(tx), base = txBase(tx);
+  const od = rule !== "same" && tx.aday && tx.rep !== "weekly" ? tx.aday : base.getDate();
   const skip = tx.skip && tx.skip.length ? new Set(tx.skip) : null;
   const rep = tx.rep || "none";
   let count = rep === "none" ? 1 : rep === "installment" ? Math.max(1, tx.installments | 0) : (tx.until === "count" ? Math.max(1, tx.count | 0) : Infinity);
   const inst = rep === "installment";
   const per = inst ? r2(Math.floor((tx.value / count) * 100) / 100) : tx.value;
+  const emit = (d, i, b) => {
+    const s = ymd(d);
+    if (s > to) return false;
+    if (tx.endBefore && s >= tx.endBefore) return false;
+    if (s < from || (skip && skip.has(s))) return true;
+    const v = inst && i === count - 1 ? r2(tx.value - per * (count - 1)) : per;
+    return cb(s, v, i + 1, count, ymd(b)) !== false;
+  };
+  if (rep === "daily" && rule === "biz") { // diário somente em dias úteis
+    let d = nextBiz(new Date(start)), i = 0;
+    if (count === Infinity) { const f = parse(from); if (f > d) { d = nextBiz(f); i = 1; } } // pula direto para "from"
+    for (; i < count; i++) { if (!emit(d, i, d)) break; d = nextBiz(addDays(d, 1)); }
+    return;
+  }
   let i0 = 0;
   if (count === Infinity || count > 400) { // pula direto para perto de "from"
     const f = parse(from);
-    if (rep === "daily") i0 = Math.max(0, Math.round((f - start) / 864e5) - 1);
-    else if (rep === "weekly") i0 = Math.max(0, Math.floor((f - start) / (864e5 * 7)) - 1);
-    else if (rep === "monthly") i0 = Math.max(0, miOf(f) - miOf(start) - 1);
-    else if (rep === "yearly") i0 = Math.max(0, f.getFullYear() - start.getFullYear() - 1);
+    if (rep === "daily") i0 = Math.max(0, Math.round((f - base) / 864e5) - 1);
+    else if (rep === "weekly") i0 = Math.max(0, Math.floor((f - base) / (864e5 * 7)) - 1);
+    else if (rep === "monthly") i0 = Math.max(0, miOf(f) - miOf(base) - 1);
+    else if (rep === "yearly") i0 = Math.max(0, f.getFullYear() - base.getFullYear() - 1);
   }
   for (let i = i0; i < count; i++) {
-    let d;
-    if (rep === "none") d = start;
-    else if (rep === "monthly" && tx.mday && tx.mday !== "same") { const t = new Date(start.getFullYear(), start.getMonth() + i, 1); d = monthDate(tx.mday, t.getFullYear(), t.getMonth(), tx.aday || od, tx.nth); }
-    else if (rep === "monthly" || inst) d = addMonthsClamp(start, i, od);
-    else if (rep === "yearly") d = addMonthsClamp(start, 12 * i, od);
-    else if (rep === "weekly") d = addDays(start, 7 * i);
-    else d = addDays(start, i);
-    const s = ymd(d);
-    if (s > to) break;
-    if (tx.endBefore && s >= tx.endBefore) break;
-    if (s < from || (skip && skip.has(s))) continue;
-    const v = inst && i === count - 1 ? r2(tx.value - per * (count - 1)) : per;
-    if (cb(s, v, i + 1, count) === false) break;
+    let d, b;
+    if (rep === "none") d = b = start;
+    else if ((rep === "monthly" || inst) && rule !== "same") { const t = new Date(base.getFullYear(), base.getMonth() + i, 1); d = monthDate(rule, t.getFullYear(), t.getMonth(), od, tx.nth); b = rule === "nth" ? d : new Date(t.getFullYear(), t.getMonth(), Math.min(od, dim(t.getFullYear(), t.getMonth()))); }
+    else if (rep === "monthly" || inst) d = b = addMonthsClamp(base, i, od);
+    else if (rep === "yearly") { b = addMonthsClamp(base, 12 * i, od); d = shiftBiz(b, rule); }
+    else if (rep === "weekly") { b = addDays(base, 7 * i); d = shiftBiz(b, rule); }
+    else d = b = addDays(base, i);
+    if (!emit(d, i, b)) break;
   }
 }
 function occs(from, to) {
@@ -2763,20 +2795,29 @@ function calcFilterBar(key) {
 }
 function closePanel() { PANEL.open = false; $("#drawer-root").innerHTML = ""; }
 // repetição em versão curta, para as listas (cabe embaixo do valor)
+/* como a regra do dia aparece (curta nas listas, completa no detalhe) */
+function ruleText(tx, short) {
+  const r = tx.rep || "none", rule = txRule(tx);
+  if (rule === "same") return "";
+  const nx = short ? "próx. útil" : "próximo dia útil", pv = short ? "útil anterior" : "dia útil anterior";
+  const end = rule === "biz" ? nx : pv, b = txBase(tx);
+  if (r === "daily") return "dias úteis";
+  if (rule === "nth") return `${short ? "" : "todo "}${tx.nth || 5}º dia útil`;
+  if (r === "weekly") return `${short ? WDL[b.getDay()] : everyWD(b.getDay())} ou ${end}`;
+  if (r === "yearly") return `${short ? "" : "todo "}${pad(b.getDate())}/${pad(b.getMonth() + 1)} ou ${end}`;
+  return `${short ? "" : "todo "}dia ${tx.aday || b.getDate()} ou ${end}`;
+}
 function repShort(x) {
   const r = x.tx.rep || "none";
   if (r === "none") return "";
   if (r === "installment") return `${x.n}/${x.total} mensais`;
-  if (r === "monthly" && x.tx.mday === "nth") return `${x.tx.nth || 5}º dia útil`;
-  if (r === "monthly" && x.tx.mday === "biz") return `dia ${x.tx.aday || +x.tx.date.slice(8)} ou próx. útil`;
-  return REP_LABEL[r];
+  return ruleText(x.tx, true) || REP_LABEL[r];
 }
 function repText(x) {
   const r = x.tx.rep || "none";
-  if (r === "installment") return `${x.n}/${x.total} mensais`;
-  if (r === "monthly" && x.tx.mday === "nth") return `todo ${x.tx.nth || 5}º dia útil`;
-  if (r === "monthly" && x.tx.mday === "biz") return `todo dia ${x.tx.aday || +x.tx.date.slice(8)} ou próximo dia útil`;
-  return r === "none" ? "" : REP_LABEL[r];
+  if (r === "installment") { const t = ruleText(x.tx, false); return `${x.n}/${x.total} mensais${t ? `, ${t}` : ""}`; }
+  if (r === "daily" && txRule(x.tx) === "biz") return "diariamente, somente dias úteis";
+  return ruleText(x.tx, false) || (r === "none" ? "" : REP_LABEL[r]);
 }
 const ddmm = s => s.slice(8, 10) + "/" + s.slice(5, 7);
 function itemHTML(x) {
@@ -2890,7 +2931,7 @@ document.addEventListener("touchstart", () => { }, { passive: true });
 function animateSlideEl(el, dir) { el.classList.remove("slide-l", "slide-r"); void el.offsetWidth; el.classList.add(dir > 0 ? "slide-l" : "slide-r"); }
 
 /* ===== repetições: escolher o alcance (somente esta, esta e as próximas, todas) ===== */
-function occInfo(tx, date) { let r = null; expand(tx, date, date, (d, v, n, t) => { r = { date: d, value: v, n, total: t }; }); return r; }
+function occInfo(tx, date) { let r = null; expand(tx, date, date, (d, v, n, t, b) => { r = { date: d, value: v, n, total: t, base: b }; }); return r; }
 function nextOccDate(tx, date) { let r = null; expand(tx, ymd(addDays(parse(date), 1)), miLast(MAX_MI), d => { r = d; return false; }); return r; }
 const dayDiff = (a, b) => Math.round((parse(b) - parse(a)) / 864e5);
 const shiftDate = (s, n) => ymd(addDays(parse(s), n));
@@ -2948,12 +2989,33 @@ function openForm({ type = "saida", date = TODAY, tx = null, occ = null } = {}) 
   const f = edit ? {
     value: perInst ? (oi ? oi.value : r2(tx.value / (tx.installments || 1))) : tx.value, type: tx.type, desc: tx.desc, date: occD, rep: tx.rep || "none", until: tx.until || "forever",
     count: tx.count || 2, installments: tx.installments || 2, tags: [...(tx.tags || [])], cardId: tx.cardId || "",
-    mday: tx.rep === "monthly" && tx.mday ? tx.mday : "same", nth: tx.nth || 5, aday: tx.aday || (tx.date ? +tx.date.slice(8) : 1),
+    mday: txRule(tx), nth: tx.nth || 5, aday: tx.aday || (txRule(tx) !== "same" && oi ? +oi.base.slice(8) : +occD.slice(8)),
   } : { value: 0, type, desc: "", date, rep: "none", until: "forever", count: 2, installments: 2, tags: [], cardId: type === "cartao" ? defCardId() : "", mday: "same", nth: 5, aday: +date.slice(8) };
-  const isRule = () => f.rep === "monthly" && f.mday !== "same";
-  /* data real conforme a regra do dia (usa o mês da data escolhida) */
-  const effDate = ds => { if (f.rep !== "monthly" || f.mday === "same") return ds; const d = parse(ds); return ymd(monthDate(f.mday, d.getFullYear(), d.getMonth(), f.aday, f.nth)); };
-  const MDAY_LABEL = () => f.mday === "nth" ? `${f.nth}º dia útil` : f.mday === "biz" ? `dia ${f.aday} ou próximo útil` : "mesmo dia";
+  /* com regra de dia útil, a data do formulário é a data-base (antes de passar para o dia útil) */
+  if (edit && txRule(tx) !== "same" && oi && oi.base) f.date = oi.base;
+  const MONTHLY = () => f.rep === "monthly" || f.rep === "installment";
+  const RULES = () => f.rep === "daily" ? ["same", "biz"] : MONTHLY() ? ["same", "biz", "prev", "nth"] : ["weekly", "yearly"].includes(f.rep) ? ["same", "biz", "prev"] : ["same"];
+  const isRule = () => f.mday !== "same" && RULES().includes(f.mday);
+  /* data real conforme a regra do dia */
+  const effDate = ds => {
+    if (!isRule()) return ds;
+    const d = parse(ds);
+    if (f.rep === "daily") return ymd(nextBiz(d));
+    if (MONTHLY()) return ymd(monthDate(f.mday, d.getFullYear(), d.getMonth(), f.aday, f.nth));
+    return ymd(shiftBiz(d, f.mday));
+  };
+  const dm = () => { const d = parse(f.date); return `${pad(d.getDate())}/${pad(d.getMonth() + 1)}`; };
+  const DAY_TXT = () => f.rep === "weekly" ? everyWD(parse(f.date).getDay()) : f.rep === "yearly" ? `dia ${dm()}` : `dia ${f.aday}`;
+  const DAY_SHORT = () => f.rep === "weekly" ? WDL[parse(f.date).getDay()] : f.rep === "yearly" ? dm() : `dia ${f.aday}`;
+  const MDAY_LABEL = () => {
+    const m = isRule() ? f.mday : "same";
+    if (f.rep === "daily") return m === "biz" ? "somente dias úteis" : "todos os dias";
+    if (m === "nth") return `${f.nth}º dia útil`;
+    if (m === "biz") return `${DAY_SHORT()} ou próximo útil`;
+    if (m === "prev") return `${DAY_SHORT()} ou útil anterior`;
+    return f.rep === "weekly" ? everyWD(parse(f.date).getDay()) : "mesmo dia";
+  };
+  const MDAY_TITLE = () => f.rep === "daily" ? "repete em" : "repete no";
   const m = openModal({ title: edit ? "editar movimentação" : "adicionar movimentação", body: "", cls: "form-modal", foot: `<button class="btn block" id="f-submit"></button><button class="btn-link" id="f-cancel">cancelar</button>` });
   const el = m.el;
   const REP_ICO = '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4.5" width="15" height="15" rx="2.5"/><path d="M3 9h15M7.5 2.5v4M13.5 2.5v4"/><path d="M21 15a4 4 0 1 1-1.2-2.8M21 11.5V14h-2.5"/></svg>';
@@ -2973,7 +3035,7 @@ function openForm({ type = "saida", date = TODAY, tx = null, occ = null } = {}) 
         ${f.type === "cartao" ? `<button class="frow" id="f-card" aria-haspopup="dialog" aria-label="cartão: ${f.cardId && cardName(f.cardId) ? esc(cardName(f.cardId)) : "nenhum escolhido"}. ${f.cardId && cardName(f.cardId) ? "mudar" : "escolher"}"><span class="fr-ico">${I.card.replace("<svg", '<svg width="22" height="22"')}</span><span class="fr-main ellip ${f.cardId && cardName(f.cardId) ? "" : "fr-ph"}">${f.cardId && cardName(f.cardId) ? esc(cardName(f.cardId)) : "qual cartão?"}</span>${CHEV}</button>` : ""}
         <button class="frow" id="f-date" aria-haspopup="dialog" aria-label="data: ${dBR(effDate(f.date))}. mudar"><span class="fr-ico">${CAL}</span><span class="fr-main">data</span><span class="fr-val num">${dBR(effDate(f.date))}</span>${CHEV}</button>
         <button class="frow" id="f-rep" aria-haspopup="dialog" aria-label="repetição: ${REP_LABEL[f.rep]}. mudar"><span class="fr-ico">${REP_ICO}</span><span class="fr-main">${REP_LABEL[f.rep]}</span>${CHEV}</button>
-        ${f.rep === "monthly" ? `<button class="frow" id="f-mday" aria-haspopup="dialog" aria-label="repete no: ${MDAY_LABEL()}. mudar"><span class="fr-ico">${CAL}</span><span class="fr-main">repete no</span><span class="fr-val">${MDAY_LABEL()}</span>${CHEV}</button>` : ""}
+        ${RULES().length > 1 ? `<button class="frow" id="f-mday" aria-haspopup="dialog" aria-label="${MDAY_TITLE()}: ${MDAY_LABEL()}. mudar"><span class="fr-ico">${CAL}</span><span class="fr-main">${MDAY_TITLE()}</span><span class="fr-val">${MDAY_LABEL()}</span>${CHEV}</button>` : ""}
         ${repeats ? `<button class="frow" id="f-until" aria-haspopup="dialog" aria-label="até quando: ${f.until === "count" ? `${f.count} vezes` : "sem data para acabar"}. mudar"><span class="fr-ico">${I.horizonte.replace("<svg", '<svg width="22" height="22"')}</span><span class="fr-main">até quando</span><span class="fr-val num">${f.until === "count" ? `${f.count} vezes` : "sem data para acabar"}</span>${CHEV}</button>` : ""}
         ${inst ? `<div class="frow"><span class="fr-ico">${I.card.replace("<svg", '<svg width="22" height="22"')}</span><span class="fr-main">parcelas</span><span class="istep"><button class="icon-btn" data-inst="-1" aria-label="menos uma parcela">−</button><b class="num" aria-live="polite">${f.installments}</b><button class="icon-btn" data-inst="1" aria-label="mais uma parcela">+</button></span></div>` : ""}
       </div>`);
@@ -3002,23 +3064,27 @@ function openForm({ type = "saida", date = TODAY, tx = null, occ = null } = {}) 
     if (t.closest("#f-card")) cardSheet(f.cardId, id => { f.cardId = id; draw(); });
     if (t.closest("#f-date")) datePicker(null, effDate(f.date), v => { f.date = v; f.aday = +v.slice(8); draw(); });
     if (t.closest("#f-mday")) {
-      const day = f.mday === "biz" ? f.aday : +f.date.slice(8);
-      const s = openSheet({ title: "repete no", body: `<div class="slist">
-          <button class="sitem ${f.mday === "same" ? "on" : ""}" data-md="same"><span class="si-txt"><b>dia ${day}</b></span></button>
-          <button class="sitem ${f.mday === "biz" ? "on" : ""}" data-md="biz"><span class="si-txt"><b>dia ${day} ou próximo dia útil</b></span></button>
-          <div class="sitem ${f.mday === "nth" ? "on" : ""}" data-md="nth" role="button" tabindex="0"><span class="si-txt"><b>dia útil do mês</b></span>
-            <span class="istep"><button class="icon-btn" data-nc="-1" aria-label="um dia útil a menos">−</button><b class="num" id="md-n">${f.nth}º</b><button class="icon-btn" data-nc="1" aria-label="um dia útil a mais">+</button></span></div>
+      const ok = RULES(), cur = isRule() ? f.mday : "same", D = DAY_TXT();
+      const opt = (k, txt) => ok.includes(k) ? `<button class="sitem ${cur === k ? "on" : ""}" data-md="${k}"><span class="si-txt"><b>${txt}</b></span></button>` : "";
+      const s = openSheet({ title: MDAY_TITLE(), body: `<div class="slist">
+          ${f.rep === "daily" ? opt("same", "todos os dias") + opt("biz", "somente dias úteis") : opt("same", D) + opt("biz", `${D} ou próximo dia útil`) + opt("prev", `${D} ou dia útil anterior`)}
+          ${ok.includes("nth") ? `<div class="sitem ${cur === "nth" ? "on" : ""}" data-md="nth" role="button" tabindex="0"><span class="si-txt"><b>dia útil do mês</b></span>
+            <span class="istep"><button class="icon-btn" data-nc="-1" aria-label="um dia útil a menos">−</button><b class="num" id="md-n">${f.nth}º</b><button class="icon-btn" data-nc="1" aria-label="um dia útil a mais">+</button></span></div>` : ""}
         </div><button class="btn block primary" data-mdsave>confirmar</button>` });
-      let mode = f.mday, n = f.nth;
+      let mode = cur, n = f.nth;
       s.el.addEventListener("click", ev => {
         const c = ev.target.closest("[data-nc]");
         if (c) { n = Math.max(1, Math.min(22, n + +c.dataset.nc)); $("#md-n", s.el).textContent = n + "º"; mode = "nth"; }
         const u = ev.target.closest("[data-md]"); if (u && !c) mode = u.dataset.md;
         $$("[data-md]", s.el).forEach(x => x.classList.toggle("on", x.dataset.md === mode));
-        if (ev.target.closest("[data-mdsave]")) { if (mode === "biz" && f.mday !== "biz") f.aday = day; f.mday = mode; f.nth = n; s.close(); draw(); }
+        if (ev.target.closest("[data-mdsave]")) { f.mday = mode; f.nth = n; s.close(); draw(); }
       });
     }
-    if (t.closest("#f-rep")) listSheet("repetição", Object.keys(REP_LABEL).map(k => [k, REP_LABEL[k], ""]), f.rep, k => { f.rep = k; draw(); });
+    if (t.closest("#f-rep")) listSheet("repetição", Object.keys(REP_LABEL).map(k => [k, REP_LABEL[k], ""]), f.rep, k => {
+      const wasM = MONTHLY(), was = f.rep; f.rep = k;
+      if (k !== was && !(wasM && MONTHLY())) f.mday = "same"; // a regra do dia muda de sentido entre repetições diferentes
+      draw();
+    });
     if (t.closest("#f-until")) {
       const s = openSheet({ title: "até quando", body: `<div class="slist">
           <button class="sitem ${f.until === "forever" ? "on" : ""}" data-u="forever"><span class="si-txt"><b>sem data para acabar</b></span></button>
@@ -3042,35 +3108,40 @@ function openForm({ type = "saida", date = TODAY, tx = null, occ = null } = {}) 
     if (f.type === "cartao" && !(f.cardId && cardName(f.cardId))) { toast("escolha o cartão desse gasto", true); cardSheet(f.cardId, id => { f.cardId = id; draw(); }); return; }
     if (f.date < miFirst(MIN_MI) || f.date > miLast(MAX_MI)) { toast("a data precisa estar dentro de 5 anos para trás ou para frente", true); return; }
     const desc = f.desc.trim() || TYPES[f.type].label;
-    const rule = isRule();
-    const base = { type: f.type, desc, rep: f.rep, until: f.until, count: f.count, installments: f.installments, tags: [], cardId: f.type === "cartao" ? f.cardId : "", skip: [], endBefore: null, mday: rule ? f.mday : "same", nth: rule && f.mday === "nth" ? f.nth : null, aday: rule && f.mday === "biz" ? f.aday : null };
+    const rule = isRule(), shifts = rule && (f.mday === "biz" || f.mday === "prev") && f.rep !== "daily";
+    const base = { type: f.type, desc, rep: f.rep, until: f.until, count: f.count, installments: f.installments, tags: [], cardId: f.type === "cartao" ? f.cardId : "", skip: [], endBefore: null, mday: rule ? f.mday : "same", nth: rule && f.mday === "nth" ? f.nth : null, aday: shifts && MONTHLY() ? f.aday : null, bdate: shifts ? f.date : null };
     const fDate = effDate(f.date);
     const stored = (v, rep, n) => rep === "installment" && perInst ? r2(v * n) : r2(v);
     if (!recurring) {
       const data = { ...base, value: r2(f.value), date: fDate, createdAt: edit ? tx.createdAt || Date.now() : Date.now() };
+      if (f.rep === "none") { data.mday = "same"; data.nth = data.aday = data.bdate = null; }
       m.close(); pxTrail(fDate, f.type); await saveTx(edit ? tx.id : uid("t"), data); if (PANEL.open) renderPanel(); return;
     }
     const nd = nextOccDate(tx, occD);
     const s = await chooseScope({ title: "salvar alterações", text: `"${esc(tx.desc)}" se repete. para quais repetições vale essa mudança?`, date: occD, hasNext: !!nd });
     if (!s) return;
     m.close();
-    const delta = dayDiff(occD, fDate), n = oi ? oi.n : 1, now = Date.now();
-    const ruleKey = o => o.rep === "monthly" ? `${o.mday || "same"}|${o.nth || ""}|${o.aday || ""}` : "";
+    const n = oi ? oi.n : 1, now = Date.now();
+    const bDelta = dayDiff(oi && oi.base ? oi.base : occD, f.date); // quanto a data-base mudou
+    /* nova primeira repetição a partir da data-base de uma ocorrência: devolve data real e data-base */
+    const fromBase = b => { const nb = shiftDate(b, bDelta); return { date: effDate(nb), bdate: shifts ? nb : null }; };
+    const ruleKey = o => `${txRule(o)}|${o.nth || ""}|${o.aday || ""}`;
     const old = stripId(tx);
     if (s === "one") {
       await saveTx(tx.id, { ...old, skip: [...(tx.skip || []), occD] });
-      await saveTx(uid("t"), { ...base, rep: "none", mday: "same", nth: null, aday: null, value: r2(f.value), date: fDate, createdAt: now });
+      await saveTx(uid("t"), { ...base, rep: "none", mday: "same", nth: null, aday: null, bdate: null, value: r2(f.value), date: fDate, createdAt: now });
     } else if (s === "all" || (s === "from" && n === 1)) {
-      const start = rule ? effDate(delta ? shiftDate(tx.date, delta) : tx.date) : shiftDate(tx.date, delta);
-      const keep = tx.rep === f.rep && start === tx.date && ruleKey(tx) === ruleKey(base);
-      await saveTx(tx.id, { ...base, value: stored(f.value, f.rep, f.installments), date: start, createdAt: tx.createdAt || now, skip: keep ? tx.skip || [] : [], endBefore: keep ? tx.endBefore || null : null });
+      const st = fromBase(ymd(txBase(tx)));
+      const keep = tx.rep === f.rep && st.date === tx.date && ruleKey(tx) === ruleKey(base);
+      await saveTx(tx.id, { ...base, bdate: st.bdate, value: stored(f.value, f.rep, f.installments), date: st.date, createdAt: tx.createdAt || now, skip: keep ? tx.skip || [] : [], endBefore: keep ? tx.endBefore || null : null });
     } else {
       const cut = s === "from" ? occD : nd;
       const done = s === "from" ? n - 1 : n;
       const cnt = f.rep === tx.rep && f.until === "count" && f.count === (tx.count || 2) ? Math.max(1, f.count - done) : f.count;
       const ins = f.rep === "installment" && tx.rep === "installment" && f.installments === (tx.installments || 2) ? Math.max(1, f.installments - done) : f.installments;
       await saveTx(tx.id, { ...old, endBefore: cut });
-      await saveTx(uid("t"), { ...base, count: cnt, installments: ins, value: stored(f.value, f.rep, ins), date: rule ? effDate(shiftDate(cut, delta)) : shiftDate(cut, delta), createdAt: now, skip: (tx.skip || []).filter(x => x > cut) });
+      const cb = occInfo(tx, cut), st = fromBase(cb && cb.base ? cb.base : cut);
+      await saveTx(uid("t"), { ...base, count: cnt, installments: ins, value: stored(f.value, f.rep, ins), date: st.date, bdate: st.bdate, createdAt: now, skip: (tx.skip || []).filter(x => x > cut) });
     }
     pxTrail(fDate, f.type);
     if (PANEL.open) { PANEL.detail = null; renderPanel(); }
@@ -3184,7 +3255,7 @@ function bsResultsHTML(list) {
   if (futFin.length) h += `<div class="bs-line"><b>${L[1]}</b><span class="num">${brl(sum(futFin))}</span></div>`;
   if (infTx.length) {
     const PM = { monthly: 1, weekly: 52 / 12, daily: 365 / 12, yearly: 1 / 12 }, avg = infTx.some(t => t.rep !== "monthly");
-    const pm = r2(infTx.reduce((a, t) => a + (allIn || noIn || t.type === "entrada" ? 1 : -1) * t.value * (PM[t.rep] || 1), 0));
+    const pm = r2(infTx.reduce((a, t) => a + (allIn || noIn || t.type === "entrada" ? 1 : -1) * t.value * (t.rep === "daily" && txRule(t) === "biz" ? 250 / 12 : PM[t.rep] || 1), 0));
     h += `<div class="bs-line bs-inf"><span class="bs-inf-l"><b>${avg ? "em média por mês" : "todo mês"}</b><small>sem data para acabar</small></span><span class="num">${brl(pm)}</span></div>`;
   }
   h += `</div>`;
