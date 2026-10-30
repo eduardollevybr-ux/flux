@@ -1255,14 +1255,7 @@ body.stk-open .bottom-nav{z-index:76!important}
 @media (min-width:701px){#px-undo{bottom:28px}}
 @keyframes undoIn{from{opacity:0;transform:translate(-50%,24px) scale(.9)}}
 @keyframes undoOut{to{opacity:0;transform:translate(-50%,16px) scale(.95)}}
-/* ===== fatura do cartão, dias do cartão e saldo cabendo no computador ===== */
-.cc-days{display:grid;grid-template-columns:1fr 1fr}
-.cc-days .lfield:first-child{margin-right:10px}.cc-days .lfield:last-child{margin-left:10px}
-.fat-chev{transition:transform .3s cubic-bezier(.3,1.3,.5,1);flex:none}
-.fat-row.on .fat-chev{transform:rotate(180deg)}
-.fat-list{animation:fatIn .3s ease both}
-.fat-list .lrow{padding-left:44px}
-@keyframes fatIn{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:none}}
+/* ===== saldo cabendo no computador ===== */
 @media (min-width:701px) and (max-width:1499px){
   :root{--sbw:196px}
   :root:has(.sidebar.collapsed){--sbw:72px}
@@ -1677,15 +1670,6 @@ function txBase(tx) {
   return start;
 }
 const isResg = tx => tx.type === "economia" && !!tx.resg;
-/* fatura do cartão: com dia de fechamento e de vencimento, a compra só sai do saldo no vencimento da fatura */
-const cardOf = id => S.cards.find(c => c.id === id) || null;
-const hasFat = c => !!(c && c.fecha >= 1 && c.vence >= 1);
-function fatDue(c, ds) {
-  if (!hasFat(c)) return null;
-  const d = parse(ds), mi = miOf(d) + (d.getDate() >= c.fecha ? 1 : 0); // comprou no dia do fechamento ou depois: fatura seguinte
-  const due = mi + (c.vence > c.fecha ? 0 : 1);
-  return `${miY(due)}-${pad(miM(due) + 1)}-${pad(Math.min(c.vence, dim(miY(due), miM(due))))}`;
-}
 /* percorre as ocorrências de um lançamento dentro de [from, to]; o 5º valor do retorno é a data-base da ocorrência */
 function expand(tx, from, to, cb) {
   if (!tx.date) return;
@@ -1744,20 +1728,11 @@ function calc() {
   let gStart = miFirst(MIN_MI);
   for (const tx of S.txs) if (tx.date && tx.date < gStart) gStart = tx.date;
   const day = {};
-  const D = d => day[d] || (day[d] = { entrada: 0, saida: 0, diario: 0, economia: 0, cartao: 0, bal: 0, fat: 0, fats: null });
   for (const tx of S.txs) {
     const ig = ignores(tx, "saldos", tm);
-    const card = tx.type === "cartao" ? cardOf(tx.cardId) : null, fat = hasFat(card);
     expand(tx, gStart, gEnd, (d, v) => {
-      const o = D(d);
+      const o = day[d] || (day[d] = { entrada: 0, saida: 0, diario: 0, economia: 0, cartao: 0, bal: 0 });
       o[tx.type] = r2(o[tx.type] + v);
-      if (fat) { // compra no cartão com fatura: o saldo cai no vencimento
-        const due = fatDue(card, d), f = D(due);
-        f.fat = r2(f.fat + v);
-        (f.fats || (f.fats = {}))[card.id] = r2((f.fats[card.id] || 0) + v);
-        if (!ig) f.bal = r2(f.bal - v);
-        return;
-      }
       if (!ig) o.bal = r2(o.bal + (tx.type === "entrada" ? v : -v));
     });
   }
@@ -1783,12 +1758,7 @@ const defCardId = () => { if (S.cards.length === 1) return S.cards[0].id; const 
 const prevDiv = () => { const n = +prof().prevDias; return n >= 28 && n <= 31 ? n : 30; };
 function perDayPrev() { return r2(prevTotal() / prevDiv()); }
 /* valor exibido numa célula: real + previsão (só diário, só dias depois de hoje) */
-function cellVal(o, t, ds) {
-  const real = o ? o[t] : 0;
-  // cartão: no dia do vencimento a célula mostra a fatura (é o que sai do saldo nesse dia)
-  if (t === "cartao" && o && o.fat > 0.004) return { v: o.fat, real, fc: 0, fat: true };
-  const fc = t === "diario" && ds > TODAY ? perDayPrev() : 0; return { v: r2(real + fc), real, fc };
-}
+function cellVal(o, t, ds) { const real = o ? o[t] : 0; const fc = t === "diario" && ds > TODAY ? perDayPrev() : 0; return { v: r2(real + fc), real, fc }; }
 function prevDaysIn(mi) { const n = dim(miY(mi), miM(mi)); if (mi < CUR) return 0; if (mi > CUR) return n; return n - NOW.getDate(); }
 
 function monthStats(mi) {
@@ -2621,8 +2591,8 @@ function monthCard(mi, horizon) {
     const s = c.saldo[ds] ?? 0;
     body += `<tr class="${cls}" data-row="${ds}"><td class="c-dia num" data-act="check" data-d="${ds}" role="button" tabindex="0" aria-label="dia ${d} de ${MONTHS[m]}: ${S.checkins[ds] ? "desmarcar" : "marcar"} check-in">${d}${S.checkins[ds] ? `<span class="check ${UI.popCheck === ds ? "pop" : ""}" aria-hidden="true">${I.checkW}</span>` : ""}</td>`;
     for (const t of cols) {
-      const { v, real, fc, fat } = cellVal(o, t, ds); tot[t] = r2(tot[t] + (fat ? real : v));
-      body += `<td class="cell num ${v ? "" : "z"} ${fc || fat ? "fc" : ""} ${fat ? "fat" : ""} ${hid[t] ? "col-min" : ""}" data-act="cell" data-d="${ds}" data-t="${t}" role="button" tabindex="0" aria-label="${TYPES[t].col} em ${d} de ${MONTHS[m]}: ${fmt(v)}${fc ? " (com previsão)" : ""}${fat ? " (fatura)" : ""}. clique para ver, botão direito para adicionar"><span class="in">${ti(fc && !real ? "prev" : t)}<span class="v">${brl(v)}</span></span></td>`;
+      const { v, real, fc } = cellVal(o, t, ds); tot[t] = r2(tot[t] + v);
+      body += `<td class="cell num ${v ? "" : "z"} ${fc ? "fc" : ""} ${hid[t] ? "col-min" : ""}" data-act="cell" data-d="${ds}" data-t="${t}" role="button" tabindex="0" aria-label="${TYPES[t].col} em ${d} de ${MONTHS[m]}: ${fmt(v)}${fc ? " (com previsão)" : ""}. clique para ver, botão direito para adicionar"><span class="in">${ti(fc && !real ? "prev" : t)}<span class="v">${brl(v)}</span></span></td>`;
     }
     body += `<td class="c-saldo num ${saldoCls(s)}" data-act="saldo" data-d="${ds}" role="button" tabindex="0" aria-label="saldo em ${d} de ${MONTHS[m]}: ${fmt(s)}">${horizon ? abbr(s) : brl(s)}</td></tr>`;
   }
@@ -2674,8 +2644,8 @@ function mMonthInner(cols) {
     const ds = `${y}-${pad(m + 1)}-${pad(d)}`, o = c.day[ds], wd = new Date(y, m, d).getDay(), s = c.saldo[ds] ?? 0;
     const cls = [(wd === 0 || wd === 6) ? "we" : "", ds === TODAY ? "today" : ""].join(" ");
     const vals = k => `<div class="m-vals">${types(k).map(t => {
-      const { v, real, fc, fat } = cellVal(o, t, ds);
-      return `<button class="m-cell num ${v ? "" : "z"} ${fc || fat ? "fc" : ""} ${fat ? "fat" : ""}" data-act="cell" data-d="${ds}" data-t="${t}" aria-label="${TYPES[t].col} em ${d} de ${MONTHS[m]}: ${fmt(v)}${fc ? " (com previsão)" : ""}${fat ? " (fatura)" : ""}. toque para ver, segure para adicionar">${ti(fc && !real ? "prev" : t)}<span>${brl(v)}</span></button>`;
+      const { v, real, fc } = cellVal(o, t, ds);
+      return `<button class="m-cell num ${v ? "" : "z"} ${fc ? "fc" : ""}" data-act="cell" data-d="${ds}" data-t="${t}" aria-label="${TYPES[t].col} em ${d} de ${MONTHS[m]}: ${fmt(v)}${fc ? " (com previsão)" : ""}. toque para ver, segure para adicionar">${ti(fc && !real ? "prev" : t)}<span>${brl(v)}</span></button>`;
     }).join("")}</div>`;
     h += `<div class="m-day ${cls}" data-row="${ds}"><button class="m-dia num" data-act="check" data-d="${ds}" aria-label="dia ${d} de ${MONTHS[m]}: ${S.checkins[ds] ? "desmarcar" : "marcar"} check-in">${d}${S.checkins[ds] ? `<span class="check ${UI.popCheck === ds ? "pop" : ""}" aria-hidden="true">${I.checkW}</span>` : ""}</button>`;
     h += strip(vals);
@@ -2786,7 +2756,7 @@ $("#view").addEventListener("click", e => {
 /* ================= painel do dia / movimentações do mês (tela cheia) ================= */
 const PANEL = { open: false, mode: "day", date: TODAY, mi: CUR, filter: null, detail: null };
 function openPanel(date, types, detail) {
-  Object.assign(PANEL, { open: true, mode: "day", calc: null, calcF: null, fromSearch: false, fatOpen: null, date, filter: types && types.length === 1 ? types[0] : null, detail: detail || null });
+  Object.assign(PANEL, { open: true, mode: "day", calc: null, calcF: null, fromSearch: false, date, filter: types && types.length === 1 ? types[0] : null, detail: detail || null });
   renderPanel();
 }
 function openMonthScreen(mi, type) {
@@ -2866,12 +2836,6 @@ function itemHTML(x) {
     <span class="lrow-top">${ti(x.tx.type, true)}<b class="ellip">${esc(x.tx.desc)}</b><span class="lrow-val num">${brl(x.value)}</span></span>
     <span class="lrow-sub"><span class="num">${ddmm(x.date)}</span>${r ? `<span class="lrow-rep num">${r}</span>` : ""}</span></button>`;
 }
-/* compras de um cartão que caem na fatura que vence em "due" */
-function fatBuys(cid, due) {
-  const c = cardOf(cid); if (!hasFat(c)) return [];
-  const from = miFirst(miOf(parse(due)) - 2);
-  return occs(from, due).filter(x => x.tx.type === "cartao" && x.tx.cardId === cid && fatDue(c, x.date) === due).sort((a, b) => b.date.localeCompare(a.date));
-}
 function filterLabel() { const f = PANEL.filter; return f ? `${ti(f)}<span>${TYPES[f].col}</span>` : `${ti("all")}<span>todas</span>`; }
 function renderPanel() {
   const root = $("#drawer-root");
@@ -2888,7 +2852,6 @@ function renderPanel() {
     body = `<dl class="detail-grid">
       <dt>tipo</dt><dd>${ti(tx.type, true)} ${TYPES[tx.type].label}${isResg(tx) ? ", resgate" : ""}</dd>
       ${tx.type === "cartao" ? `<dt>cartão</dt><dd>${cardName(tx.cardId) ? esc(cardName(tx.cardId)) : `<span class="muted">sem cartão</span>`}</dd>` : ""}
-      ${tx.type === "cartao" && hasFat(cardOf(tx.cardId)) ? `<dt>fatura</dt><dd class="num">vence em ${dBR(fatDue(cardOf(tx.cardId), occ.date))}</dd>` : ""}
       <dt>descrição</dt><dd>${esc(tx.desc)}</dd>
       <dt>valor</dt><dd class="num">${brl(occ.value)}</dd>
       <dt>data</dt><dd class="num">${dBR(occ.date)}</dd>
@@ -2919,12 +2882,6 @@ function renderPanel() {
       const pd = perDayPrev();
       if (day && PANEL.date > TODAY && pd > 0.004 && (!PANEL.filter || PANEL.filter === "diario"))
         prevRow = `<div class="lrow static" role="group" aria-label="previsão de diário: ${brl(pd)}"><span class="lrow-top">${ti("prev")}<b class="ellip">previsão de diário</b><span class="lrow-val num">${brl(pd)}</span></span><span class="lrow-sub">previsão para o dia</span></div>`;
-      // faturas que vencem no dia: tocar abre as compras que fazem parte dela
-      const fo = day && calc().day[PANEL.date];
-      if (fo && fo.fats && (!PANEL.filter || PANEL.filter === "cartao")) for (const [cid, val] of Object.entries(fo.fats)) {
-        const buys = fatBuys(cid, PANEL.date), open = PANEL.fatOpen === cid;
-        prevRow = `<button class="lrow fat-row ${open ? "on" : ""}" data-fat="${cid}" aria-expanded="${open}" aria-label="fatura ${esc(cardName(cid))}: ${brl(val)}, ${buys.length} ${buys.length === 1 ? "compra" : "compras"}"><span class="lrow-top">${ti("cartao", true)}<b class="ellip">fatura ${esc(cardName(cid))}</b><span class="lrow-val num">${brl(val)}</span></span><span class="lrow-sub"><span class="num">${buys.length} ${buys.length === 1 ? "compra" : "compras"}</span><svg class="fat-chev" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 9l6 6 6-6"/></svg></span></button>${open ? `<div class="fat-list">${buys.map(itemHTML).join("")}</div>` : ""}` + prevRow;
-      }
     }
     head = `<button class="icon-btn flat" ${PANEL.calcF ? "data-pcalcback" : "data-pclose"} aria-label="voltar">${I.back}</button>
       <div class="ph-mid"><button class="icon-btn flat" data-pstep="-1" aria-label="${day ? "dia anterior" : "mês anterior"}" ${prevOk ? "" : "disabled"}>${I.left}</button>${mid}<button class="icon-btn flat" data-pstep="1" aria-label="${day ? "próximo dia" : "próximo mês"}" ${nextOk ? "" : "disabled"}>${I.right}</button></div>
@@ -2953,7 +2910,7 @@ $("#drawer-root").addEventListener("click", e => {
   const st = t.closest("[data-pstep]");
   if (st) {
     const d = +st.dataset.pstep;
-    PANEL.fatOpen = null; if (PANEL.mode === "day") PANEL.date = ymd(addDays(parse(PANEL.date), d)); else PANEL.mi += d;
+    if (PANEL.mode === "day") PANEL.date = ymd(addDays(parse(PANEL.date), d)); else PANEL.mi += d;
     renderPanel(); const el = $("#drawer-root .lrows, #drawer-root .empty"); if (el) animateSlideEl(el, d); return;
   }
   const pc = t.closest("[data-pcal]"); if (pc) { datePicker(pc, PANEL.date, v => { PANEL.date = v; renderPanel(); }); return; }
@@ -2973,8 +2930,6 @@ $("#drawer-root").addEventListener("click", e => {
     openTypeStack(add, types, k => openForm({ type: k, date }));
     return;
   }
-  const fb = t.closest("[data-fat]");
-  if (fb) { PANEL.fatOpen = PANEL.fatOpen === fb.dataset.fat ? null : fb.dataset.fat; renderPanel(); return; }
   if (t.closest("[data-pback]")) { if (PANEL.fromSearch) return closePanel(); PANEL.detail = null; return renderPanel(); }
   if (t.closest("[data-pedit]")) { const tx = S.txs.find(x => x.id === PANEL.detail.tx); return openForm({ tx, occ: PANEL.detail.date }); }
   if (t.closest("[data-pdel]")) { const tx = S.txs.find(x => x.id === PANEL.detail.tx); return deleteOcc(tx, PANEL.detail.date); }
@@ -3366,7 +3321,6 @@ function bsInsights() {
     () => { const v = sum(monthOcc.filter(x => x.tx.type === "cartao")); return v > 0 ? m("info", I.card, `em ${mName}, <b>${bm(v)}</b> foram no cartão.`, { month: "cartao" }) : null; },
     () => urgent ? null : m("good", BI.wallet, "nenhum dia com saldo <b>negativo</b> nos próximos 12 meses.", { tab: "horizonte" }),
     () => { const v = sum(occs(miFirst(MIN_MI), TODAY).filter(x => x.tx.type === "economia")); return v > 0.004 ? m("good", BI.piggy, `sua reserva está em <b>${bm(v)}</b>, somando o que já foi guardado e resgatado.`, { month: "economia" }) : null; },
-    () => { const c = calc(); for (let d = addDays(NOW, 1), end = parse(miLast(CUR + 2)); d <= end; d = addDays(d, 1)) { const o = c.day[ymd(d)]; if (o && o.fats) { const [cid, v] = Object.entries(o.fats)[0]; return m("info", I.card, `a próxima fatura do <b class="bs-nm">${esc(cardName(cid))}</b> é de <b>${bm(v)}</b> e vence em ${ddmm(ymd(d))}.`, { day: ymd(d) }); } } return null; },
 
   ];
   const L = S.txs.length ? pool.map(f => f()).filter(Boolean) : [];
@@ -3631,8 +3585,7 @@ function openCards() {
       ? `<div class="slist2">${cardsSorted().map(c => {
         const n = S.txs.filter(t => t.cardId === c.id).length;
         const mov = n ? `${n} ${n === 1 ? "movimentação" : "movimentações"}` : "nenhuma movimentação";
-        const fv = hasFat(c) ? `, vence dia ${c.vence}` : "";
-        return srow({ attr: `data-editcard="${c.id}"`, ico: I.card, main: esc(c.name), sub: (c.id === defCardId() ? `cartão padrão, ${mov}` : mov) + fv });
+        return srow({ attr: `data-editcard="${c.id}"`, ico: I.card, main: esc(c.name), sub: c.id === defCardId() ? `cartão padrão, ${mov}` : mov });
       }).join("")}</div>`
       : `<div class="sempty"><button class="circ" data-addcard aria-label="adicionar cartão">${SI.cardAdd}</button><span>sem cartões por aqui.<br>toque no botão acima para criar.</span></div>`);
   };
@@ -3655,7 +3608,6 @@ function openCardForm(id) {
   openScreen({
     title: c ? "editar cartão" : "novo cartão",
     body: `${lfield("cc-name", "nome do cartão", c ? c.name : "", 'maxlength="40" placeholder="ex.: nubank"')}
-      <div class="cc-days">${lfield("cc-fecha", "fecha no dia", c && c.fecha ? String(c.fecha) : "", 'class="num" inputmode="numeric" maxlength="2" placeholder="ex.: 5"')}${lfield("cc-vence", "vence no dia", c && c.vence ? String(c.vence) : "", 'class="num" inputmode="numeric" maxlength="2" placeholder="ex.: 12"')}</div>
       <div class="slist2 cc-def">${defRow()}</div>
       <div class="sbtns">${c ? `<button class="sbtn is-danger" data-delcard>apagar</button>` : ""}<button class="sbtn solid" data-savecc>salvar</button></div>`,
     onMount: (el, s) => el.addEventListener("click", async e => {
@@ -3664,15 +3616,11 @@ function openCardForm(id) {
         const name = $("#cc-name", el).value.trim();
         if (!name) { toast("informe um nome para o cartão", true); $("#cc-name", el).focus(); return; }
         if (S.cards.some(x => x.id !== id && x.name.toLowerCase() === name.toLowerCase())) { toast("já tem um cartão com esse nome", true); return; }
-        const dv = k => { const v = $("#" + k, el).value.trim(); return v === "" ? null : +v; };
-        const fecha = dv("cc-fecha"), vence = dv("cc-vence");
-        if ([fecha, vence].some(v => v !== null && !(Number.isInteger(v) && v >= 1 && v <= 31))) { toast("informe um dia entre 1 e 31", true); return; }
-        if ((fecha === null) !== (vence === null)) { toast("informe o dia de fechamento e o de vencimento", true); return; }
         s.close();
         const cid = c ? c.id : uid("c");
         if (def && !only) saveProfile({ defCard: cid });
         else if (!def && prof().defCard === cid) saveProfile({ defCard: "" });
-        await backend.put("cards", cid, { name, fecha, vence, createdAt: c ? c.createdAt || Date.now() : Date.now() });
+        await backend.put("cards", cid, { name, createdAt: c ? c.createdAt || Date.now() : Date.now() });
       }
       if (e.target.closest("[data-delcard]")) {
         const n = S.txs.filter(t => t.cardId === c.id).length;
