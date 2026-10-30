@@ -1255,13 +1255,13 @@ body.stk-open .bottom-nav{z-index:76!important}
 @media (min-width:701px){#px-undo{bottom:28px}}
 @keyframes undoIn{from{opacity:0;transform:translate(-50%,24px) scale(.9)}}
 @keyframes undoOut{to{opacity:0;transform:translate(-50%,16px) scale(.95)}}
-/* ===== saldo cabendo no computador ===== */
+/* ===== saldo cabendo no computador (só nos saldos; o horizonte mantém o tamanho dele) ===== */
 @media (min-width:701px) and (max-width:1499px){
   :root{--sbw:196px}
   :root:has(.sidebar.collapsed){--sbw:72px}
-  .mtable td.cell:not(.col-min),.mtable th[data-col]:not(.col-min){width:max(118px,calc((100vw - var(--sbw) - 48px - 64px - 164px - 24px) / 5));min-width:118px}
-  .mtable td.c-saldo,.mtable th.c-sh{width:150px;min-width:150px}
-  .mtable td,.mtable th{padding-left:10px!important;padding-right:10px!important}
+  .mcard:not(.hcard) .mtable td.cell:not(.col-min),.mcard:not(.hcard) .mtable th[data-col]:not(.col-min){width:max(118px,calc((100vw - var(--sbw) - 48px - 64px - 164px - 24px) / 5));min-width:118px}
+  .mcard:not(.hcard) .mtable td.c-saldo,.mcard:not(.hcard) .mtable th.c-sh{width:150px;min-width:150px}
+  .mcard:not(.hcard) .mtable td,.mcard:not(.hcard) .mtable th{padding-left:10px!important;padding-right:10px!important}
 }
 </style>
 <script>try{var t=JSON.parse(localStorage.getItem("ae.theme")||"null")||"dark";if(t==="system")t=matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light";if(t==="light")document.documentElement.classList.add("light")}catch(e){}</script>
