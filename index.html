@@ -3041,7 +3041,7 @@ function openForm({ type = "saida", date = TODAY, tx = null, occ = null } = {}) 
       ${inst ? `<p class="f-hint num">${pi ? `valor de cada parcela` : `${f.installments}x de ${brl(f.value / f.installments)}`}</p>` : ""}
       <div class="frows">
         <button class="frow" id="f-type" aria-haspopup="dialog" aria-label="tipo: ${TYPES[f.type].label}. mudar"><span class="fr-ico">${ti(f.type, true)}</span><span class="fr-main">${TYPES[f.type].label}</span>${CHEV}</button>
-        ${f.type === "economia" ? `<button class="frow" id="f-resg" aria-haspopup="dialog" aria-label="${f.resg ? "resgatar" : "guardar"}. mudar"><span class="fr-ico">${BI.piggy.replace("<svg", '<svg width="22" height="22"')}</span><span class="fr-main">${f.resg ? "resgatar" : "guardar"}</span>${CHEV}</button>` : ""}
+        ${f.type === "economia" ? `<button class="frow" id="f-resg" aria-haspopup="dialog" aria-label="${f.resg ? "resgatar" : "guardar"}. mudar"><span class="fr-ico">${BI[f.resg ? "resgatar" : "guardar"].replace("<svg", '<svg width="22" height="22"')}</span><span class="fr-main">${f.resg ? "resgatar" : "guardar"}</span>${CHEV}</button>` : ""}
         <label class="frow"><span class="fr-ico">${PEN}</span><input class="fr-input" id="f-desc" autocomplete="off" maxlength="80" placeholder="descrição" aria-label="descrição" value="${esc(f.desc)}"></label>
         ${f.type === "cartao" ? `<button class="frow" id="f-card" aria-haspopup="dialog" aria-label="cartão: ${f.cardId && cardName(f.cardId) ? esc(cardName(f.cardId)) : "nenhum escolhido"}. ${f.cardId && cardName(f.cardId) ? "mudar" : "escolher"}"><span class="fr-ico">${I.card.replace("<svg", '<svg width="22" height="22"')}</span><span class="fr-main ellip ${f.cardId && cardName(f.cardId) ? "" : "fr-ph"}">${f.cardId && cardName(f.cardId) ? esc(cardName(f.cardId)) : "qual cartão?"}</span>${CHEV}</button>` : ""}
         <button class="frow" id="f-date" aria-haspopup="dialog" aria-label="data: ${dBR(effDate(f.date))}. mudar"><span class="fr-ico">${CAL}</span><span class="fr-main">data</span><span class="fr-val num">${dBR(effDate(f.date))}</span>${CHEV}</button>
@@ -3064,6 +3064,7 @@ function openForm({ type = "saida", date = TODAY, tx = null, occ = null } = {}) 
     }
     if (e.target.id === "f-desc") f.desc = e.target.value;
   });
+  const RESG_ICO = k => `<span class="fr-ico">${BI[k].replace("<svg", '<svg width="22" height="22"')}</span>`;
   const listSheet = (title, items, cur, pick) => {
     const s = openSheet({ title, body: `<div class="slist">${items.map(([k, main, sub, ico]) => `<button class="sitem ${k === cur ? "on" : ""}" data-k="${k}">${ico ? `<span class="si-ico">${ico}</span>` : ""}<span class="si-txt"><b>${main}</b>${sub ? `<span>${sub}</span>` : ""}</span></button>`).join("")}</div>` });
     s.el.addEventListener("click", ev => { const b = ev.target.closest("[data-k]"); if (b) { s.close(); pick(b.dataset.k); } });
@@ -3072,7 +3073,7 @@ function openForm({ type = "saida", date = TODAY, tx = null, occ = null } = {}) 
     const t = e.target;
     const ins = t.closest("[data-inst]"); if (ins) { f.installments = Math.max(2, Math.min(120, f.installments + +ins.dataset.inst)); return draw(); }
     if (t.closest("#f-type")) listSheet("tipo", TYPE_ORDER.map(k => [k, TYPES[k].label, "", ti(k, true)]), f.type, k => { f.type = k; if (k === "cartao" && !f.cardId) f.cardId = defCardId(); draw(); });
-    if (t.closest("#f-resg")) listSheet("economia", [["g", "guardar", "", ""], ["r", "resgatar", "", ""]], f.resg ? "r" : "g", k => { f.resg = k === "r"; draw(); });
+    if (t.closest("#f-resg")) listSheet("economia", [["g", "guardar", "", RESG_ICO("guardar")], ["r", "resgatar", "", RESG_ICO("resgatar")]], f.resg ? "r" : "g", k => { f.resg = k === "r"; draw(); });
     if (t.closest("#f-card")) cardSheet(f.cardId, id => { f.cardId = id; draw(); });
     if (t.closest("#f-date")) datePicker(null, effDate(f.date), v => { f.date = v; f.aday = +v.slice(8); draw(); });
     if (t.closest("#f-mday")) {
@@ -3214,7 +3215,8 @@ const BI = {
   down: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7l6 6 4-4 8 8"/><path d="M21 11v6h-6"/></svg>',
   up: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17l6-6 4 4 8-8"/><path d="M21 13V7h-6"/></svg>',
   receipt: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 21V4a1 1 0 0 1 1-1h12a1 1 0 0 1 1 1v17l-3-2-2 2-2-2-2 2-2-2z"/><path d="M9 8h6M9 12h6"/></svg>',
-  piggy: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 11c0-3.3-3.1-6-7-6-1.4 0-2.7.3-3.8.9L5 4v3.6A5.6 5.6 0 0 0 3.6 10H2v4h2a7 7 0 0 0 3 3v3h3v-2h4v2h3v-3.5A5.7 5.7 0 0 0 19 11z"/><path d="M15 10h.01"/></svg>',
+  guardar: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 13v6a1 1 0 0 0 1 1h16a1 1 0 0 0 1-1v-6"/><path d="M12 3v11M7.5 9.5L12 14l4.5-4.5"/></svg>',
+  resgatar: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 13v6a1 1 0 0 0 1 1h16a1 1 0 0 0 1-1v-6"/><path d="M12 15V4M7.5 8.5L12 4l4.5 4.5"/></svg>',
   inc: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12M7 10l5 5 5-5"/><path d="M5 21h14"/></svg>',
   wallet: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 7H5a2 2 0 0 1 0-4h13v4"/><path d="M3 5v14a2 2 0 0 0 2 2h15V7"/><path d="M16 14h.01"/></svg>',
 };
@@ -3303,10 +3305,10 @@ function bsInsights() {
     () => { let best = null; for (const tx of S.txs) { const fin = tx.rep === "installment" || ((tx.rep || "none") !== "none" && tx.until === "count") || ((tx.rep || "none") !== "none" && tx.endBefore); if (!fin) continue; let left = 0, last = null; expand(tx, tomorrow, miLast(MAX_MI), d => { left++; last = d; }); if (left && (!best || left > best.left)) best = { tx, left, last }; }
       if (!best) return null; const ld = parse(best.last), parc = best.tx.rep === "installment", w = parc ? ["parcela", "parcelas"] : best.tx.type === "entrada" ? ["recebimento", "recebimentos"] : ["pagamento", "pagamentos"];
       return m("info", I.cal, `${best.left === 1 ? `falta <b>1 ${w[0]}</b>` : `faltam <b>${best.left} ${w[1]}</b>`} de ${esc(best.tx.desc)}. ${parc ? "a última" : "o último"} é em ${MON3[ld.getMonth()]}/${String(ld.getFullYear()).slice(2)}.`, { item: { tx: best.tx, date: best.last } }); },
-    () => { const v = sum(occs(`${NOW.getFullYear()}-01-01`, TODAY).filter(x => x.tx.type === "economia")); return v > 0 ? m("good", BI.piggy, `você já guardou <b>${bm(v)}</b> este ano.`, { calc: "economizado" }) : null; },
+    () => { const v = sum(occs(`${NOW.getFullYear()}-01-01`, TODAY).filter(x => x.tx.type === "economia")); return v > 0 ? m("good", BI.guardar, `você já guardou <b>${bm(v)}</b> este ano.`, { calc: "economizado" }) : null; },
     () => nextIn ? m("good", BI.inc, `a próxima entrada é <b class="bs-nm">${esc(nextIn.tx.desc)}</b>, de <b>${bm(nextIn.value)}</b>, em ${ddmm(nextIn.date)}.`, { item: nextIn }) : null,
-    () => { if (!(st.econBase > 0)) return null; const p = st.econPct; if (st.econVal <= 0) return m("info", BI.piggy, `você ainda não guardou nada em ${mName}.`, { calc: "economizado" });
-      const s = p < 20 ? "abaixo do ideal" : p <= 30 ? "dentro do ideal" : "acima do ideal"; return m(p < 20 ? "info" : "good", BI.piggy, `em ${mName}, você guardou <b>${pctFmt(p)}</b> das entradas, ${s}.`, { calc: "economizado" }); },
+    () => { if (!(st.econBase > 0)) return null; const p = st.econPct; if (st.econVal <= 0) return m("info", BI.guardar, `você ainda não guardou nada em ${mName}.`, { calc: "economizado" });
+      const s = p < 20 ? "abaixo do ideal" : p <= 30 ? "dentro do ideal" : "acima do ideal"; return m(p < 20 ? "info" : "good", BI.guardar, `em ${mName}, você guardou <b>${pctFmt(p)}</b> das entradas, ${s}.`, { calc: "economizado" }); },
     () => { const v = saldoOf(monthEnd); return m(v < -0.004 ? "warn" : "good", BI.wallet, `${mName} termina com saldo de <b>${bm(v)}</b>.`, { day: monthEnd }); },
     () => { if (!(st.custoBase > 0 && st.custo > 0)) return null; const p = Math.round(st.custo / st.custoBase * 100); return m(p > 100 ? "warn" : "info", BI.receipt, `seu custo de vida está em <b>${p}%</b> das entradas de ${mName}.`, { calc: "custo" }); },
     () => { const g = todayOcc.filter(x => x.tx.type === "saida" || x.tx.type === "cartao").sort((a, b) => b.value - a.value)[0]; return g ? m("info", BI.receipt, `hoje sai <b class="bs-nm">${esc(g.tx.desc)}</b>, de <b>${bm(g.value)}</b>.`, { item: g }) : null; },
@@ -3320,7 +3322,7 @@ function bsInsights() {
       return best && best.v > 0.004 ? m("good", BI.wallet, `o melhor mês pela frente é <b>${MONTHS[miM(best.mi)]}</b>, com saldo de <b>${bm(best.v)}</b>.`, { day: miLast(best.mi) }) : null; },
     () => { const v = sum(monthOcc.filter(x => x.tx.type === "cartao")); return v > 0 ? m("info", I.card, `em ${mName}, <b>${bm(v)}</b> foram no cartão.`, { month: "cartao" }) : null; },
     () => urgent ? null : m("good", BI.wallet, "nenhum dia com saldo <b>negativo</b> nos próximos 12 meses.", { tab: "horizonte" }),
-    () => { const v = sum(occs(miFirst(MIN_MI), TODAY).filter(x => x.tx.type === "economia")); return v > 0.004 ? m("good", BI.piggy, `sua reserva está em <b>${bm(v)}</b>, somando o que já foi guardado e resgatado.`, { month: "economia" }) : null; },
+    () => { const v = sum(occs(miFirst(MIN_MI), TODAY).filter(x => x.tx.type === "economia")); return v > 0.004 ? m("good", BI.guardar, `sua reserva está em <b>${bm(v)}</b>, somando o que já foi guardado e resgatado.`, { month: "economia" }) : null; },
 
   ];
   const L = S.txs.length ? pool.map(f => f()).filter(Boolean) : [];
