@@ -3300,32 +3300,33 @@ function bsInsights() {
   const nextIn = occs(tomorrow, miLast(CUR + 2)).filter(x => x.tx.type === "entrada").sort((a, b) => a.date.localeCompare(b.date))[0];
   /* relevância: 1 = pede atenção agora (sempre entra); 2 = útil para o mês atual (troca toda semana); 3 = só completa se faltar assunto */
   const pool = [
-    [1, () => { const g = todayOcc.filter(x => OUT.includes(x.tx.type) && x.tx.type !== "diario").sort((a, b) => b.value - a.value)[0]; return g ? m("info", BI.receipt, `hoje sai <b class="bs-nm">${esc(g.tx.desc)}</b>, de <b>${bm(g.value)}</b>.`, { item: g }) : null; }],
-    [1, () => { const g = todayOcc.filter(x => x.tx.type === "entrada").sort((a, b) => b.value - a.value)[0]; return g ? m("good", BI.inc, `hoje entra <b class="bs-nm">${esc(g.tx.desc)}</b>, de <b>${bm(g.value)}</b>.`, { item: g }) : null; }],
-    [1, () => { const prev = prevTotal(), d = sum(occs(miFirst(CUR), TODAY).filter(x => x.tx.type === "diario")); return prev > 0 && d > prev ? m("warn", BI.wallet, `o diário de ${mName} passou da previsão em <b>${bm(r2(d - prev))}</b>.`, { month: "diario" }) : null; }],
-    [1, () => { if (!(st.custoBase > 0 && st.custo > st.custoBase)) return null; const p = Math.round(st.custo / st.custoBase * 100); return m("warn", BI.receipt, `seu custo de vida está em <b>${p}%</b> das entradas de ${mName}.`, { calc: "custo" }); }],
-    [2, () => { const prev = prevTotal(), d = sum(occs(miFirst(CUR), TODAY).filter(x => x.tx.type === "diario")); return prev > 0 && d > 0 && d <= prev ? m("info", BI.wallet, `o diário de ${mName} está em <b>${bm(d)}</b>, de uma previsão de <b>${bm(prev)}</b>.`, { month: "diario" }) : null; }],
-    [2, () => { if (!nextIn) return null; const n = Math.round((parse(nextIn.date) - parse(TODAY)) / 864e5); return m("good", BI.inc, `a próxima entrada é <b class="bs-nm">${esc(nextIn.tx.desc)}</b>, de <b>${bm(nextIn.value)}</b>, ${n === 1 ? "amanhã" : `daqui a <b>${n} dias</b>`}.`, { item: nextIn }); }],
-    [2, () => { if (tomorrow > monthEnd) return null; const v = sum(occs(tomorrow, monthEnd).filter(x => OUT.includes(x.tx.type))); return v > 0 ? m("info", BI.up, `ainda saem <b>${bm(v)}</b> até o fim de ${mName}.`, { month: "all" }) : null; }],
-    [2, () => { if (tomorrow > monthEnd) return null; const v = sum(occs(tomorrow, monthEnd).filter(x => x.tx.type === "entrada")); return v > 0 ? m("good", BI.inc, `ainda entram <b>${bm(v)}</b> até o fim de ${mName}.`, { month: "entrada" }) : null; }],
-    [2, () => { const v = saldoOf(monthEnd); return v < -0.004 && urgent ? null : m(v < -0.004 ? "warn" : "good", BI.wallet, `${mName} termina com saldo de <b>${bm(v)}</b>.`, { day: monthEnd }); }],
-    [2, () => { if (!(st.econBase > 0)) return null; const p = st.econPct; if (st.econVal <= 0) return m("info", BI.guardar, `você ainda não guardou nada em ${mName}.`, { calc: "economizado" });
+    [1, "hoje", () => { const g = todayOcc.filter(x => OUT.includes(x.tx.type) && x.tx.type !== "diario").sort((a, b) => b.value - a.value)[0]; return g ? m("info", BI.receipt, `hoje sai <b class="bs-nm">${esc(g.tx.desc)}</b>, de <b>${bm(g.value)}</b>.`, { item: g }) : null; }],
+    [1, "hoje", () => { const g = todayOcc.filter(x => x.tx.type === "entrada").sort((a, b) => b.value - a.value)[0]; return g ? m("good", BI.inc, `hoje entra <b class="bs-nm">${esc(g.tx.desc)}</b>, de <b>${bm(g.value)}</b>.`, { item: g }) : null; }],
+    [1, "diario", () => { const prev = prevTotal(), d = sum(occs(miFirst(CUR), TODAY).filter(x => x.tx.type === "diario")); return prev > 0 && d > prev ? m("warn", BI.wallet, `o diário de ${mName} passou da previsão em <b>${bm(r2(d - prev))}</b>.`, { month: "diario" }) : null; }],
+    [1, "gastos", () => { if (!(st.custoBase > 0 && st.custo > st.custoBase)) return null; const p = Math.round(st.custo / st.custoBase * 100); return m("warn", BI.receipt, `seu custo de vida está em <b>${p}%</b> das entradas de ${mName}.`, { calc: "custo" }); }],
+    [2, "diario", () => { const prev = prevTotal(), d = sum(occs(miFirst(CUR), TODAY).filter(x => x.tx.type === "diario")); return prev > 0 && d > 0 && d <= prev ? m("info", BI.wallet, `o diário de ${mName} está em <b>${bm(d)}</b>, de uma previsão de <b>${bm(prev)}</b>.`, { month: "diario" }) : null; }],
+    [2, "entrada", () => { if (!nextIn) return null; const n = Math.round((parse(nextIn.date) - parse(TODAY)) / 864e5); return m("good", BI.inc, `a próxima entrada é <b class="bs-nm">${esc(nextIn.tx.desc)}</b>, de <b>${bm(nextIn.value)}</b>, ${n === 1 ? "amanhã" : `daqui a <b>${n} dias</b>`}.`, { item: nextIn }); }],
+    [2, "mes", () => { if (tomorrow > monthEnd) return null; const v = sum(occs(tomorrow, monthEnd).filter(x => OUT.includes(x.tx.type))); return v > 0 ? m("info", BI.up, `ainda saem <b>${bm(v)}</b> até o fim de ${mName}.`, { month: "all" }) : null; }],
+    [2, "mes", () => { if (tomorrow > monthEnd) return null; const v = sum(occs(tomorrow, monthEnd).filter(x => x.tx.type === "entrada")); return v > 0 ? m("good", BI.inc, `ainda entram <b>${bm(v)}</b> até o fim de ${mName}.`, { month: "entrada" }) : null; }],
+    [2, "mes", () => { const v = saldoOf(monthEnd); return v < -0.004 && urgent ? null : m(v < -0.004 ? "warn" : "good", BI.wallet, `${mName} termina com saldo de <b>${bm(v)}</b>.`, { day: monthEnd }); }],
+    [2, "economia", () => { if (!(st.econBase > 0)) return null; const p = st.econPct; if (st.econVal <= 0) return m("info", BI.guardar, `você ainda não guardou nada em ${mName}.`, { calc: "economizado" });
       const s = p < 20 ? "abaixo do ideal" : p <= 30 ? "dentro do ideal" : "acima do ideal"; return m(p < 20 ? "info" : "good", BI.guardar, `em ${mName}, você guardou <b>${pctFmt(p)}</b> das entradas, ${s}.`, { calc: "economizado" }); }],
-    [2, () => { const g = monthOcc.filter(x => x.tx.type === "saida" || x.tx.type === "cartao").sort((a, b) => b.value - a.value)[0]; return g ? m("info", BI.receipt, `o maior gasto de ${mName} é <b class="bs-nm">${esc(g.tx.desc)}</b>, de <b>${bm(g.value)}</b>.`, { item: g }) : null; }],
-    [2, () => { if (NOW.getDate() < 7) return null; const a = st.diarioMedio, b = pv.diarioMedio; if (!(a > 0 && b > 0)) return null; const p = Math.round((a - b) / b * 100);
+    [2, "gastos", () => { const g = monthOcc.filter(x => x.tx.type === "saida" || x.tx.type === "cartao").sort((a, b) => b.value - a.value)[0]; return g ? m("info", BI.receipt, `o maior gasto de ${mName} é <b class="bs-nm">${esc(g.tx.desc)}</b>, de <b>${bm(g.value)}</b>.`, { item: g }) : null; }],
+    [2, "diario", () => { if (NOW.getDate() < 7) return null; const a = st.diarioMedio, b = pv.diarioMedio; if (!(a > 0 && b > 0)) return null; const p = Math.round((a - b) / b * 100);
       return p === 0 ? null : p < 0 ? m("good", BI.down, `seu diário médio está <b>${-p}% menor</b> que em ${pName}.`, { calc: "diarioMedio" }) : m("info", BI.up, `seu diário médio está <b>${p}% maior</b> que em ${pName}.`, { calc: "diarioMedio" }); }],
-    [2, () => { const lim = miLast(CUR + 1); let best = null; for (const tx of S.txs) { const fin = tx.rep === "installment" || ((tx.rep || "none") !== "none" && (tx.until === "count" || tx.endBefore)); if (!fin) continue; let last = null, val = 0, after = false; expand(tx, tomorrow, miLast(MAX_MI), (d, v) => { if (d > lim) after = true; else { last = d; if (v != null) val = v; } }); if (!last || after) continue; if (!best || last < best.last) best = { tx, last }; }
+    [2, "gastos", () => { const lim = miLast(CUR + 1); let best = null; for (const tx of S.txs) { const fin = tx.rep === "installment" || ((tx.rep || "none") !== "none" && (tx.until === "count" || tx.endBefore)); if (!fin) continue; let last = null, val = 0, after = false; expand(tx, tomorrow, miLast(MAX_MI), (d, v) => { if (d > lim) after = true; else { last = d; if (v != null) val = v; } }); if (!last || after) continue; if (!best || last < best.last) best = { tx, last }; }
       if (!best) return null; const ld = parse(best.last), when = `${MON3[ld.getMonth()]}/${String(ld.getFullYear()).slice(2)}`, inc = best.tx.type === "entrada";
       return m(inc ? "info" : "good", I.cal, best.tx.rep === "installment" ? `a última parcela de <b class="bs-nm">${esc(best.tx.desc)}</b> é em ${when}.` : `${inc ? "o último recebimento" : "o último pagamento"} de <b class="bs-nm">${esc(best.tx.desc)}</b> é em ${when}.`, { item: { tx: best.tx, date: best.last } }); }],
-    [3, () => { const v = sum(monthOcc.filter(x => x.tx.type === "cartao")); return v > 0 ? m("info", I.card, `em ${mName}, <b>${bm(v)}</b> foram no cartão.`, { month: "cartao" }) : null; }],
-    [3, () => { const v = sum(occs(miFirst(MIN_MI), TODAY).filter(x => x.tx.type === "economia")); return v > 0.004 ? m("good", BI.guardar, `sua reserva está em <b>${bm(v)}</b>, somando o que já foi guardado e resgatado.`, { month: "economia" }) : null; }],
-    [3, () => urgent ? null : m("good", BI.wallet, "nenhum dia com saldo <b>negativo</b> nos próximos 12 meses.", { tab: "horizonte" })],
+    [3, "gastos", () => { const v = sum(monthOcc.filter(x => x.tx.type === "cartao")); return v > 0 ? m("info", I.card, `em ${mName}, <b>${bm(v)}</b> foram no cartão.`, { month: "cartao" }) : null; }],
+    [3, "economia", () => { const v = sum(occs(miFirst(MIN_MI), TODAY).filter(x => x.tx.type === "economia")); return v > 0.004 ? m("good", BI.guardar, `sua reserva está em <b>${bm(v)}</b>, somando o que já foi guardado e resgatado.`, { month: "economia" }) : null; }],
+    [3, "saldo", () => urgent ? null : m("good", BI.wallet, "nenhum dia com saldo <b>negativo</b> nos próximos 12 meses.", { tab: "horizonte" })],
   ];
-  const got = S.txs.length ? pool.map(([t, f]) => [t, f()]).filter(x => x[1]) : [];
-  const tier = t => got.filter(x => x[0] === t).map(x => x[1]);
-  const out = urgent ? [urgent] : [];
-  for (const x of tier(1)) if (out.length < 3) out.push(x);
-  for (const t of [2, 3]) { const L = tier(t), slots = 3 - out.length; if (!L.length || slots <= 0) continue; const s0 = (bsWeek() * slots) % L.length; for (let i = 0; i < Math.min(slots, L.length); i++) out.push(L[(s0 + i) % L.length]); }
+  /* uma frase por assunto: as 3 sempre falam de coisas diferentes */
+  const got = S.txs.length ? pool.map(([t, c, f]) => [t, c, f()]).filter(x => x[2]) : [];
+  const out = urgent ? [urgent] : [], used = new Set(urgent ? ["saldo"] : []);
+  const take = x => { if (out.length < 3 && !used.has(x[1])) { out.push(x[2]); used.add(x[1]); } };
+  got.filter(x => x[0] === 1).forEach(take);
+  for (const t of [2, 3]) { const L = got.filter(x => x[0] === t); if (!L.length) continue; const s0 = (bsWeek() * 3) % L.length; for (let i = 0; i < L.length; i++) take(L[(s0 + i) % L.length]); }
   if (!out.length) out.push(m("info", BI.wallet, "lance suas movimentações para ver as dicas aqui."));
   return out;
 }
