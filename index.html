@@ -3008,8 +3008,11 @@ function openForm({ type = "saida", date = TODAY, tx = null, occ = null } = {}) 
   const MONTHLY = () => f.rep === "monthly" || f.rep === "installment";
   const RULES = () => f.rep === "daily" ? ["same", "biz"] : MONTHLY() ? ["same", "biz", "prev", "nth"] : ["weekly", "yearly"].includes(f.rep) ? ["same", "biz", "prev"] : ["same"];
   const isRule = () => f.mday !== "same" && RULES().includes(f.mday);
+  /* data escolhida à mão numa repetição: vale exatamente essa data, sem passar pela regra do dia */
+  let manualDate = false;
   /* data real conforme a regra do dia */
-  const effDate = ds => {
+  const effDate = ds => manualDate ? ds : ruleDate(ds);
+  const ruleDate = ds => {
     if (!isRule()) return ds;
     const d = parse(ds);
     if (f.rep === "daily") return ymd(nextBiz(d));
@@ -3077,7 +3080,7 @@ function openForm({ type = "saida", date = TODAY, tx = null, occ = null } = {}) 
     if (t.closest("#f-type")) listSheet("tipo", TYPE_ORDER.map(k => [k, TYPES[k].label, "", ti(k, true)]), f.type, k => { f.type = k; if (k === "cartao" && !f.cardId) f.cardId = defCardId(); draw(); });
     if (t.closest("#f-resg")) listSheet("economia", [["g", "guardar", "", RESG_ICO("guardar")], ["r", "resgatar", "", RESG_ICO("resgatar")]], f.resg ? "r" : "g", k => { f.resg = k === "r"; draw(); });
     if (t.closest("#f-card")) cardSheet(f.cardId, id => { f.cardId = id; draw(); });
-    if (t.closest("#f-date")) datePicker(null, effDate(f.date), v => { f.date = v; f.aday = +v.slice(8); draw(); });
+    if (t.closest("#f-date")) datePicker(null, effDate(f.date), v => { manualDate = recurring && v !== occD; f.date = v; f.aday = +v.slice(8); draw(); });
     if (t.closest("#f-mday")) {
       const ok = RULES(), cur = isRule() ? f.mday : "same", D = DAY_TXT();
       const opt = (k, txt) => ok.includes(k) ? `<button class="sitem ${cur === k ? "on" : ""}" data-md="${k}"><span class="si-txt"><b>${txt}</b></span></button>` : "";
@@ -3139,7 +3142,7 @@ function openForm({ type = "saida", date = TODAY, tx = null, occ = null } = {}) 
     const n = oi ? oi.n : 1, now = Date.now();
     const bDelta = dayDiff(oi && oi.base ? oi.base : occD, f.date); // quanto a data-base mudou
     /* nova primeira repetição a partir da data-base de uma ocorrência: devolve data real e data-base */
-    const fromBase = b => { const nb = shiftDate(b, bDelta); return { date: effDate(nb), bdate: shifts ? nb : null }; };
+    const fromBase = b => { const nb = shiftDate(b, bDelta); return { date: ruleDate(nb), bdate: shifts ? nb : null }; };
     const ruleKey = o => `${txRule(o)}|${o.nth || ""}|${o.aday || ""}`;
     const old = stripId(tx);
     if (s === "one") {
