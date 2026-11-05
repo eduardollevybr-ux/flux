@@ -1227,11 +1227,6 @@ body.stk-open .bottom-nav{z-index:76!important}
 @keyframes stkRight{from{opacity:0;transform:translateX(-24px) scale(.8)}}
 @keyframes stkOut{to{opacity:0;transform:scale(.85)}}
 /* ===================== melhorias de 28/10/2026 ===================== */
-/* destaque do que foi lançado */
-@keyframes pxFlash{0%{box-shadow:inset 0 0 0 999px color-mix(in srgb,var(--fl) 0%,transparent)}18%{box-shadow:inset 0 0 0 999px color-mix(in srgb,var(--fl) 55%,transparent);transform:scale(1.05)}45%{transform:scale(1)}100%{box-shadow:inset 0 0 0 999px color-mix(in srgb,var(--fl) 0%,transparent)}}
-.px-flash{animation:pxFlash 1.7s cubic-bezier(.2,.8,.2,1);border-radius:12px}
-:root .m-saldo.px-flash,:root td.c-saldo.px-flash,:root .hz-v.px-flash{animation:none}
-:root .m-saldo.px-flash::before,:root td.c-saldo.px-flash::before,:root .hz-v.px-flash::before{animation:pxFlash 1.7s cubic-bezier(.2,.8,.2,1)}
 /* frases do buscar que levam ao assunto */
 .bs-msg.go{width:100%;text-align:left;color:inherit;transition:transform .22s var(--spring),background-color .2s}
 .bs-msg.go .bs-mt{flex:1;min-width:0}
@@ -3964,7 +3959,7 @@ function bsGoTo(g) {
   if (g.day) return goToDay(g.day);
   if (g.tab) { if (g.tab === "totais") UI.tMonth = CUR; return goTab(g.tab); }
 }
-// abre os saldos no dia e destaca o saldo dele
+// abre os saldos no dia
 function goToDay(ds) {
   UI.tMonth = miOf(parse(ds));
   UI.flash = { d: ds, t: null, scroll: true };
@@ -4024,7 +4019,7 @@ async function bsQuickSave(k, btn) {
   undoPill("movimentação lançada", () => delTx(id));
 }
 
-/* ===== destaque do que foi lançado: os saldos vão até o dia e a célula acende na cor do tipo ===== */
+/* ===== depois de lançar, os saldos vão até o dia (sem destaque piscando) ===== */
 function pxTrail(ds, t) {
   if (PANEL.open || !["saldos", "horizonte"].includes(UI.tab)) return;
   if (isMobile() && UI.tab === "saldos") UI.tMonth = miOf(parse(ds));
@@ -4037,15 +4032,13 @@ function pxApplyFlash() {
     const live = el => !el.closest(".m-nb") && !el.closest(".pane:not(.cur)");
     const els = $$(`[data-act="saldo"][data-d="${f.d}"]${f.t ? `, [data-act="cell"][data-d="${f.d}"][data-t="${f.t}"]` : ""}`, v).filter(live);
     if (!els.length) return;
-    let wait = 0;
     if (f.scroll && isMobile()) {
       const sc = $(".page", v), r = els[0].getBoundingClientRect(), b = sc && sc.getBoundingClientRect();
       if (sc && (r.top < b.top + 80 || r.bottom > b.bottom - 120)) {
         const top = sc.scrollTop + r.top - b.top - b.height / 2 + r.height / 2, far = Math.abs(top - sc.scrollTop) > sc.clientHeight * 1.5;
-        if (far) sc.scrollTop = top; else { sc.scrollTo({ top, behavior: "smooth" }); wait = 320; }
+        if (far) sc.scrollTop = top; else sc.scrollTo({ top, behavior: "smooth" });
       }
     }
-    setTimeout(() => els.forEach(el => { el.style.setProperty("--fl", f.t ? `var(--c-${f.t})` : "var(--accent)"); el.classList.remove("px-flash"); void el.offsetWidth; el.classList.add("px-flash"); el.addEventListener("animationend", () => el.classList.remove("px-flash"), { once: true }); }), wait);
   }));
 }
 
