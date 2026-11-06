@@ -90,6 +90,7 @@ button{cursor:pointer;background:none;border:0;padding:0}
 .lrow-top b{flex:1;min-width:0;font-size:17px}
 .lrow-val{font-size:17px;white-space:nowrap}
 .lrow-sub{display:flex;justify-content:space-between;align-items:center;gap:12px;color:var(--muted);font-size:14px;padding-left:28px;min-width:0}
+.lrow-sub>span:first-child{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .lrow-rep{white-space:nowrap;text-align:right}
 .pb .detail-grid{padding:16px}
 .pb .skel{margin:12px 16px}
@@ -2827,11 +2828,13 @@ function repText(x) {
   return ruleText(x.tx, false) || (r === "none" ? "" : REP_LABEL[r]);
 }
 const ddmm = s => s.slice(8, 10) + "/" + s.slice(5, 7);
+// gasto no cartão: nome do cartão na linha de baixo, ao lado da data
+function txCard(tx) { return tx.type === "cartao" && cardName(tx.cardId) ? esc(cardName(tx.cardId)) : ""; }
 function itemHTML(x) {
   const r = repShort(x);
   return `<button class="lrow" data-item="${x.tx.id}" data-date="${x.date}" aria-label="${esc(TYPES[x.tx.type].label)}: ${esc(x.tx.desc)}, ${brl(x.value)}, ${dBR(x.date)}. ver detalhes">
     <span class="lrow-top">${ti(x.tx.type, true)}<b class="ellip">${esc(x.tx.desc)}</b><span class="lrow-val num">${brl(x.value)}</span></span>
-    <span class="lrow-sub"><span class="num">${ddmm(x.date)}</span>${r ? `<span class="lrow-rep num">${r}</span>` : ""}</span></button>`;
+    <span class="lrow-sub"><span class="num">${[txCard(x.tx), ddmm(x.date)].filter(Boolean).join(", ")}</span>${r ? `<span class="lrow-rep num">${r}</span>` : ""}</span></button>`;
 }
 function filterLabel() { const f = PANEL.filter; return f ? `${ti(f)}<span>${TYPES[f].col}</span>` : `${ti("all")}<span>todas</span>`; }
 function renderPanel() {
@@ -3248,7 +3251,7 @@ function bsSearch() {
 }
 function bsItem(x) {
   const r = repShort(x), yr = x.date.slice(0, 4) !== String(NOW.getFullYear());
-  const sub = [yr ? dYY(x.date) : ddmm(x.date), x.tx.type === "cartao" && cardName(x.tx.cardId) ? esc(cardName(x.tx.cardId)) : ""].filter(Boolean).join(", ");
+  const sub = [txCard(x.tx), yr ? dYY(x.date) : ddmm(x.date)].filter(Boolean).join(", ");
   return `<button class="lrow" data-item="${x.tx.id}" data-date="${x.date}" aria-label="${esc(TYPES[x.tx.type].label)}: ${esc(x.tx.desc)}, ${brl(x.value)}, ${dBR(x.date)}. ver detalhes">
     <span class="lrow-top">${ti(x.tx.type, true)}<b class="ellip">${esc(x.tx.desc)}</b><span class="lrow-val num">${brl(x.value)}</span></span>
     <span class="lrow-sub"><span class="num">${sub}</span>${r ? `<span class="lrow-rep num">${r}</span>` : ""}</span></button>`;
