@@ -661,8 +661,15 @@ input,textarea,[contenteditable="true"]{-webkit-user-select:text;user-select:tex
 .pager.dragging .m-cell:active,.pager.dragging .m-saldo:active,.pager.dragging .hz-v:active{transform:none}
 @media (max-width:700px){ .page{overflow-x:hidden} }
 @supports not (overflow-x: clip){ .pager{overflow:hidden} .page.page-flush{overflow-x:hidden} }
-#net-pill.relog{pointer-events:auto;cursor:pointer;color:var(--accent)}
-#net-pill{position:fixed;top:calc(env(safe-area-inset-top,0px) + 8px);left:50%;transform:translateX(-50%);z-index:95;padding:6px 14px;border-radius:999px;font-size:12px;font-weight:600;white-space:nowrap;pointer-events:none;background:var(--surface3);color:var(--muted);border:1px solid var(--line2);box-shadow:var(--shadow);animation:pop .2s ease}
+/* login vencido: bolinha lilás no ícone do menu (barra de baixo e barra lateral) */
+body.relog .bn[data-tab="menu"]::after,body.relog .nav-btn[data-tab="menu"]::after{content:"";position:absolute;width:9px;height:9px;border-radius:50%;background:var(--nav-ic);box-shadow:0 0 0 2px var(--nav-bar);pointer-events:none;z-index:2}
+body.relog .bn[data-tab="menu"]::after{top:calc(50% - 16px);left:calc(50% + 7px)}
+body.relog .nav-btn[data-tab="menu"]::after{top:9px;left:31px}
+.is-acc{color:var(--nav-ic)!important;font-weight:700}
+/* lançamento salvo sem internet: nuvem riscada ao lado da data até ser enviado */
+.lrow-sub .pend{display:inline-flex;vertical-align:-2px;margin-left:6px;color:var(--nav-ic)}
+.lrow-sub .pend svg{width:14px;height:14px}
+#px-undo .sep{width:1px;height:18px;background:currentColor;opacity:.3}
 /* toque: destaque só enquanto o dedo está pressionando (nada de cinza "preso" depois de soltar) */
 @media (hover:none){
   .lrow:not(.static):active,button.row:active,.crow:active,.pop-item:active,.sitem:active,button.frow:active,.nav-btn:active,.cal2-grid button:active,.btn-link:active{background:var(--surface2)}
@@ -1472,17 +1479,26 @@ function loadScript(src) { return new Promise((res, rej) => { const s = document
 const CACHE_KEY = "flux.cache";
 const isOnline = () => navigator.onLine !== false;
 let NET = { offline: !isOnline(), dirty: false, relogin: false };
-function setNet(p) { Object.assign(NET, p); renderNet(); }
-function renderNet() {
-  let el = document.getElementById("net-pill");
-  const txt = NET.offline ? "sem internet · salvo no aparelho" : NET.relogin ? "toque aqui para entrar de novo e sincronizar" : "";
-  if (!txt) { if (el) el.remove(); return; }
-  if (!el) { el = document.createElement("div"); el.id = "net-pill"; el.setAttribute("role", "status"); document.body.appendChild(el); el.addEventListener("click", () => { if (NET.relogin && !NET.offline && window.fluxRelogin) window.fluxRelogin(); }); }
-  el.className = NET.offline ? "off" : NET.relogin ? "relog" : "sync";
-  el.textContent = txt;
+// lançamentos salvos sem internet que ainda não subiram para a conta
+const PEND_KEY = "flux.pending";
+const PENDING = new Set(lsGet(PEND_KEY, []));
+const markPending = id => { if (S.mode !== "supabase" || PENDING.has(id)) return; PENDING.add(id); lsSet(PEND_KEY, [...PENDING]); };
+const isPending = id => PENDING.has(id) && (NET.offline || NET.relogin);
+function setNet(p) {
+  const was = NET.offline + "|" + NET.relogin;
+  Object.assign(NET, p);
+  if (p.dirty === false && PENDING.size) { PENDING.clear(); lsSet(PEND_KEY, []); if (S.loaded) render(); }
+  if (was !== NET.offline + "|" + NET.relogin) renderNet();
 }
-window.addEventListener("offline", () => setNet({ offline: true }));
-window.addEventListener("online", () => setNet({ offline: false }));
+// sem pílula no topo: sem internet aparece só no próprio lançamento; login vencido vira uma bolinha no menu
+function renderNet() {
+  document.body.classList.toggle("relog", !!NET.relogin && !NET.offline);
+  if (S.loaded) render();
+}
+// a troca de rede (Wi-Fi para 5G, volta do segundo plano) derruba a conexão por instantes: só conta depois de 4 segundos
+let OFF_T = null;
+window.addEventListener("offline", () => { clearTimeout(OFF_T); OFF_T = setTimeout(() => { if (!isOnline()) setNet({ offline: true }); }, 4000); });
+window.addEventListener("online", () => { clearTimeout(OFF_T); setNet({ offline: false }); });
 renderNet();
 
 async function initSupabase() {
@@ -1778,7 +1794,7 @@ function monthStats(mi) {
 }
 
 /* ================= ações de dados ================= */
-function saveTx(id, data) { return backend.put("tx", id, data); }
+function saveTx(id, data) { markPending(id); return backend.put("tx", id, data); }
 function delTx(id) { return backend.del("tx", id); }
 function toggleCheckin(d) {
   const next = { ...S.checkins };
@@ -2829,12 +2845,13 @@ function repText(x) {
 }
 const ddmm = s => s.slice(8, 10) + "/" + s.slice(5, 7);
 // gasto no cartão: nome do cartão na linha de baixo, ao lado da data
+const pendIco = tx => isPending(tx.id) ? `<span class="pend" aria-label="salvo no aparelho">${CLOUD_OFF}</span>` : "";
 function txCard(tx) { return tx.type === "cartao" && cardName(tx.cardId) ? esc(cardName(tx.cardId)) : ""; }
 function itemHTML(x) {
   const r = repShort(x);
   return `<button class="lrow" data-item="${x.tx.id}" data-date="${x.date}" aria-label="${esc(TYPES[x.tx.type].label)}: ${esc(x.tx.desc)}, ${brl(x.value)}, ${dBR(x.date)}. ver detalhes">
     <span class="lrow-top">${ti(x.tx.type, true)}<b class="ellip">${esc(x.tx.desc)}</b><span class="lrow-val num">${brl(x.value)}</span></span>
-    <span class="lrow-sub"><span class="num">${[txCard(x.tx), ddmm(x.date)].filter(Boolean).join(", ")}</span>${r ? `<span class="lrow-rep num">${r}</span>` : ""}</span></button>`;
+    <span class="lrow-sub"><span class="num">${[txCard(x.tx), ddmm(x.date)].filter(Boolean).join(" · ")}${pendIco(x.tx)}</span>${r ? `<span class="lrow-rep num">${r}</span>` : ""}</span></button>`;
 }
 function filterLabel() { const f = PANEL.filter; return f ? `${ti(f)}<span>${TYPES[f].col}</span>` : `${ti("all")}<span>todas</span>`; }
 function renderPanel() {
@@ -3251,7 +3268,7 @@ function bsSearch() {
 }
 function bsItem(x) {
   const r = repShort(x), yr = x.date.slice(0, 4) !== String(NOW.getFullYear());
-  const sub = [txCard(x.tx), yr ? dYY(x.date) : ddmm(x.date)].filter(Boolean).join(", ");
+  const sub = [txCard(x.tx), yr ? dYY(x.date) : ddmm(x.date)].filter(Boolean).join(" · ") + pendIco(x.tx);
   return `<button class="lrow" data-item="${x.tx.id}" data-date="${x.date}" aria-label="${esc(TYPES[x.tx.type].label)}: ${esc(x.tx.desc)}, ${brl(x.value)}, ${dBR(x.date)}. ver detalhes">
     <span class="lrow-top">${ti(x.tx.type, true)}<b class="ellip">${esc(x.tx.desc)}</b><span class="lrow-val num">${brl(x.value)}</span></span>
     <span class="lrow-sub"><span class="num">${sub}</span>${r ? `<span class="lrow-rep num">${r}</span>` : ""}</span></button>`;
@@ -3472,17 +3489,19 @@ const MENU = [
   ["ajuda", "como funciona", "help"],
   ["sair", "sair", "out"],
 ];
+const SIGN_IN = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><path d="M10 17l5-5-5-5"/><path d="M15 12H3"/></svg>';
 function menuHTML() {
   const p = prof();
   let h = `<div class="page menu-page"><div class="page-inner mp" style="max-width:720px">
     <div class="mp-head"><div class="mp-name ellip">${esc(p.nome) || "você"}</div><div class="mp-mail ellip">${esc(p.email)}</div></div><div class="slist2">`;
+  if (NET.relogin && !NET.offline) h += srow({ attr: 'data-menu="relogin"', ico: SIGN_IN, main: "entrar de novo", chev: false, cls: "is-acc" });
   for (const [k, lbl, ic] of MENU)
     h += srow({ attr: `data-menu="${k}"`, ico: ic ? (I[ic] || SI[ic]) : `<span class="pv-ico" aria-hidden="true"></span>`, main: lbl, chev: k !== "sair", cls: k === "sair" ? "is-danger" : "" });
   return h + `</div></div></div>`;
 }
 $("#view").addEventListener("click", e => {
   const b = e.target.closest("[data-menu]"); if (!b) return;
-  ({ perfil: openProfile, prev: openPrevScreen, cartoes: openCards, aparencia: openAppearance, ajuda: () => openTutorial(false), sair: signOut })[b.dataset.menu]();
+  ({ relogin: () => window.fluxRelogin && window.fluxRelogin(), perfil: openProfile, prev: openPrevScreen, cartoes: openCards, aparencia: openAppearance, ajuda: () => openTutorial(false), sair: signOut })[b.dataset.menu]();
 });
 
 /* ===== editar perfil ===== */
@@ -3810,14 +3829,17 @@ function openTutorial(first) {
   view.addEventListener("wheel", e => tuWheel(e, () => !drag), { passive: false });
   return s;
 }
-// conta nova: o tutorial abre sozinho uma vez, depois da abertura do app
+// conta sem lançamentos: o tutorial abre sozinho uma vez em cada aparelho (site e atalho da tela de início contam separado)
 function maybeTutorial() {
   if (!S.loaded || UI.signedOut || $("#auth")) return;
   const key = S.mode === "supabase" ? (SB_USER && SB_USER.id) || "" : S.mode;
   if (!key || UI.tuKey === key) return;
   UI.tuKey = key;
-  if (prof().tutorial || S.txs.length || S.cards.length || S.prev.length) return;
-  saveProfile({ tutorial: true });
+  if (S.txs.length || S.cards.length || S.prev.length) return;
+  const app = (window.matchMedia && matchMedia("(display-mode: standalone)").matches) || navigator.standalone ? "app" : "web";
+  const seen = "flux.tutorial." + app + "." + key;
+  if (lsGet(seen, false)) return;
+  lsSet(seen, true);
   setTimeout(() => { if (!$("#auth") && !UI.signedOut) openTutorial(true); }, Math.max(0, SPLASH_MIN - performance.now()) + 500);
 }
 
@@ -4046,10 +4068,11 @@ function pxApplyFlash() {
 }
 
 /* ===== desfazer ao apagar: apaga na hora e oferece desfazer por alguns segundos ===== */
+const offNow = () => S.mode === "supabase" && (!isOnline() || NET.offline || NET.relogin);
 async function deleteUndo(tx, date) {
   const old = JSON.parse(JSON.stringify(tx));
   const restore = () => saveTx(old.id, stripId(old));
-  if ((tx.rep || "none") === "none") { await delTx(tx.id); afterDelete(); undoPill("movimentação apagada", restore); return; }
+  if ((tx.rep || "none") === "none") { await delTx(tx.id); afterDelete(); undoPill("movimentação apagada", restore, offNow()); return; }
   const nd = nextOccDate(tx, date);
   const s = await chooseDelScope(!!nd);
   if (!s) return;
@@ -4058,17 +4081,18 @@ async function deleteUndo(tx, date) {
   else if (s === "one") await saveTx(tx.id, { ...stripId(tx), skip: [...(tx.skip || []), date] });
   else if (s === "from") await saveTx(tx.id, { ...stripId(tx), endBefore: date });
   afterDelete();
-  undoPill(s === "one" ? "repetição apagada" : "repetições apagadas", restore);
+  undoPill(s === "one" ? "repetição apagada" : "repetições apagadas", restore, offNow());
 }
 let UNDO_T = null;
+const CLOUD_OFF = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m2 2 20 20"/><path d="M5.8 5.8A7 7 0 0 0 9 19h8.5a4.5 4.5 0 0 0 1.3-.2"/><path d="M21.5 16.5A4.5 4.5 0 0 0 17.5 10h-1.8A7 7 0 0 0 10 5.1"/></svg>';
 const UNDO_ICO = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 14L4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11"/></svg>';
 // botão "desfazer" no estilo da barra de baixo
-function undoPill(msg, fn) {
+function undoPill(msg, fn, cloud) {
   let el = $("#px-undo"); if (el) el.remove();
   clearTimeout(UNDO_T);
   el = document.createElement("button"); el.id = "px-undo";
   el.setAttribute("aria-label", msg + ". desfazer");
-  el.innerHTML = `${UNDO_ICO}<span>desfazer</span>`;
+  el.innerHTML = `${UNDO_ICO}<span>desfazer</span>${cloud ? `<span class="sep"></span>${CLOUD_OFF}` : ""}`;
   document.body.appendChild(el);
   // no celular fica logo acima da barra de baixo, onde quer que ela esteja
   const nav = $("#bottom-nav");
