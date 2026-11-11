@@ -1,6 +1,6 @@
 /* FLUX: guarda uma cópia do app no aparelho para abrir sem internet */
-const VERSION = "flux-v7";
-const SHELL = ["./", "./index.html", "./manifest.json", "./icon-192.png", "./icon-512.png", "./icon-rounded-192.png", "./icon-rounded-512.png",
+const VERSION = "flux-v8";
+const SHELL = ["./", "./index.html", "./manifest.json", "./icons/icon-192.png", "./icons/icon-512.png", "./icons/icon-rounded-192.png", "./icons/icon-rounded-512.png",
   "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"];
 
 self.addEventListener("install", e => {
