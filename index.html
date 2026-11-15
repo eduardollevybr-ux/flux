@@ -92,7 +92,6 @@ button{cursor:pointer;background:none;border:0;padding:0}
 .lrow-sub{display:flex;justify-content:space-between;align-items:center;gap:12px;color:var(--muted);font-size:14px;padding-left:28px;min-width:0}
 .lrow-sub>span:first-child{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .lrow-rep{white-space:nowrap;text-align:right}
-.pb .detail-grid{padding:16px}
 .pb .skel{margin:12px 16px}
 .form-err{margin:0;padding:10px 14px;border-radius:var(--r-sm);background:color-mix(in srgb,var(--c-saida) 14%,transparent);color:var(--c-saida);font-weight:600;font-size:13px}
 /* formulário no estilo lista */
@@ -122,6 +121,9 @@ button{cursor:pointer;background:none;border:0;padding:0}
   .overlay:has(.form-modal),.overlay.ov-form{padding:0}
   .modal.form-modal{width:100%;height:100%;max-height:none;border-radius:0;border:0;background:var(--screen)}
   .form-modal .modal-head{display:none}
+  .form-modal.is-edit{position:relative}
+  .form-modal.is-edit .modal-head{display:flex;position:absolute;top:calc(34px + env(safe-area-inset-top,0px));right:12px;padding:0;z-index:2}
+  .form-modal.is-edit .modal-head h2{display:none}
   .form-modal .modal-body{flex:0 0 auto;padding-top:calc(24px + env(safe-area-inset-top,0px))!important}
   .form-modal .modal-foot{padding-top:24px}
   .form-modal .modal-foot{padding-bottom:calc(16px + env(safe-area-inset-bottom,0px));border-top:0}
@@ -235,9 +237,8 @@ button{cursor:pointer;background:none;border:0;padding:0}
 .ti{font-style:normal}
 .ti.lg{width:16px;height:16px;border-radius:50%}
 /* ---------- cards de totais clicáveis + telas de cálculo ---------- */
-button.card.calc{width:100%;text-align:left;color:inherit;font:inherit;cursor:pointer}
-@media (min-width:701px){ @media (hover:hover){button.card.calc:hover{border-color:var(--line2)}} }
-button.card.calc:active{transform:scale(.98)}
+.card.calc{width:100%;text-align:left;color:inherit;font:inherit;cursor:pointer;-webkit-tap-highlight-color:transparent}
+@media (min-width:701px){ @media (hover:hover){.card.calc:hover{border-color:var(--line2)}} }
 .ph-mid.start{justify-content:flex-start;padding-left:4px}
 .ph-mid.start .ph-title{font-size:24px}
 .pill-nav{display:grid;grid-template-columns:36px 1fr 36px;align-items:center;height:38px;padding:0 2px;border:2px solid var(--line2);border-radius:999px}
@@ -391,9 +392,6 @@ textarea.input{height:auto;min-height:120px;padding:12px 14px;resize:vertical}
 .empty{display:flex;flex-direction:column;align-items:center;gap:14px;padding:48px 0;color:var(--muted)}
 .empty .plus{width:64px;height:64px;border-radius:99px;border:2px dashed var(--line2);display:grid;place-items:center;color:var(--accent)}
 @media (hover:hover){.empty .plus:hover{border-color:var(--accent)}}
-.detail-grid{display:grid;grid-template-columns:auto 1fr;gap:14px 18px;align-items:center}
-.detail-grid dt{color:var(--muted);font-size:13px}
-.detail-grid dd{margin:0;font-weight:600;display:flex;align-items:center;gap:8px;min-width:0;overflow-wrap:anywhere}
 .popover{position:fixed;z-index:70;background:var(--surface);border:1px solid var(--line2);border-radius:16px;box-shadow:var(--shadow);padding:6px;overflow:auto;animation:fade .12s ease}
 .pop-item{display:flex;align-items:center;gap:12px;width:100%;padding:0 14px;height:46px;border-radius:10px;font-weight:500;white-space:nowrap;text-align:left}
 @media (hover:hover){.pop-item:hover{background:var(--surface2)}}
@@ -759,11 +757,7 @@ body.relog .nav-btn[data-tab="menu"]::after{top:9px;left:31px}
 .crow-top b,.crow-top .num{font-size:18px}
 .cs-total{padding:24px 20px 8px}
 .cs-label{padding:28px 20px 12px}
-.pb .detail-grid{padding:0;gap:0;grid-template-columns:auto 1fr;align-items:stretch}
 .row .grow{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.pb .detail-grid dt,.pb .detail-grid dd{padding:20px 0;border-bottom:1px solid var(--line);min-height:64px;display:flex;align-items:center}
-.pb .detail-grid dt{padding-left:20px;padding-right:20px;font-size:15px}
-.pb .detail-grid dd{padding-right:20px;font-size:18px;justify-content:flex-end;text-align:right}
 @media (max-width:700px){
   .section-title{padding:28px 20px 12px;margin:0;font-size:15px}
   .page-inner{gap:0}
@@ -799,8 +793,6 @@ body.relog .nav-btn[data-tab="menu"]::after{top:9px;left:31px}
 .lrow-top b,.lrow-val{font-size:16px}
 .lrow-sub{font-size:14px}
 .crow-top b,.crow-top .num{font-size:16px}
-.pb .detail-grid dt{font-size:14px}
-.pb .detail-grid dd{font-size:16px}
 @media (max-width:700px){
   .section-title{font-size:14px}
   .row,.menu-page .row{font-size:16px}
@@ -809,7 +801,7 @@ body.relog .nav-btn[data-tab="menu"]::after{top:9px;left:31px}
 
 /* ===== padrão dos cálculos do mês para o site todo: título 16px negrito, valor 16px seminegrito ===== */
 .row .grow,.srow-main,.lrow-top b,.crow-top b,.pv-row b,.pv-line b{font-size:16px;font-weight:700}
-.row .val,.srow-val,.lrow-val,.crow-top .num,.pv-row span,.pv-line>span,.pb .detail-grid dd{font-size:16px;font-weight:600}
+.row .val,.srow-val,.lrow-val,.crow-top .num,.pv-row span,.pv-line>span{font-size:16px;font-weight:600}
 .row .muted,.pv-x{font-size:14px;font-weight:500}
 .row-link{font-weight:700}
 @media (max-width:700px){.row,.menu-page .row{min-height:66px;padding:18px 20px}}
@@ -1165,6 +1157,30 @@ body.relog .nav-btn[data-tab="menu"]::after{top:9px;left:31px}
 
 /* 4) seleções preenchidas: nada de contorno, a opção ativa ganha um fundo arredondado */
 :root .m-sel{border-color:transparent;background:var(--surface2)}
+:root .pill-dd,:root .pill-nav,:root .stepper{border-color:transparent;background:var(--surface2)}
+/* totais: conta e mês anterior escondidos até tocar no cálculo; ritmo do diário */
+.calc .xp{grid-column:1/-1;display:flex;flex-direction:column;gap:10px;overflow:hidden;max-height:0;opacity:0;margin-top:-6px;transition:max-height .35s var(--ease-out),opacity .25s,margin .35s var(--ease-out)}
+.calc.open .xp{max-height:160px;opacity:1;margin-top:4px}
+.calc .xp .formula{flex-wrap:nowrap;overflow:hidden}
+.calc .xo{display:flex;justify-content:space-between;align-items:center;gap:10px;font-size:13px;color:var(--muted)}
+.cmp{flex:none;font-size:12px;font-weight:700;padding:2px 8px;border-radius:999px;background:var(--surface2);color:var(--muted);white-space:nowrap}
+.cmp.good{background:var(--pos);color:var(--pos-fg)}
+.cmp.bad{background:var(--neg1);color:var(--neg1-fg)}
+.calc .xgo{display:inline-flex;align-items:center;gap:2px;align-self:flex-start;padding:4px 0;color:var(--nav-ic);font-weight:700;font-size:14px}
+.calc .xgo svg{width:16px;height:16px}
+.calc .big-of{color:var(--muted);font-weight:500;white-space:nowrap}
+@media (min-width:701px){.calc .big-of{display:block;font-size:15px;margin-top:4px}}
+.calc .dchart{grid-column:1/-1;display:block;width:100%;height:auto;margin-top:6px}
+.dc-prev{stroke:var(--muted);stroke-width:1.5;stroke-dasharray:4 4;opacity:.7}
+.dc-area{fill:color-mix(in srgb,var(--c-diario) 14%,transparent)}
+.dc-line{fill:none;stroke:var(--c-diario);stroke-width:2.5;stroke-linejoin:round;stroke-linecap:round}
+.dc-dot{fill:var(--c-diario);stroke:var(--bg);stroke-width:2}
+.hold{position:relative;overflow:hidden;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;touch-action:pan-y}
+.hold-fill{position:absolute;inset:0;border-radius:inherit;clip-path:inset(0 100% 0 0);background:color-mix(in srgb,var(--c-saida) 18%,transparent);pointer-events:none;z-index:0}
+.srow.hold .hold-fill{inset:4px 8px;border-radius:14px}
+.hold.neutral .hold-fill{background:color-mix(in srgb,var(--text) 10%,transparent)}
+.hold>*:not(.hold-fill){position:relative;z-index:1}
+.hold:active{transform:none!important;background-color:transparent!important}
 :root .bn-ind{display:none}
 /* aba ativa: pílula que pega ícone e nome e desliza de uma aba para a outra (barra de baixo e barra lateral) */
 :root .bn{transition:color .25s}
@@ -1267,6 +1283,25 @@ body.stk-open .bottom-nav{z-index:76!important}
   .mcard:not(.hcard) .mtable td,.mcard:not(.hcard) .mtable th{padding-left:10px!important;padding-right:10px!important}
   .mcard:not(.hcard) .mtable td.c-saldo{padding-right:24px!important}
   .mcard:not(.hcard) .mtable th.c-sh{padding-right:20px!important}
+}
+
+/* ===== padronização de espaçamentos (15/11/2026): mesmas medidas para o que tem a mesma função ===== */
+/* texto depois de ícone de linha começa sempre em 64px (20 de margem + 28 do ícone + 16) */
+.frow{gap:16px}
+.bs-msg{gap:12px}
+/* título das telas cheias na mesma posição (68px), com ou sem botão no título */
+.ph-mid.start{padding-left:0}
+.ph-mid.start .ph-title{padding-left:0;padding-right:0}
+/* rótulos de seção: mesmo tamanho */
+.cs-label{font-size:14px}
+/* filtros e seletores em pílula: 38px de altura, 16px nas laterais, 10px entre ícone e texto */
+:root .m-sel,.bs-pill{height:38px;padding:0 16px;gap:10px}
+/* botões grandes: 52px em telas e janelas */
+:root .dbtn,.modal:not(.form-modal) .modal-foot .btn{height:52px}
+@media (max-width:700px){
+  /* linhas de uma linha só: 64px de altura em todas as listas */
+  .row,.menu-page .row{min-height:64px;padding-top:16px;padding-bottom:16px}
+  .crow,.pv-row{padding-top:21px;padding-bottom:21px}
 }
 </style>
 <script>try{var t=JSON.parse(localStorage.getItem("ae.theme")||"null")||"dark";if(t==="system")t=matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light";if(t==="light")document.documentElement.classList.add("light")}catch(e){}</script>
@@ -1430,6 +1465,7 @@ const DEFAULT_PROFILE = { nome: "", sobrenome: "", email: "" };
 const S = { txs: [], tags: [], cards: [], prev: [], profile: null, checkins: {}, loaded: false, mode: "local" };
 const UI = {
   tab: "saldos",
+  calcOpen: new Set(), // cálculos do totais abertos (conta e mês anterior)
   sideCollapsed: lsGet("ae.side", false),
   hiddenCols: lsGet("ae.cols", {}),
   bStart: CUR, bEnd: CUR + 11, hzS: CUR, mCol: (v => ["all", ...TYPE_ORDER].includes(v) ? v : "all")(lsGet("flux.mcol", "all")),
@@ -1929,7 +1965,7 @@ const EDGE_W = 24;
 function backTarget() {
   if (popClose) return { el: null, go: closePopover };
   if (modals.length) { const m = modals[modals.length - 1]; return { el: m.el, go: () => m.close() }; }
-  if (PANEL.open) return { el: $("#drawer-root .drawer"), go: () => { if (PANEL.fromSearch) closePanel(); else if (PANEL.detail) { PANEL.detail = null; renderPanel(); } else if (PANEL.calcF) backToCalc(); else closePanel(); } };
+  if (PANEL.open) return { el: $("#drawer-root .drawer"), go: () => { if (PANEL.calcF) backToCalc(); else closePanel(); } };
   if (isMobile() && UI.tab === "horizonte") return { el: $("#view"), go: () => goTab("saldos") };
   return null;
 }
@@ -2744,13 +2780,26 @@ function totaisInner(mi) {
   const pct = st.econPct;
   const ecS = st.econVal <= 0 ? ["nada guardado", ""] : pct < 20 ? ["abaixo do ideal", "bad"] : pct <= 30 ? ["dentro do ideal", "good"] : ["acima do ideal", "good"];
   const cvS = Math.abs(st.custo) < 0.005 ? ["zerado", ""] : st.custo <= st.custoBase ? ["dentro da renda", "good"] : ["acima da renda", "bad"];
-  const dmS = [`${ti("prev")}<span class="num">${brl(st.perDay)}</span>`, "pv"];
-  const calcCard = (key, formula, value, s, extra = "", num) => { const title = CALCS[key].t; return `<button class="card calc" data-calc="${key}" aria-label="${title}"><h3>${title}</h3>${formula}<div class="big num" ${num != null ? `data-count="${num}"` : ""}>${value}</div>${extra}<span class="status ${s[1]}">${s[0]}</span></button>`; };
+  /* tocar no cálculo abre a conta e o mês anterior; "todos os meses" leva para a tela detalhada */
+  const pm = mi - 1 >= MIN_MI ? mi - 1 : null, pv = pm != null ? monthStats(pm) : null, pName = pm != null ? MONTHS[miM(pm)] : "";
+  const chip = (txt, good) => `<span class="cmp ${good == null ? "" : good ? "good" : "bad"}">${txt}</span>`;
+  const rel = (cur, old, upGood) => { if (!pv || Math.abs(old) < 0.005) return ""; const d = Math.round((cur - old) / Math.abs(old) * 100); return chip(`${d > 0 ? "+" : ""}${d}%`, d === 0 ? null : (d > 0) === upGood); };
+  const cmpLine = (txt, ch) => pv ? `<div class="xo"><span>${txt}</span>${ch}</div>` : "";
+  const calcCard = (key, opts) => {
+    const { title = CALCS[key].t, formula = "", value, s = null, extra = "", num = null, cmp = "" } = opts;
+    const open = UI.calcOpen.has(key);
+    return `<div class="card calc ${open ? "open" : ""}" data-ctog="${key}" role="button" tabindex="0" aria-expanded="${open}" aria-label="${title}"><h3>${title}</h3><div class="big num" ${num != null ? `data-count="${num}"` : ""}>${value}</div>${s ? `<span class="status ${s[1]}">${s[0]}</span>` : ""}${extra}
+      <div class="xp" aria-hidden="${!open}">${formula}${cmp}<button class="xgo" data-calc="${key}">todos os meses${I.right}</button></div></div>`;
+  };
+  const econDiff = pv ? r2(pct - pv.econPct) : 0;
+  const econChip = pv ? chip(`${econDiff > 0 ? "+" : econDiff < 0 ? "-" : ""}${pctFmt(Math.abs(econDiff))}`, Math.abs(econDiff) < 0.005 ? null : econDiff > 0) : "";
+  const PT = prevTotal();
   let h = `<div class="page-inner"><div><h2 class="section-title">cálculos do mês</h2><div class="calc-grid">`;
-  h += calcCard("performance", fx(ti("entrada"), op("−"), ti("saida"), op("−"), ti("diario"), op("−"), ti("economia"), op("−"), ti("cartao"), op("−"), ti("prev")), brl(perf), perfS, "", perf);
-  h += calcCard("economizado", ecBar(pct), pctFmt(pct), ecS);
-  h += calcCard("custo", fx(ti("saida"), op("+"), ti("diario"), op("+"), ti("cartao"), op("+"), ti("prev")), brl(st.custo), cvS, "", st.custo);
-  h += calcCard("diarioMedio", fx(ti("diario"), op("/"), op(`${st.diarioDias}`)), brl(st.diarioMedio), dmS);
+  h += calcCard("performance", { formula: fx(ti("entrada"), op("−"), ti("saida"), op("−"), ti("diario"), op("−"), ti("economia"), op("−"), ti("cartao"), op("−"), ti("prev")), value: brl(perf), s: perfS, num: perf, cmp: cmpLine(`em ${pName} ${pv ? brl(pv.performance) : ""}`, rel(perf, pv && pv.performance, true)) });
+  h += calcCard("economizado", { value: pctFmt(pct), s: ecS, extra: ecBar(pct), cmp: cmpLine(`em ${pName} ${pv ? pctFmt(pv.econPct) : ""}`, econChip) });
+  h += calcCard("custo", { formula: fx(ti("saida"), op("+"), ti("diario"), op("+"), ti("cartao"), op("+"), ti("prev")), value: brl(st.custo), s: cvS, num: st.custo, cmp: cmpLine(`em ${pName} ${pv ? brl(pv.custo) : ""}`, rel(st.custo, pv && pv.custo, false)) });
+  h += calcCard("diarioMedio", { title: "diário", formula: fx(ti("diario"), op("/"), op(`${st.diarioDias}`)), value: `${brl(st.diarioTot)}${PT > 0.004 ? `<span class="big-of"> / ${brl(PT)}</span>` : ""}`, extra: diarioChart(mi, PT),
+    cmp: cmpLine(`média por dia ${brl(st.diarioMedio)} · ${pName} ${pv ? brl(pv.diarioMedio) : ""}`, rel(st.diarioMedio, pv && pv.diarioMedio, false)) });
   h += `</div></div><div><h2 class="section-title">movimentações do mês</h2><div class="list">`;
   for (const t of TYPE_ORDER) h += `<button class="row" data-mlist="${t}">${ti(t, true)}<span class="grow">${TYPES[t].label}</span><span class="val num">${brl(st.all[t])}</span>${I.chev}</button>`;
   h += `<button class="row" data-mlist="all"><span class="grow row-link">ver todas</span><span class="muted">${st.list.length} ${st.list.length === 1 ? "movimentação" : "movimentações"}</span>${I.chev}</button></div></div>`;
@@ -2758,9 +2807,40 @@ function totaisInner(mi) {
   h += `<div><h2 class="section-title">previsão de diário do mês</h2><div class="list"><button class="row" data-openprev aria-label="previsão de diário: ${pdays} ${pdays === 1 ? "dia" : "dias"}, ${brl(st.P)}">${ti("prev", true)}<span class="grow">previsão de diário <span class="pv-x num">x${pdays}</span></span><span class="val num">${brl(st.P)}</span>${I.chev}</button></div></div>`;
   return h + `</div>`;
 }
+/* ritmo do diário: diário lançado no mês, somado dia a dia, contra a linha da previsão de diário do mês */
+function diarioChart(mi, PT) {
+  const days = dim(miY(mi), miM(mi)), first = miFirst(mi);
+  const upto = mi < CUR ? days : mi > CUR ? 0 : NOW.getDate();
+  const tm = tagMap(), byDay = new Array(days + 1).fill(0);
+  for (const x of occs(first, miLast(mi))) if (x.tx.type === "diario" && !ignores(x.tx, "diarioMedio", tm)) byDay[+x.date.slice(8)] += x.value;
+  const acc = []; let a = 0; for (let d = 1; d <= upto; d++) { a += byDay[d]; acc.push(a); }
+  if (!(PT > 0.004) && !(a > 0.004)) return "";
+  const W = 300, H = 72, top = Math.max(PT, a, 1) * 1.04;
+  const x = d => 3 + (d - 1) / Math.max(1, days - 1) * (W - 6), y = v => H - 3 - v / top * (H - 8);
+  let svg = `<svg class="dchart" viewBox="0 0 ${W} ${H}" aria-hidden="true">`;
+  if (PT > 0.004) svg += `<line x1="${x(1)}" y1="${y(0)}" x2="${x(days)}" y2="${y(PT)}" class="dc-prev"/>`;
+  if (acc.length) {
+    const pts = acc.map((v, i) => `${x(i + 1).toFixed(1)},${y(v).toFixed(1)}`).join(" ");
+    svg += `<polygon class="dc-area" points="${x(1).toFixed(1)},${y(0).toFixed(1)} ${pts} ${x(acc.length).toFixed(1)},${y(0).toFixed(1)}"/><polyline class="dc-line" points="${pts}"/>`;
+    if (mi === CUR) svg += `<circle class="dc-dot" cx="${x(acc.length).toFixed(1)}" cy="${y(a).toFixed(1)}" r="4.5"/>`;
+  }
+  return svg + `</svg>`;
+}
+function toggleCalc(card) {
+  const key = card.dataset.ctog, open = !UI.calcOpen.has(key);
+  if (open) UI.calcOpen.add(key); else UI.calcOpen.delete(key);
+  // vale para os meses ao lado também (o pager desenha os três)
+  $$(`[data-ctog="${key}"]`).forEach(c => { c.classList.toggle("open", open); c.setAttribute("aria-expanded", open); $(".xp", c)?.setAttribute("aria-hidden", !open); });
+}
+$("#view").addEventListener("keydown", e => {
+  const ct = e.target.closest && e.target.closest("[data-ctog]");
+  if (ct && e.target === ct && (e.key === "Enter" || e.key === " ")) { e.preventDefault(); toggleCalc(ct); }
+});
 $("#view").addEventListener("click", e => {
   const cc = e.target.closest("[data-calc]");
   if (cc) return openCalcScreen(cc.dataset.calc, miY(UI.tMonth));
+  const ct = e.target.closest("[data-ctog]");
+  if (ct) return toggleCalc(ct);
   if (e.target.closest("[data-openprev]")) return openPrevScreen();
   const ml = e.target.closest("[data-mlist]");
   if (ml) openMonthScreen(UI.tMonth, ml.dataset.mlist);
@@ -2768,13 +2848,13 @@ $("#view").addEventListener("click", e => {
 
 
 /* ================= painel do dia / movimentações do mês (tela cheia) ================= */
-const PANEL = { open: false, mode: "day", date: TODAY, mi: CUR, filter: null, detail: null };
-function openPanel(date, types, detail) {
-  Object.assign(PANEL, { open: true, mode: "day", calc: null, calcF: null, fromSearch: false, date, filter: types && types.length === 1 ? types[0] : null, detail: detail || null });
+const PANEL = { open: false, mode: "day", date: TODAY, mi: CUR, filter: null };
+function openPanel(date, types) {
+  Object.assign(PANEL, { open: true, mode: "day", calc: null, calcF: null, date, filter: types && types.length === 1 ? types[0] : null });
   renderPanel();
 }
 function openMonthScreen(mi, type) {
-  Object.assign(PANEL, { open: true, mode: "month", calc: null, calcF: null, mi, filter: type === "all" ? null : type, detail: null });
+  Object.assign(PANEL, { open: true, mode: "month", calc: null, calcF: null, mi, filter: type === "all" ? null : type });
   renderPanel();
 }
 function openCalcScreen(key, year) {
@@ -2849,7 +2929,7 @@ const pendIco = tx => isPending(tx.id) ? `<span class="pend" aria-label="salvo n
 function txCard(tx) { return tx.type === "cartao" && cardName(tx.cardId) ? esc(cardName(tx.cardId)) : ""; }
 function itemHTML(x) {
   const r = repShort(x);
-  return `<button class="lrow" data-item="${x.tx.id}" data-date="${x.date}" aria-label="${esc(TYPES[x.tx.type].label)}: ${esc(x.tx.desc)}, ${brl(x.value)}, ${dBR(x.date)}. ver detalhes">
+  return `<button class="lrow" data-item="${x.tx.id}" data-date="${x.date}" aria-label="${esc(TYPES[x.tx.type].label)}: ${esc(x.tx.desc)}, ${brl(x.value)}, ${dBR(x.date)}. editar">
     <span class="lrow-top">${ti(x.tx.type, true)}<b class="ellip">${esc(x.tx.desc)}</b><span class="lrow-val num">${brl(x.value)}</span></span>
     <span class="lrow-sub"><span class="num">${[txCard(x.tx), ddmm(x.date)].filter(Boolean).join(" · ")}${pendIco(x.tx)}</span>${r ? `<span class="lrow-rep num">${r}</span>` : ""}</span></button>`;
 }
@@ -2859,21 +2939,6 @@ function renderPanel() {
   let head, body, label;
   if (PANEL.mode === "calc") {
     ({ head, body, label } = calcScreen());
-  } else if (PANEL.detail) {
-    const tx = S.txs.find(t => t.id === PANEL.detail.tx);
-    const occ = tx ? occInfo(tx, PANEL.detail.date) : null;
-    if (!occ) { PANEL.detail = null; return renderPanel(); }
-    const x = { tx, ...occ };
-    head = `<button class="icon-btn flat" data-pback aria-label="voltar">${I.back}</button><div class="ph-mid"></div>
-      <div class="ph-right"><button class="icon-btn flat" data-pedit aria-label="editar movimentação">${I.pencil}</button><button class="icon-btn flat is-danger" data-pdel aria-label="apagar movimentação">${I.trash}</button></div>`;
-    body = `<dl class="detail-grid">
-      <dt>tipo</dt><dd>${ti(tx.type, true)} ${TYPES[tx.type].label}${isResg(tx) ? ", resgate" : ""}</dd>
-      ${tx.type === "cartao" ? `<dt>cartão</dt><dd>${cardName(tx.cardId) ? esc(cardName(tx.cardId)) : `<span class="muted">sem cartão</span>`}</dd>` : ""}
-      <dt>descrição</dt><dd>${esc(tx.desc)}</dd>
-      <dt>valor</dt><dd class="num">${brl(occ.value)}</dd>
-      <dt>data</dt><dd class="num">${dBR(occ.date)}</dd>
-      <dt>repetição</dt><dd>${repText(x) || "não repete"}</dd>
-    </dl>`;
   } else {
     const day = PANEL.mode === "day";
     let mid, list, prevOk, nextOk;
@@ -2947,11 +3012,9 @@ $("#drawer-root").addEventListener("click", e => {
     openTypeStack(add, types, k => openForm({ type: k, date }));
     return;
   }
-  if (t.closest("[data-pback]")) { if (PANEL.fromSearch) return closePanel(); PANEL.detail = null; return renderPanel(); }
-  if (t.closest("[data-pedit]")) { const tx = S.txs.find(x => x.id === PANEL.detail.tx); return openForm({ tx, occ: PANEL.detail.date }); }
-  if (t.closest("[data-pdel]")) { const tx = S.txs.find(x => x.id === PANEL.detail.tx); return deleteOcc(tx, PANEL.detail.date); }
+  // tocar no lançamento abre direto o formulário (sem tela de detalhes)
   const it = t.closest("[data-item]");
-  if (it) { PANEL.detail = { tx: it.dataset.item, date: it.dataset.date }; renderPanel(); }
+  if (it) { const tx = S.txs.find(x => x.id === it.dataset.item); if (tx) openForm({ tx, occ: it.dataset.date }); }
 });
 // iOS só aplica :active em toques quando existe um ouvinte de toque na página
 document.addEventListener("touchstart", () => { }, { passive: true });
@@ -2966,7 +3029,7 @@ function chooseScope({ title, hasNext }) {
   return new Promise(res => {
     let done = false;
     const m = openModal({
-      title, body: `<p class="dialog-text">escolha para quais repetições vale essa mudança.</p>`,
+      title, body: "",
       foot: `<button class="dbtn" data-s="one">salvar somente nesta</button><button class="dbtn" data-s="from">salvar nesta e nas próximas</button><button class="dbtn" data-s="all">salvar em todas</button><button class="btn-link" data-no>cancelar</button>`,
       onClose: () => { if (!done) res(null); }, cls: "cmodal"
     });
@@ -3002,7 +3065,7 @@ async function deleteOcc(tx, date) {
   else if (s === "next") await saveTx(tx.id, { ...stripId(tx), endBefore: nd });
   afterDelete();
 }
-function afterDelete() { if (PANEL.open) { if (PANEL.fromSearch) return closePanel(); PANEL.detail = null; renderPanel(); } }
+function afterDelete() { if (PANEL.open) renderPanel(); }
 
 /* ================= formulário adicionar / editar ================= */
 function parseMoney(str) { const dg = String(str).replace(/\D/g, ""); return dg ? parseInt(dg, 10) / 100 : 0; }
@@ -3046,8 +3109,12 @@ function openForm({ type = "saida", date = TODAY, tx = null, occ = null } = {}) 
     return f.rep === "weekly" ? everyWD(parse(f.date).getDay()) : "mesmo dia";
   };
   const MDAY_TITLE = () => f.rep === "daily" ? "repete em" : "repete no";
-  const m = openModal({ title: edit ? "editar movimentação" : "adicionar movimentação", body: "", cls: "form-modal", foot: `<button class="btn block" id="f-submit"></button><button class="btn-link" id="f-cancel">cancelar</button>` });
+  const m = openModal({ title: edit ? "editar movimentação" : "adicionar movimentação", body: "", cls: "form-modal", headExtra: edit ? `<button class="icon-btn flat is-danger f-del" id="f-del" aria-label="apagar movimentação">${I.trash}</button>` : "", foot: `<button class="btn block" id="f-submit"></button><button class="btn-link" id="f-cancel">cancelar</button>` });
   const el = m.el;
+  if (edit) {
+    el.classList.add("is-edit");
+    $("#f-del", el).onclick = () => { m.close(); deleteOcc(tx, occD || tx.date); };
+  }
   const REP_ICO = '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4.5" width="15" height="15" rx="2.5"/><path d="M3 9h15M7.5 2.5v4M13.5 2.5v4"/><path d="M21 15a4 4 0 1 1-1.2-2.8M21 11.5V14h-2.5"/></svg>';
   const PEN = '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg>';
   const CAL = I.cal.replace("<svg", '<svg width="22" height="22"');
@@ -3177,7 +3244,7 @@ function openForm({ type = "saida", date = TODAY, tx = null, occ = null } = {}) 
       await saveTx(uid("t"), { ...base, count: cnt, installments: ins, value: stored(f.value, f.rep, ins), date: st.date, bdate: st.bdate, createdAt: now, skip: (tx.skip || []).filter(x => x > cut) });
     }
     pxTrail(fDate, f.type);
-    if (PANEL.open) { PANEL.detail = null; renderPanel(); }
+    if (PANEL.open) renderPanel();
   }
 }
 
@@ -3269,7 +3336,7 @@ function bsSearch() {
 function bsItem(x) {
   const r = repShort(x), yr = x.date.slice(0, 4) !== String(NOW.getFullYear());
   const sub = [txCard(x.tx), yr ? dYY(x.date) : ddmm(x.date)].filter(Boolean).join(" · ") + pendIco(x.tx);
-  return `<button class="lrow" data-item="${x.tx.id}" data-date="${x.date}" aria-label="${esc(TYPES[x.tx.type].label)}: ${esc(x.tx.desc)}, ${brl(x.value)}, ${dBR(x.date)}. ver detalhes">
+  return `<button class="lrow" data-item="${x.tx.id}" data-date="${x.date}" aria-label="${esc(TYPES[x.tx.type].label)}: ${esc(x.tx.desc)}, ${brl(x.value)}, ${dBR(x.date)}. editar">
     <span class="lrow-top">${ti(x.tx.type, true)}<b class="ellip">${esc(x.tx.desc)}</b><span class="lrow-val num">${brl(x.value)}</span></span>
     <span class="lrow-sub"><span class="num">${sub}</span>${r ? `<span class="lrow-rep num">${r}</span>` : ""}</span></button>`;
 }
@@ -3415,7 +3482,7 @@ $("#view").addEventListener("click", e => {
     return;
   }
   const it = t.closest("[data-item]");
-  if (it) { $("#bs-q")?.blur(); openPanel(it.dataset.date, null, { tx: it.dataset.item, date: it.dataset.date }); PANEL.fromSearch = true; }
+  if (it) { $("#bs-q")?.blur(); const tx = S.txs.find(x => x.id === it.dataset.item); if (tx) openForm({ tx, occ: it.dataset.date }); }
 });
 
 /* ================= telas cheias do menu (previsão, cartões, perfil, aparência) ================= */
@@ -3512,15 +3579,14 @@ function openProfile() {
     body: `${lfield("pf-n", "nome", p.nome, 'maxlength="40"')}${lfield("pf-s", "sobrenome", p.sobrenome, 'maxlength="60"')}
       ${accountRowsHTML()}
       <div class="sbtns"><button class="sbtn" data-pw>alterar senha</button><button class="sbtn solid" data-savep>salvar</button></div>`,
-    onMount: (el, s) => el.addEventListener("click", e => {
-      if (e.target.closest("[data-zerar], [data-apagar]")) return accountAction(e);
+    onMount: (el, s) => { bindAccountHold(el); el.addEventListener("click", e => {
       if (e.target.closest("[data-pw]")) return openPassword();
       if (e.target.closest("[data-savep]")) {
         const nome = $("#pf-n", el).value.trim(), sobrenome = $("#pf-s", el).value.trim();
         if (!nome) { toast("informe seu nome", true); return; }
         saveProfile({ nome, sobrenome }); s.close();
       }
-    }),
+    }); },
   });
 }
 function openPassword() {
@@ -3582,19 +3648,16 @@ function openPrevForm(id) {
   openScreen({
     title: p ? "editar gasto" : "novo gasto",
     body: `${lfield("pv-v", "valor por mês", p ? fmt(p.value) : "", 'class="num" inputmode="numeric" placeholder="0,00"')}${lfield("pv-d", "descrição", p ? p.desc : "", 'maxlength="60" placeholder="ex.: mercado"')}
-      <div class="sbtns">${p ? `<button class="sbtn is-danger" data-delprev>apagar</button>` : ""}<button class="sbtn solid" data-saveprev>salvar</button></div>`,
+      <div class="sbtns">${p ? `<button class="sbtn is-danger" data-delprev><span class="hold-lbl">apagar</span></button>` : ""}<button class="sbtn solid" data-saveprev>salvar</button></div>`,
     onMount: (el, s) => {
       bindMoney(el, "pv-v");
+      if (p) bindHold($("[data-delprev]", el), async () => { s.close(); await backend.del("prev", p.id); });
       el.addEventListener("click", async e => {
         if (e.target.closest("[data-saveprev]")) {
           const value = parseMoney($("#pv-v", el).value), desc = $("#pv-d", el).value.trim();
           if (!(value > 0)) { toast("informe um valor maior que zero", true); return; }
           s.close();
           await backend.put("prev", p ? p.id : uid("p"), { value, desc: desc || "gasto do dia a dia", createdAt: p ? p.createdAt || Date.now() : Date.now() });
-        }
-        if (e.target.closest("[data-delprev]")) {
-          if (!(await confirmBox({ title: "apagar gasto", text: "essa ação não poderá ser desfeita.", ok: "apagar" }))) return;
-          s.close(); await backend.del("prev", p.id);
         }
       });
     },
@@ -3632,8 +3695,10 @@ function openCardForm(id) {
     title: c ? "editar cartão" : "novo cartão",
     body: `${lfield("cc-name", "nome do cartão", c ? c.name : "", 'maxlength="40" placeholder="ex.: nubank"')}
       <div class="slist2 cc-def">${defRow()}</div>
-      <div class="sbtns">${c ? `<button class="sbtn is-danger" data-delcard>apagar</button>` : ""}<button class="sbtn solid" data-savecc>salvar</button></div>`,
-    onMount: (el, s) => el.addEventListener("click", async e => {
+      <div class="sbtns">${c ? `<button class="sbtn is-danger" data-delcard><span class="hold-lbl">apagar</span></button>` : ""}<button class="sbtn solid" data-savecc>salvar</button></div>`,
+    onMount: (el, s) => {
+      if (c) bindHold($("[data-delcard]", el), async () => { s.close(); if (prof().defCard === c.id) saveProfile({ defCard: "" }); await backend.del("cards", c.id); });
+      el.addEventListener("click", async e => {
       if (e.target.closest("[data-defcc]") && !only) { def = !def; $(".cc-def", el).innerHTML = defRow(); return; }
       if (e.target.closest("[data-savecc]")) {
         const name = $("#cc-name", el).value.trim();
@@ -3645,13 +3710,7 @@ function openCardForm(id) {
         else if (!def && prof().defCard === cid) saveProfile({ defCard: "" });
         await backend.put("cards", cid, { name, createdAt: c ? c.createdAt || Date.now() : Date.now() });
       }
-      if (e.target.closest("[data-delcard]")) {
-        const n = S.txs.filter(t => t.cardId === c.id).length;
-        if (!(await confirmBox({ title: "apagar cartão", text: "essa ação não poderá ser desfeita.", ok: "apagar" }))) return;
-        s.close(); if (prof().defCard === c.id) saveProfile({ defCard: "" });
-        await backend.del("cards", c.id);
-      }
-    }),
+    }); },
   });
 }
 
@@ -3674,17 +3733,47 @@ function openAppearance() {
   });
   draw(s);
 }
+/* ações que não têm volta: segurar o próprio botão por 3 segundos, com o preenchimento mostrando o progresso */
+function bindHold(btn, onDone, neutral = false, ms = 3000) {
+  if (!btn) return;
+  btn.classList.add("hold"); if (neutral) btn.classList.add("neutral");
+  const fill = document.createElement("span"); fill.className = "hold-fill"; fill.setAttribute("aria-hidden", "true"); btn.prepend(fill);
+  const lbl = $(".srow-main", btn) || $(".hold-lbl", btn), orig = lbl ? lbl.textContent : "";
+  btn.setAttribute("aria-label", `${orig}: segure por 3 segundos`);
+  let raf = 0, t0 = 0, on = false, busy = false;
+  const set = p => { fill.style.clipPath = `inset(0 ${(1 - p) * 100}% 0 0)`; };
+  const back = () => { fill.style.transition = "clip-path .35s var(--ease-out)"; set(0); if (lbl) lbl.textContent = orig; };
+  const step = t => {
+    if (!t0) t0 = t;
+    const p = Math.min(1, (t - t0) / ms);
+    set(p);
+    if (p < 1) { raf = requestAnimationFrame(step); return; }
+    on = false; busy = true; try { navigator.vibrate && navigator.vibrate(25); } catch { }
+    setTimeout(() => { busy = false; fill.style.transition = "none"; set(0); if (lbl) lbl.textContent = orig; }, 700);
+    onDone();
+  };
+  const start = e => { if (on || busy || btn.disabled || (e.button || 0) > 0) return; on = true; t0 = 0; fill.style.transition = "none"; if (lbl) lbl.textContent = "continue segurando"; raf = requestAnimationFrame(step); };
+  const stop = () => { if (!on) return; on = false; cancelAnimationFrame(raf); back(); };
+  btn.addEventListener("pointerdown", start);
+  ["pointerup", "pointerleave", "pointercancel"].forEach(ev => btn.addEventListener(ev, stop));
+  btn.addEventListener("contextmenu", e => e.preventDefault());
+  btn.addEventListener("keydown", e => { if ((e.key === "Enter" || e.key === " ") && !e.repeat) { e.preventDefault(); start(e); } });
+  btn.addEventListener("keyup", e => { if (e.key === "Enter" || e.key === " ") stop(); });
+}
 function accountRowsHTML() {
   return `<div class="slist2 pf-acc">${srow({ attr: "data-zerar", ico: SI.reset, main: "zerar minha conta", chev: false })}
       ${srow({ attr: "data-apagar", ico: I.trash, main: "apagar minha conta", chev: false, cls: "danger-row" })}</div>`;
 }
-async function accountAction(e) {
-      if (e.target.closest("[data-zerar]")) {
-        if (!(await confirmBox({ title: "zerar minha conta", text: "essa ação não poderá ser desfeita.", ok: "zerar conta" }))) return;
+/* zerar e apagar a conta: sem janela de confirmação, a pessoa segura a própria linha por 3 segundos */
+function bindAccountHold(el) {
+  bindHold($("[data-zerar]", el), () => accountAction("zerar"), true);
+  bindHold($("[data-apagar]", el), () => accountAction("apagar"));
+}
+async function accountAction(kind) {
+      if (kind === "zerar") {
         await wipe(["tx"]); S.checkins = {}; backend.putCheckins({});
       }
-      if (e.target.closest("[data-apagar]")) {
-        if (!(await confirmBox({ title: "apagar minha conta", text: "essa ação não poderá ser desfeita.", ok: "apagar conta" }))) return;
+      if (kind === "apagar") {
         if (S.mode === "supabase" && (!SB || !isOnline())) { toast("sem internet. conecte-se para apagar a conta", true); return; }
         while (SCREENS.length) SCREENS[SCREENS.length - 1].close();
         if (S.mode === "supabase") {
@@ -3979,7 +4068,7 @@ if ("ontouchstart" in window || navigator.maxTouchPoints > 0) {
 function bsGoTo(g) {
   if (!g) return;
   if (g.calc) return openCalcScreen(g.calc, NOW.getFullYear());
-  if (g.item) { openPanel(g.item.date, null, { tx: g.item.tx.id, date: g.item.date }); PANEL.fromSearch = true; return; }
+  if (g.item) return openForm({ tx: g.item.tx, occ: g.item.date });
   if (g.month) return openMonthScreen(CUR, g.month);
   if (g.day) return goToDay(g.day);
   if (g.tab) { if (g.tab === "totais") UI.tMonth = CUR; return goTab(g.tab); }
