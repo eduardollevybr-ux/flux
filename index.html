@@ -38,7 +38,7 @@ body{margin:0;background:var(--bg);color:var(--text);font-family:var(--font);fon
 button,input,select,textarea{font:inherit;color:inherit}
 button{cursor:pointer;background:none;border:0;padding:0}
 :focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:6px}
-.num{font-variant-numeric:tabular-nums}
+.num{font-variant-numeric:proportional-nums}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 /* ---------- layout ---------- */
 .app{display:flex;height:100%}
@@ -1415,9 +1415,10 @@ body.stk-open .bottom-nav{z-index:76!important}
 .casc>*:nth-child(2){animation-delay:50ms}.casc>*:nth-child(3){animation-delay:100ms}.casc>*:nth-child(4){animation-delay:150ms}.casc>*:nth-child(5){animation-delay:200ms}.casc>*:nth-child(6){animation-delay:250ms}.casc>*:nth-child(7){animation-delay:300ms}.casc>*:nth-child(8){animation-delay:350ms}.casc>*:nth-child(n+9){animation-delay:400ms}
 @media (prefers-reduced-motion:reduce){.casc>*{animation:none}}
 /* valor que rola */
-.odo{display:inline-flex;align-items:flex-end;white-space:nowrap;font-variant-numeric:tabular-nums;line-height:1.2;vertical-align:bottom}
-.odo .od{display:inline-block;height:1.2em;overflow:hidden}
-.odo .od>span{display:flex;flex-direction:column;transition:transform .7s var(--ease-out)}
+.odo{display:inline-flex;align-items:flex-end;white-space:nowrap;font-variant-numeric:proportional-nums;line-height:1.2;vertical-align:bottom}
+.odo .od{display:inline-block;position:relative;height:1.2em;overflow:hidden}
+.odo .od>b{font:inherit;visibility:hidden;display:block;line-height:1.2em}
+.odo .od>span{position:absolute;left:0;top:0;display:flex;flex-direction:column;align-items:flex-start;transition:transform .7s var(--ease-out)}
 .odo .od i{font-style:normal;display:block;height:1.2em;line-height:1.2em}
 .odo .os{display:inline-block;line-height:1.2em;white-space:pre}
 /* erro sem janela */
@@ -1494,7 +1495,7 @@ body.stk-open .bottom-nav{z-index:76!important}
 .wc-top{display:flex;justify-content:space-between;align-items:center;gap:12px;position:relative;z-index:1}
 .wc-top b{font-size:18px;min-width:0}.wc-top .num{font-size:17px;font-weight:700;white-space:nowrap}
 .wc-sub{font-size:13px;opacity:.75;position:relative;z-index:1}
-.wal-info{position:absolute;left:0;right:0;opacity:0;transform:translateY(-10px);pointer-events:none;transition:opacity .3s,transform .4s var(--ease-out)}
+.wal-info{position:absolute;left:0;right:0;z-index:60;opacity:0;transform:translateY(-10px);pointer-events:none;transition:opacity .3s,transform .4s var(--ease-out)}
 .wal-info.on{opacity:1;transform:none;pointer-events:auto}
 .wi-r{display:flex;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--line);font-size:15px}
 .wi-r span{color:var(--muted)}.wi-r b{white-space:nowrap}
@@ -1600,6 +1601,21 @@ body.stk-open .bottom-nav{z-index:76!important}
 .st-x svg{width:20px;height:20px}
 .scr.story .tu-foot{display:none}
 .scr.story .tu-view{flex:1;user-select:none;-webkit-user-select:none}
+
+/* ===== ícone do horizonte B e janelas de repetição D (15/11) ===== */
+:root{--hz-soft:#5B2C9A}:root.light{--hz-soft:#D9C2F7}
+.m-grid{display:grid!important;place-items:center;grid-template-columns:none!important;grid-template-rows:none!important}
+.m-grid svg{width:32px;height:32px;display:block}
+.scp-sub{color:var(--muted);font-size:14px;margin:-4px 0 4px}
+.scp{display:flex;flex-direction:column;gap:8px;width:100%}
+.scp-b{width:100%;text-align:left;padding:13px 16px 14px;border-radius:18px;font-size:15px;font-weight:700;color:var(--text);box-shadow:inset 0 0 0 1.5px var(--line2);display:flex;flex-direction:column;gap:10px;transition:transform .2s var(--spring),background-color .2s}
+.scp-b:active{transform:scale(.97);background:var(--surface3)}
+.scp.del .scp-b{color:var(--c-saida);box-shadow:inset 0 0 0 1.5px color-mix(in srgb,var(--c-saida) 45%,transparent)}
+.scp-dots{display:flex;justify-content:space-between;position:relative;width:100%}
+.scp-dots::before{content:"";position:absolute;left:4px;right:4px;top:50%;height:2px;margin-top:-1px;background:var(--line2)}
+.scp-dots i{position:relative;width:9px;height:9px;border-radius:50%;background:color-mix(in srgb,var(--text) 22%,var(--surface));transition:transform .3s var(--spring)}
+.scp.del .scp-dots i.hit{background:var(--c-saida)}.scp.save .scp-dots i.hit{background:var(--accent)}
+.scp-dots i.cur{box-shadow:0 0 0 2px var(--surface),0 0 0 3.2px var(--text)}
 </style></head><body>
 <div id="splash" class="splash" role="img" aria-label="FLUX"><span class="sp-logo"><svg class="logo-svg" width="56" height="56" viewBox="-140 -114 2200 2200" aria-hidden="true"><g transform="translate(0,1980) scale(0.1,-0.1)"><path fill="var(--logo-b)" d="M15530 9714 c-68 -13 -138 -28 -155 -33 -16 -6 -52 -13 -80 -16 -27 -4 -111 -20 -185 -35 -74 -16 -169 -36 -210 -44 -210 -41 -276 -58 -293 -75 -17 -17 -18 -173 -20 -3688 -2 -3594 -2 -3671 -21 -3692 -30 -33 -2372 -33 -2402 0 -19 21 -19 92 -21 3361 -2 2270 -6 3345 -13 3358 -17 31 -56 35 -114 12 -28 -12 -64 -24 -81 -27 -16 -4 -55 -15 -85 -25 -30 -10 -131 -41 -225 -69 -234 -70 -330 -99 -400 -123 -33 -11 -89 -28 -125 -38 -36 -10 -146 -46 -245 -80 -99 -35 -227 -78 -285 -96 -58 -17 -170 -55 -250 -84 -80 -29 -179 -63 -220 -77 -41 -14 -109 -38 -150 -53 -41 -15 -127 -44 -190 -65 -63 -20 -128 -43 -145 -51 -16 -8 -55 -22 -85 -33 -71 -25 -256 -92 -345 -126 -38 -15 -92 -35 -120 -45 -27 -10 -111 -42 -185 -70 -74 -28 -153 -57 -175 -65 -76 -25 -154 -64 -165 -84 -7 -14 -10 -848 -10 -2768 0 -2579 -1 -2749 -17 -2760 -30 -23 -1394 -18 -1422 4 -22 18 -22 18 -22 2437 0 1718 -3 2424 -11 2433 -17 21 -76 15 -116 -12 -20 -14 -42 -25 -49 -25 -12 0 -230 -100 -273 -126 -14 -8 -45 -24 -70 -35 -83 -38 -375 -179 -400 -194 -14 -8 -106 -56 -205 -106 -99 -49 -238 -121 -310 -160 -71 -38 -157 -83 -190 -99 -33 -17 -105 -57 -160 -89 -55 -32 -145 -84 -199 -115 -54 -31 -111 -66 -126 -76 -16 -11 -31 -20 -35 -20 -19 0 -676 -410 -820 -511 -38 -27 -108 -75 -155 -107 -90 -61 -223 -156 -305 -220 -27 -22 -69 -51 -91 -65 -93 -58 -84 67 -84 -1173 0 -668 -4 -1102 -10 -1118 -17 -47 -37 -47 -140 -4 -52 22 -117 49 -145 60 -54 21 -86 40 -226 131 -154 102 -381 358 -440 499 -94 223 -119 308 -119 402 0 91 -62 118 -112 48 -14 -20 -55 -69 -90 -109 -124 -142 -147 -170 -211 -269 -36 -54 -80 -119 -98 -144 -38 -52 -120 -216 -139 -275 -7 -22 -23 -65 -35 -95 -74 -179 -94 -503 -41 -684 33 -113 96 -255 134 -303 162 -201 186 -226 327 -332 146 -109 154 -115 385 -236 195 -102 413 -192 575 -236 39 -10 95 -27 125 -38 30 -11 134 -38 230 -60 96 -23 211 -50 255 -61 44 -11 117 -24 162 -30 46 -5 109 -16 140 -24 32 -8 101 -19 153 -25 135 -16 247 -31 305 -41 28 -5 136 -16 240 -25 105 -9 251 -22 325 -30 74 -8 293 -21 485 -30 193 -8 456 -20 585 -26 166 -9 1611 -13 4919 -16 4398 -4 4685 -3 4702 13 19 17 19 125 19 4453 0 3999 -2 4439 -16 4459 -18 26 -24 26 -184 -4z"/><path fill="var(--logo-a)" d="M12063 19057 c-29 -18 -110 -71 -180 -119 -172 -116 -396 -266 -540 -361 -65 -43 -219 -147 -343 -232 -124 -85 -243 -165 -265 -176 -22 -12 -53 -33 -70 -46 -16 -14 -77 -56 -135 -94 -123 -82 -176 -118 -285 -194 -44 -30 -109 -74 -145 -98 -36 -23 -179 -118 -319 -212 -139 -93 -309 -207 -377 -251 -68 -45 -139 -96 -158 -112 -19 -17 -45 -33 -58 -37 -13 -4 -39 -19 -58 -34 -19 -14 -53 -37 -76 -51 -23 -14 -88 -56 -143 -95 -56 -38 -136 -93 -179 -122 -120 -80 -140 -96 -152 -122 -7 -16 -10 -510 -10 -1704 0 -1555 -1 -1682 -16 -1699 -27 -29 -76 -23 -123 15 -22 17 -62 47 -88 65 -27 18 -89 61 -140 97 -50 36 -95 65 -99 65 -4 0 -18 10 -31 22 -13 12 -43 34 -67 48 -24 14 -61 37 -82 51 -22 15 -118 79 -214 142 -96 64 -200 134 -230 156 -30 23 -71 49 -91 60 -19 11 -41 27 -49 36 -7 9 -27 23 -44 32 -17 9 -74 45 -128 80 -113 74 -112 74 -174 27 -27 -21 -67 -49 -91 -63 -23 -14 -59 -38 -80 -52 -21 -14 -104 -71 -186 -125 -81 -54 -225 -152 -320 -217 -94 -65 -191 -130 -215 -145 -24 -15 -82 -53 -130 -85 -48 -32 -121 -80 -162 -107 -41 -27 -85 -56 -96 -64 -66 -46 -339 -229 -539 -362 -126 -84 -246 -164 -265 -179 -34 -25 -105 -73 -215 -145 -29 -19 -127 -84 -217 -144 -90 -61 -242 -162 -338 -227 -96 -64 -217 -145 -267 -180 -51 -35 -117 -80 -146 -99 -119 -78 -194 -130 -210 -148 -16 -18 -17 -165 -17 -2201 -1 -2383 3 -2237 -57 -2263 -15 -7 -46 -24 -68 -39 -22 -14 -83 -53 -135 -85 -221 -136 -555 -365 -675 -463 -27 -23 -67 -53 -88 -68 -21 -16 -62 -48 -91 -73 -29 -25 -110 -94 -182 -155 -155 -131 -479 -454 -587 -585 -43 -52 -95 -115 -116 -140 -34 -41 -91 -119 -166 -225 -27 -38 -88 -131 -156 -235 -37 -57 -189 -360 -215 -430 -97 -252 -135 -379 -181 -600 -80 -387 -61 -864 47 -1205 16 -49 32 -108 36 -130 8 -47 51 -166 65 -180 17 -17 26 12 32 98 14 190 127 495 272 737 25 41 55 93 66 115 12 22 44 66 70 98 27 32 49 62 49 67 0 10 85 124 138 186 23 27 57 68 75 91 109 142 633 685 710 736 24 16 74 58 152 127 27 25 75 66 105 90 30 25 87 72 125 105 64 56 195 158 249 195 12 8 89 67 172 131 125 97 314 231 494 349 20 14 122 82 226 151 104 69 200 132 214 139 14 7 61 36 105 65 44 29 111 70 149 91 38 22 101 58 140 81 39 24 89 52 112 63 22 10 51 28 65 38 13 10 65 40 114 66 99 53 126 68 325 178 141 77 804 408 995 496 61 28 191 87 290 132 99 45 194 90 210 100 17 10 53 26 80 35 28 9 86 34 130 54 44 21 107 49 140 64 33 14 101 44 150 66 50 22 158 67 240 100 83 34 179 74 215 90 87 39 394 163 500 201 46 17 96 38 110 45 14 8 50 23 80 34 30 10 98 36 150 56 100 39 221 84 305 114 73 26 353 130 405 151 25 10 68 26 95 35 62 21 208 72 340 120 55 19 161 56 235 80 74 25 252 84 395 132 289 97 358 119 525 170 63 19 144 45 180 58 36 13 79 27 95 30 30 7 78 21 395 119 96 29 202 61 235 69 195 51 254 68 285 81 19 8 60 20 90 25 30 6 91 22 135 36 44 14 114 34 155 44 41 11 122 33 180 49 230 65 344 95 540 143 219 54 361 90 450 116 50 15 165 42 390 92 47 11 132 31 190 45 271 67 553 131 615 141 22 4 81 17 130 30 50 13 115 26 145 29 30 4 84 16 120 26 36 11 101 26 145 35 44 9 150 29 235 46 85 17 205 41 265 54 61 13 187 38 280 55 94 17 222 42 285 55 63 13 183 36 265 51 83 15 184 33 225 41 41 7 149 27 240 43 262 46 575 103 880 160 58 11 135 25 172 30 37 6 111 19 165 29 54 11 134 25 178 31 44 6 125 20 180 31 55 12 138 27 185 34 47 7 207 34 355 60 149 26 311 53 360 60 50 7 212 34 360 60 149 26 311 51 362 56 96 10 143 22 143 38 0 14 -122 39 -250 51 -63 6 -187 19 -275 30 -615 76 -1709 88 -2585 29 -80 -5 -212 -14 -295 -19 -82 -6 -157 -13 -165 -15 -8 -2 -113 -12 -233 -20 -120 -9 -242 -20 -270 -26 -66 -12 -367 -43 -429 -43 -35 -1 -53 5 -68 19 -20 21 -20 21 -20 2778 l0 2757 -37 40 c-20 23 -50 47 -67 54 -17 7 -88 53 -159 102 -70 49 -153 106 -185 126 -31 20 -102 69 -157 107 -55 39 -116 80 -135 91 -37 21 -128 81 -250 165 -77 52 -128 87 -176 119 -16 10 -53 35 -82 55 -29 20 -74 50 -101 66 -63 39 -404 268 -439 295 -15 11 -76 53 -136 93 -324 214 -387 257 -449 304 -23 18 -46 33 -52 33 -5 0 -29 15 -52 33 -39 30 -74 53 -133 87 -15 8 -53 34 -86 58 -32 23 -115 80 -184 126 -69 45 -174 116 -233 157 -60 41 -123 83 -141 94 -17 11 -47 32 -66 46 -19 14 -62 43 -95 63 -33 21 -75 48 -94 62 -43 31 -64 29 -128 -9z m148 -1747 c19 -5 53 -25 75 -43 21 -18 66 -50 99 -71 33 -20 79 -51 102 -69 52 -39 130 -93 292 -200 197 -130 204 -135 241 -157 19 -12 60 -39 90 -61 30 -22 93 -65 140 -96 47 -31 109 -73 138 -92 28 -20 70 -47 91 -61 21 -14 71 -47 110 -75 39 -27 109 -75 155 -105 142 -94 240 -159 265 -177 13 -10 52 -36 87 -58 54 -34 245 -161 339 -225 17 -11 59 -39 95 -63 60 -39 66 -46 77 -92 10 -39 12 -545 10 -2359 -2 -2309 -2 -2309 -28 -2328 -17 -13 -53 -23 -100 -28 -41 -5 -87 -13 -104 -19 -16 -5 -68 -15 -115 -21 -47 -6 -123 -19 -170 -30 -47 -10 -116 -23 -155 -29 -90 -14 -421 -76 -545 -101 -52 -11 -126 -24 -165 -30 -38 -7 -90 -18 -115 -25 -25 -8 -76 -19 -115 -25 -38 -7 -106 -20 -150 -30 -44 -11 -114 -26 -155 -34 -41 -9 -131 -29 -200 -44 -69 -16 -146 -32 -173 -35 -26 -4 -61 -13 -77 -22 -41 -21 -92 -19 -118 5 -22 21 -22 21 -23 3388 -1 1852 0 3374 1 3382 5 39 35 48 101 30z m-5057 -4869 c25 -22 82 -64 128 -95 46 -30 156 -104 244 -163 89 -59 180 -119 203 -133 23 -14 71 -46 106 -73 58 -43 101 -71 188 -125 16 -9 64 -42 107 -72 43 -30 91 -63 107 -72 86 -51 289 -198 307 -222 21 -27 21 -34 24 -984 1 -526 0 -967 -3 -978 -8 -33 -46 -53 -194 -100 -238 -76 -946 -319 -1048 -359 -34 -14 -70 -25 -81 -25 -11 0 -46 -13 -77 -30 -69 -36 -79 -37 -110 -5 -25 24 -25 24 -25 1723 0 1699 0 1699 21 1726 28 36 50 33 103 -13z"/></g></svg></span><span class="sp-t">FLUX</span></div>
 <div id="app" class="app">
@@ -3117,15 +3133,9 @@ $("#view").addEventListener("contextmenu", e => { if (e.target.closest(".m-cell"
 
 /* horizonte no celular: 3 meses lado a lado, só a coluna de saldos */
 const hzCls = v => Math.abs(v) < 0.005 ? "h-zero" : v > 0 ? "h-pos" : v > -NEG_SMALL ? "h-neg1" : "h-neg2";
-/* ícone do horizonte: dias 10, 20 e 30 deste mês e dos próximos dois, com as cores do horizonte */
+/* ícone do horizonte: sol nascendo atrás da linha, em dois tons do lilás do app */
 function gridIcon() {
-  const c = calc(); let h = "";
-  for (const d of [10, 20, 30]) for (let k = 0; k < 3; k++) {
-    const mi = CUR + k, dd = Math.min(d, dim(miY(mi), miM(mi)));
-    const s = c.saldo[`${miY(mi)}-${pad(miM(mi) + 1)}-${pad(dd)}`] ?? 0;
-    h += `<i class="${hzCls(s)}"></i>`;
-  }
-  return h;
+  return `<svg viewBox="0 0 32 32" aria-hidden="true"><path d="M8 21a8 8 0 0 1 16 0z" fill="var(--hz-soft)"/><path d="M16 6v3M7 10.5l2 2M25 10.5l-2 2" stroke="var(--cal-l)" stroke-width="2.4" stroke-linecap="round"/><path d="M4 22h24" stroke="var(--cal-l)" stroke-width="2.6" stroke-linecap="round"/><path d="M9 26.5h14" stroke="var(--hz-soft)" stroke-width="2.4" stroke-linecap="round"/></svg>`;
 }
 function hzStart() { return Math.max(CUR, Math.min(UI.hzS, HZ_END - 2)); }
 /* ===== horizonte: cada mês vira um calendário e a cor de cada dia é o saldo (mês atual + 11) ===== */
@@ -3519,28 +3529,32 @@ function occInfo(tx, date) { let r = null; expand(tx, date, date, (d, v, n, t, b
 function nextOccDate(tx, date) { let r = null; expand(tx, ymd(addDays(parse(date), 1)), miLast(MAX_MI), d => { r = d; return false; }); return r; }
 const dayDiff = (a, b) => Math.round((parse(b) - parse(a)) / 864e5);
 const shiftDate = (s, n) => ymd(addDays(parse(s), n));
-function chooseScope({ title, hasNext }) {
+/* linha de bolinhas: as repetições em volta da tocada, acesas conforme o alcance */
+function scopeDots(tx, date) {
+  if (!tx || !date) return null;
+  const prev = []; expand(tx, tx.date, ymd(addDays(parse(date), -1)), d => { prev.push(d); });
+  const next = []; expand(tx, ymd(addDays(parse(date), 1)), miLast(MAX_MI), d => { next.push(d); if (next.length >= 5) return false; });
+  const p = prev.slice(-2), list = [...p.map(d => ({ d, k: -1 })), { d: date, k: 0 }, ...next.map(d => ({ d, k: 1 }))];
+  return s => `<span class="scp-dots">${list.map(o => `<i class="${o.k === 0 ? "cur " : ""}${s === "all" || (s === "from" && o.k >= 0) || (s === "one" && o.k === 0) ? "hit" : ""}"></i>`).join("")}</span>`;
+}
+function scopeModal({ title, kind, labels, tx, date }) {
   return new Promise(res => {
     let done = false;
+    const dots = scopeDots(tx, date);
     const m = openModal({
-      title, body: "",
-      foot: `<button class="dbtn" data-s="one">salvar somente nesta</button><button class="dbtn" data-s="from">salvar nesta e nas próximas</button><button class="dbtn" data-s="all">salvar em todas</button><button class="btn-link" data-no>cancelar</button>`,
+      title, body: tx ? `<p class="scp-sub">${esc(tx.desc || "")}</p>` : "",
+      foot: `<div class="scp ${kind}">${["one", "from", "all"].map((k, i) => `<button class="scp-b" data-s="${k}"><span>${labels[i]}</span>${dots ? dots(k) : ""}</button>`).join("")}</div><button class="btn-link" data-no>cancelar</button>`,
       onClose: () => { if (!done) res(null); }, cls: "cmodal"
     });
     m.el.addEventListener("click", e => { if (e.target.closest("[data-no]")) return m.close(); const b = e.target.closest("[data-s]"); if (!b || b.disabled) return; done = true; m.close(); res(b.dataset.s); });
   });
 }
-// apagar algo que se repete: três opções diretas, sem explicações
-function chooseDelScope(hasNext) {
-  return new Promise(res => {
-    let done = false;
-    const m = openModal({
-      title: "apagar repetições", body: "",
-      foot: `<button class="dbtn danger" data-s="one">apagar somente esta</button><button class="dbtn danger" data-s="from">apagar esta e as próximas</button><button class="dbtn danger" data-s="all">apagar todas</button><button class="btn-link" data-no>cancelar</button>`,
-      onClose: () => { if (!done) res(null); }, cls: "cmodal"
-    });
-    m.el.addEventListener("click", e => { if (e.target.closest("[data-no]")) return m.close(); const b = e.target.closest("[data-s]"); if (!b || b.disabled) return; done = true; m.close(); res(b.dataset.s); });
-  });
+function chooseScope({ title, tx, date }) {
+  return scopeModal({ title, kind: "save", tx, date, labels: ["salvar somente nesta", "salvar nesta e nas próximas", "salvar em todas"] });
+}
+// apagar algo que se repete: três opções diretas, cada uma mostra quais repetições afeta
+function chooseDelScope(hasNext, tx, date) {
+  return scopeModal({ title: "apagar repetições", kind: "del", tx, date, labels: ["apagar somente esta", "apagar esta e as próximas", "apagar todas"] });
 }
 async function deleteOcc(tx, date) {
   if (!tx) return;
@@ -3550,7 +3564,7 @@ async function deleteOcc(tx, date) {
     await delTx(tx.id); afterDelete(); return;
   }
   const nd = nextOccDate(tx, date);
-  const s = await chooseDelScope(!!nd);
+  const s = await chooseDelScope(!!nd, tx, date);
   if (!s) return;
   const first = occInfo(tx, date)?.n === 1;
   if (s === "all" || (s === "from" && first)) await delTx(tx.id);
@@ -3714,7 +3728,7 @@ function openForm({ type = "saida", date = TODAY, tx = null, occ = null, pre = {
       m.close(); pxTrail(fDate, f.type); if (PANEL.open) renderPanel(); return;
     }
     const nd = nextOccDate(tx, occD);
-    const s = await chooseScope({ title: "salvar alterações", text: `"${esc(tx.desc)}" se repete. para quais repetições vale essa mudança?`, date: occD, hasNext: !!nd });
+    const s = await chooseScope({ title: "salvar alterações", tx, date: occD, hasNext: !!nd });
     if (!s) return;
     m.close();
     const n = oi ? oi.n : 1, now = Date.now();
@@ -4045,14 +4059,14 @@ function odoPut(el, str) {
   if (!el) return; str = String(str).replace(/ /g, "\u00a0");
   if (el.dataset.odo === str) return;
   const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
-  const same = el.classList.contains("odo") && el.childElementCount === str.length && [...str].every((ch, k) => /\d/.test(ch) === !!el.children[k].firstElementChild);
+  const same = el.classList.contains("odo") && el.childElementCount === str.length && [...str].every((ch, k) => /\d/.test(ch) === el.children[k].classList.contains("od"));
   el.dataset.odo = str; el.setAttribute("aria-label", str);
   if (!same || reduce) {
     el.classList.add("odo");
-    el.innerHTML = [...str].map(ch => /\d/.test(ch) ? `<span class="od" aria-hidden="true"><span style="transform:translateY(calc(${ch} * -1.2em))">${"0123456789".split("").map(n => `<i>${n}</i>`).join("")}</span></span>` : `<span class="os" aria-hidden="true">${ch}</span>`).join("");
+    el.innerHTML = [...str].map(ch => /\d/.test(ch) ? `<span class="od" aria-hidden="true"><b>${ch}</b><span style="transform:translateY(calc(${ch} * -1.2em))">${"0123456789".split("").map(n => `<i>${n}</i>`).join("")}</span></span>` : `<span class="os" aria-hidden="true">${ch}</span>`).join("");
     return;
   }
-  [...str].forEach((ch, k) => { const c = el.children[k]; if (c.firstElementChild) c.firstElementChild.style.transform = `translateY(calc(${ch} * -1.2em))`; else c.textContent = ch; });
+  [...str].forEach((ch, k) => { const c = el.children[k]; if (c.firstElementChild) { c.firstElementChild.textContent = ch; c.lastElementChild.style.transform = `translateY(calc(${ch} * -1.2em))`; } else c.textContent = ch; });
 }
 /* botão que mostra o que está acontecendo: encolhe e gira enquanto salva, vira "salvo" e só então a tela fecha */
 async function busyBtn(btn, work, done = "salvo") {
@@ -4288,23 +4302,26 @@ function openCards() {
   let open = null;
   const place = el => {
     const cs = $$(".wcard", el), STEP = 64, H = 170, k = cs.findIndex(c => c.dataset.cid === open);
-    cs.forEach((c, i) => {
+    const info = $(".wal-info", el), c = S.cards.find(x => x.id === open);
+    let rest = H + 150;
+    if (info) {
+      if (!c) info.classList.remove("on");
+      else {
+        const m = cardMonth(c.id);
+        info.innerHTML = `<div class="wi-r"><span>gasto em ${MONTHS[miM(CUR)]}</span><b class="num">${brl(m.v)}</b></div><div class="wi-r"><span>movimentações no mês</span><b class="num">${m.n}</b></div><div class="wi-r"><span>cartão padrão</span><b>${c.id === defCardId() ? "sim" : "não"}</b></div><button class="sbtn" data-editcard="${c.id}">editar cartão</button>`;
+        info.style.top = (H + 12) + "px"; info.classList.add("on");
+        rest = H + 12 + info.offsetHeight + 24;
+      }
+    }
+    cs.forEach((cd, i) => {
       let top, sc = 1;
       if (k < 0) top = i * STEP;
       else if (i === k) top = 0;
-      else { const j = i < k ? i : i - 1; top = H + 150 + j * 14; sc = .92; }
-      c.style.transform = `translateY(${top}px) scale(${sc})`; c.style.zIndex = i === k ? 50 : i;
-      c.setAttribute("aria-expanded", i === k);
+      else { const j = i < k ? i : i - 1; top = rest + j * 14; sc = .92; }
+      cd.style.transform = `translateY(${top}px) scale(${sc})`; cd.style.zIndex = i === k ? 50 : i;
+      cd.setAttribute("aria-expanded", i === k);
     });
-    const wal = $(".wal", el); if (wal) wal.style.height = (k < 0 ? (cs.length - 1) * STEP + H : H + 150 + (cs.length - 1) * 14 + 40) + "px";
-    const info = $(".wal-info", el);
-    if (info) {
-      const c = S.cards.find(x => x.id === open);
-      if (!c) { info.classList.remove("on"); return; }
-      const m = cardMonth(c.id);
-      info.innerHTML = `<div class="wi-r"><span>gasto em ${MONTHS[miM(CUR)]}</span><b class="num">${brl(m.v)}</b></div><div class="wi-r"><span>movimentações no mês</span><b class="num">${m.n}</b></div><div class="wi-r"><span>cartão padrão</span><b>${c.id === defCardId() ? "sim" : "não"}</b></div><button class="sbtn" data-editcard="${c.id}">editar cartão</button>`;
-      info.style.top = (H + 12) + "px"; info.classList.add("on");
-    }
+    const wal = $(".wal", el); if (wal) wal.style.height = (k < 0 ? (cs.length - 1) * STEP + H : rest + (cs.length - 2) * 14 + H * .92 + 10) + "px";
   };
   const draw = s => {
     if (!S.cards.length) { s.setBody(`<div class="sempty"><button class="circ" data-addcard aria-label="adicionar cartão">${SI.cardAdd}</button><span>sem cartões por aqui.<br>toque no botão acima para criar.</span></div>`); return; }
@@ -4834,7 +4851,7 @@ async function deleteUndo(tx, date) {
   const restore = () => saveTx(old.id, stripId(old));
   if ((tx.rep || "none") === "none") { await delTx(tx.id); afterDelete(); undoPill("movimentação apagada", restore, offNow()); return; }
   const nd = nextOccDate(tx, date);
-  const s = await chooseDelScope(!!nd);
+  const s = await chooseDelScope(!!nd, tx, date);
   if (!s) return;
   const first = occInfo(tx, date)?.n === 1;
   if (s === "all" || (s === "from" && first)) await delTx(tx.id);
