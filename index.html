@@ -1478,15 +1478,19 @@ body.stk-open .bottom-nav{z-index:76!important}
 .pvx-days{padding:20px 20px 30px}
 .pvx-dl{display:flex;justify-content:space-between;font-size:16px;font-weight:700;margin-bottom:14px}
 .pvx-dl b{color:var(--nav-ic)}
-.pvx-sl{position:relative;height:30px;touch-action:none;cursor:pointer;outline:none}
+.pvx-sl{position:relative;height:30px;margin:0 11px;touch-action:none;cursor:pointer;outline:none}
 .pvx-sl .tr,.pvx-sl .fi{position:absolute;left:0;top:13px;height:4px;border-radius:2px}
-.pvx-sl .tr{right:0;background:var(--surface3)}.pvx-sl .fi{background:var(--nav-ic)}
-.pvx-sl .kn{position:absolute;top:4px;width:22px;height:22px;border-radius:50%;background:#fff;transform:translateX(-50%);box-shadow:0 2px 8px rgba(0,0,0,.35);transition:left .25s var(--spring),transform .15s}
-.pvx-sl.drag .kn{transition:transform .15s;transform:translateX(-50%) scale(1.15)}
+.pvx-sl .tr{left:-11px!important;right:-11px;background:var(--surface3)}.pvx-sl .fi{left:-11px;padding-left:11px;box-sizing:content-box;background:var(--nav-ic);transition:width .55s var(--spring)}
+.pvx-sl .kn{position:absolute;top:4px;width:22px;height:22px;border-radius:50%;background:#fff;transform:translateX(-50%);box-shadow:0 2px 8px rgba(0,0,0,.35);transition:left .55s var(--spring),transform .3s var(--spring)}
+.pvx-sl.drag .kn{transform:translateX(-50%) scale(1.2)}
+.pvx-sl.live .kn{transition:transform .3s var(--spring)}.pvx-sl.live .fi{transition:none}
 .pvx-sl:focus-visible .kn{box-shadow:0 0 0 3px var(--accent)}
-.pvx-tick{display:flex;justify-content:space-between;font-size:12px;color:var(--muted);margin-top:2px}
+.pvx-tick{position:relative;height:18px;margin:2px 11px 0;font-size:12px;color:var(--muted)}
+.pvx-tick span{position:absolute;top:0;transform:translateX(-50%);transition:color .25s,transform .35s var(--spring)}
+.pvx-tick span.on{color:var(--text);font-weight:700;transform:translateX(-50%) scale(1.15)}
 .pvx-chips{display:flex;gap:8px;margin-top:14px}
-.pvx-chips button{padding:8px 14px;border-radius:999px;background:var(--surface2);font-size:14px;font-weight:700;transition:background-color .2s,color .2s}
+.pvx-chips button{padding:8px 14px;border-radius:999px;background:var(--surface2);font-size:14px;font-weight:700;transition:background-color .25s,color .25s,transform .2s var(--spring)}
+.pvx-chips button:active{transform:scale(.94)}
 .pvx-chips button.on{background:var(--text);color:var(--bg)}
 /* cartões em carteira */
 .wal{position:relative;margin:12px 20px 30px;transition:height .45s var(--spring)}
@@ -4287,10 +4291,12 @@ function openPassword() {
 
 /* ===== previsão de diário ===== */
 const prevSorted = () => [...S.prev].sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0));
+let PVSKIP = 0;
 function openPrevScreen() {
   const PAL = ["#EC5DA8", "#B98AF0", "#4DB6F7", "#E2B93B", "#FF8A65", "#7FA7FF", "#F07EC0", "#C9A6F5"];
   let focus = null;
   const draw = s => {
+    if (Date.now() - PVSKIP < 1500 && $("[data-pvsl]", s.el)) { PVSKIP = 0; paintFocus(s.el); return; } // só mudou o número de dias: a tela não é redesenhada
     const list = prevSorted(), tot = prevTotal(), n = prevDiv();
     if (!list.length) {
       s.setBody(`<div class="sempty"><button class="circ" data-addprev aria-label="adicionar gasto">${I.plus}</button><span>sem gastos por aqui.<br>toque no botão acima para criar.</span></div>`); return;
@@ -4300,24 +4306,30 @@ function openPrevScreen() {
       <div class="slist2 pvx-list">${list.map((p, k) => `<button class="srow" data-editprev="${p.id}" data-pvk="${k}"><span class="sico"><i class="pvx-dot" style="background:${PAL[k % PAL.length]}"></i></span><span class="grow"><span class="srow-main ellip">${esc(p.desc)}</span></span><span class="srow-val num">${brl(p.value)}</span>${I.chev}</button>`).join("")}</div>
       <div class="pvx-days"><div class="pvx-dl"><span>dividido por</span><b class="num" data-pvd>${n} dias</b></div>
         <div class="pvx-sl" data-pvsl role="slider" tabindex="0" aria-label="dias do mês" aria-valuemin="28" aria-valuemax="31" aria-valuenow="${n}"><i class="tr"></i><i class="fi"></i><i class="kn"></i></div>
-        <div class="pvx-tick num"><span>28</span><span>29</span><span>30</span><span>31</span></div>
+        <div class="pvx-tick num">${[28, 29, 30, 31].map((d, k) => `<span data-pvt="${d}" style="left:${k / 3 * 100}%">${d}</span>`).join("")}</div>
         <div class="pvx-chips">${[28, 30, 31].map(d => `<button data-pvn="${d}" class="${d === n ? "on" : ""}">${d} dias</button>`).join("")}</div></div></div>`);
-    setDays(s.el, n, false); paintFocus(s.el);
+    s.el._pvn = null; setDays(s.el, n, false); paintFocus(s.el);
   };
   const paintFocus = el => {
-    const list = prevSorted(), n = prevDiv(), on = focus != null && list[focus];
+    const list = prevSorted(), n = el._pvn || prevDiv(), on = focus != null && list[focus];
     $$("[data-pvk]", el).forEach(b => { b.classList.toggle("sel", on && +b.dataset.pvk === focus); b.classList.toggle("dim", on && +b.dataset.pvk !== focus); });
     const v = $("[data-pvv]", el), l = $("[data-pvl]", el); if (!v) return;
     odoPut(v, fmt(r2((on ? list[focus].value : prevTotal()) / n)));
     l.textContent = on ? `${list[focus].desc} por dia` : "você pode gastar por dia";
   };
-  // 28 a 31 dias: arrasta, toca nos atalhos ou usa as setas do teclado; salva ao soltar
-  const setDays = (el, n, save) => {
-    const p = (n - 28) / 3 * 100, sl = $("[data-pvsl]", el); if (!sl) return;
-    $(".kn", sl).style.left = p + "%"; $(".fi", sl).style.width = p + "%"; sl.setAttribute("aria-valuenow", n);
-    $("[data-pvd]", el).textContent = `${n} dias`;
+  // 28 a 31 dias: o botão segue o dedo sem travar, os números rolam ao passar de um dia para outro e, ao soltar, ele assenta no dia mais perto
+  const show = (el, n) => {
+    const sl = $("[data-pvsl]", el); sl.setAttribute("aria-valuenow", n);
+    odoPut($("[data-pvd]", el), `${n} dias`);
     $$("[data-pvn]", el).forEach(b => b.classList.toggle("on", +b.dataset.pvn === n));
-    el._pvn = n; if (save && n !== prevDiv()) saveProfile({ prevDias: n }); else paintFocus(el);
+    $$("[data-pvt]", el).forEach(t => t.classList.toggle("on", +t.dataset.pvt === n));
+    if (el._pvn !== n) { el._pvn = n; paintFocus(el); }
+  };
+  const setPos = (el, p) => { const sl = $("[data-pvsl]", el); if (!sl) return; $(".kn", sl).style.left = p * 100 + "%"; $(".fi", sl).style.width = p * 100 + "%"; };
+  const setDays = (el, n, save) => {
+    if (!$("[data-pvsl]", el)) return;
+    setPos(el, (n - 28) / 3); show(el, n);
+    if (save && n !== prevDiv()) { PVSKIP = Date.now(); saveProfile({ prevDias: n }); }
   };
   const s = openScreen({
     title: "previsão de diário",
@@ -4331,10 +4343,11 @@ function openPrevScreen() {
         if (focus != null && !e.target.closest("[data-pvsl]")) { focus = null; paintFocus(el); }
       });
       let drag = false;
-      const pick = e => { const sl = $("[data-pvsl]", el), r = sl.getBoundingClientRect(); return 28 + Math.round(Math.max(0, Math.min(1, (e.clientX - r.left) / r.width)) * 3); };
-      el.addEventListener("pointerdown", e => { const sl = e.target.closest("[data-pvsl]"); if (!sl) return; drag = true; sl.classList.add("drag"); try { sl.setPointerCapture(e.pointerId); } catch { } setDays(el, pick(e), false); });
-      el.addEventListener("pointermove", e => { if (drag) setDays(el, pick(e), false); });
-      const up = () => { if (!drag) return; drag = false; $("[data-pvsl]", el)?.classList.remove("drag"); setDays(el, el._pvn, true); };
+      const frac = e => { const sl = $("[data-pvsl]", el), r = sl.getBoundingClientRect(); return Math.max(0, Math.min(1, (e.clientX - r.left) / r.width)); };
+      const follow = e => { const p = frac(e); setPos(el, p); show(el, 28 + Math.round(p * 3)); };
+      el.addEventListener("pointerdown", e => { const sl = e.target.closest("[data-pvsl]"); if (!sl) return; drag = true; sl.classList.add("drag"); try { sl.setPointerCapture(e.pointerId); } catch { } requestAnimationFrame(() => { if (drag) sl.classList.add("live"); }); follow(e); });
+      el.addEventListener("pointermove", e => { if (drag) follow(e); });
+      const up = () => { if (!drag) return; drag = false; const sl = $("[data-pvsl]", el); sl?.classList.remove("drag", "live"); setDays(el, el._pvn, true); };
       el.addEventListener("pointerup", up); el.addEventListener("pointercancel", up);
       el.addEventListener("keydown", e => { if (!e.target.closest("[data-pvsl]")) return; const d = e.key === "ArrowRight" ? 1 : e.key === "ArrowLeft" ? -1 : 0; if (d) { e.preventDefault(); setDays(el, Math.min(31, Math.max(28, prevDiv() + d)), true); } });
     },
