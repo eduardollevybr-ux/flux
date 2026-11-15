@@ -1523,13 +1523,14 @@ body.stk-open .bottom-nav{z-index:76!important}
 .ap-lens{position:absolute;top:4px;bottom:4px;left:4px;width:calc((100% - 8px)/3);border-radius:14px;background:var(--text);transition:transform .4s var(--spring)}
 /* horizonte em calendários */
 .hzh{overflow-y:auto;height:100%;position:relative;padding-bottom:120px}
-.hzh-chips{position:sticky;top:0;z-index:3;display:flex;gap:6px;overflow-x:auto;padding:8px 16px 12px;background:var(--bg);scrollbar-width:none;overscroll-behavior-x:contain;-webkit-overflow-scrolling:touch;touch-action:pan-x}
+.hzh-chips{position:sticky;top:0;z-index:3;display:flex;gap:6px;overflow-x:auto;padding:8px 16px 12px;background:var(--bg);scrollbar-width:none;overscroll-behavior-x:contain;-webkit-overflow-scrolling:touch;touch-action:pan-x;isolation:isolate}
 .hzh-chips::-webkit-scrollbar{display:none}
 .hzh-chips button{position:relative;z-index:1;flex:none;padding:7px 13px;border-radius:999px;font-size:13px;font-weight:700;color:var(--muted);transition:transform .2s var(--spring)}
-.hzh-chips button:active{transform:scale(.94)}
+.hzh-chips button{transform:translateZ(0);will-change:transform;-webkit-backface-visibility:hidden}
+.hzh-chips button:active{transform:translateZ(0) scale(.94)}
 .hzh-chips button.on{color:var(--bg)}
 .hzh-chips:not(.ready) button.on{background:var(--text)}
-.hzh-lens{position:absolute;left:0;top:8px;height:calc(100% - 20px);border-radius:999px;background:var(--text);transition:transform .5s var(--spring),width .5s var(--spring);pointer-events:none}
+.hzh-lens{position:absolute;z-index:0;left:0;top:8px;height:calc(100% - 20px);border-radius:999px;background:var(--text);transition:transform .5s var(--spring),width .5s var(--spring);pointer-events:none}
 .hzh-chips::after{content:"";flex:none;width:10px}
 .hzh-ms{display:grid;grid-template-columns:1fr;gap:6px;padding:0 16px}
 @media (min-width:701px){.hzh-chips{display:none}.hzh-ms{grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:22px 28px;padding:24px 28px}.hzh{padding-bottom:40px}}
