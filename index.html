@@ -667,7 +667,7 @@ body.relog .nav-btn[data-tab="menu"]::after{top:9px;left:31px}
 /* lançamento salvo sem internet: nuvem riscada ao lado da data até ser enviado */
 .lrow-sub .pend{display:inline-flex;vertical-align:-2px;margin-left:6px;color:var(--nav-ic)}
 .lrow-sub .pend svg{width:14px;height:14px}
-#px-undo .sep{width:1px;height:18px;background:currentColor;opacity:.3}
+
 /* toque: destaque só enquanto o dedo está pressionando (nada de cinza "preso" depois de soltar) */
 @media (hover:none){
   .lrow:not(.static):active,button.row:active,.crow:active,.pop-item:active,.sitem:active,button.frow:active,.nav-btn:active,.cal2-grid button:active,.btn-link:active{background:var(--surface2)}
@@ -1267,11 +1267,11 @@ body.stk-open .bottom-nav{z-index:76!important}
 @keyframes pqDone{to{opacity:0;transform:translateY(-14px) scale(.96)}}
 .px-quick.pq-done{animation:pqDone .38s cubic-bezier(.2,.8,.2,1) forwards}
 /* desfazer */
-#px-undo{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom,0px) + 104px);transform:translateX(-50%);z-index:96;display:flex;align-items:center;gap:8px;padding:0 20px;height:48px;border-radius:999px;background:var(--nav-bar);border:1px solid var(--nav-line);color:var(--nav-ic);font-weight:700;font-size:15px;white-space:nowrap;box-shadow:var(--nav-shadow);cursor:pointer;animation:undoIn .38s cubic-bezier(.2,.9,.25,1.2)}
-#px-undo svg{width:20px;height:20px;flex:none}
-:root.light #px-undo{background:var(--nav-ic);border-color:transparent;color:#fff} /* claro: invertido, fundo roxo e branco */
-#px-undo:active{transform:translateX(-50%) scale(.95)}
-#px-undo.out{animation:undoOut .26s ease forwards}
+
+
+ /* claro: invertido, fundo roxo e branco */
+
+
 @media (min-width:701px){#px-undo{bottom:28px}}
 @keyframes undoIn{from{opacity:0;transform:translate(-50%,24px) scale(.9)}}
 @keyframes undoOut{to{opacity:0;transform:translate(-50%,16px) scale(.95)}}
@@ -1408,6 +1408,198 @@ body.stk-open .bottom-nav{z-index:76!important}
   .qk-k{height:50px}
   .qk-go{margin-top:14px;height:54px}
 }
+/* ===================== evolução visual (15/11) ===================== */
+/* listas em cascata */
+@keyframes casc{from{opacity:0;transform:translateY(12px)}}
+.casc>*{animation:casc .45s var(--ease-out) both}
+.casc>*:nth-child(2){animation-delay:50ms}.casc>*:nth-child(3){animation-delay:100ms}.casc>*:nth-child(4){animation-delay:150ms}.casc>*:nth-child(5){animation-delay:200ms}.casc>*:nth-child(6){animation-delay:250ms}.casc>*:nth-child(7){animation-delay:300ms}.casc>*:nth-child(8){animation-delay:350ms}.casc>*:nth-child(n+9){animation-delay:400ms}
+@media (prefers-reduced-motion:reduce){.casc>*{animation:none}}
+/* valor que rola */
+.odo{display:inline-flex;align-items:flex-end;white-space:nowrap;font-variant-numeric:tabular-nums;line-height:1.2;vertical-align:bottom}
+.odo .od{display:inline-block;height:1.2em;overflow:hidden}
+.odo .od>span{display:flex;flex-direction:column;transition:transform .7s var(--ease-out)}
+.odo .od i{font-style:normal;display:block;height:1.2em;line-height:1.2em}
+.odo .os{display:inline-block;line-height:1.2em;white-space:pre}
+/* erro sem janela */
+@keyframes shk{20%,60%{transform:translateX(-7px)}40%,80%{transform:translateX(7px)}}
+.shk{animation:shk .38s}
+.lfield.has-err{border-color:var(--c-saida)}
+.f-money.has-err{box-shadow:inset 0 -1.5px 0 var(--c-saida)}
+.ferr{color:var(--c-saida);font-size:14px;font-weight:600;max-height:0;opacity:0;overflow:hidden;margin:0 20px;transition:max-height .3s var(--ease-out),opacity .2s,margin .3s var(--ease-out)}
+.ferr.on{max-height:60px;opacity:1;margin:8px 20px 14px}
+.ferr-slot .ferr{margin:0}.ferr-slot .ferr.on{margin:8px 0 0}
+.form-modal .ferr{margin-left:0;margin-right:0;text-align:center}
+/* botão que mostra o que está acontecendo */
+.sbtn.busy,#f-submit.busy{transition:width .35s var(--spring),background-color .3s;margin-left:auto;margin-right:auto;width:54px!important;padding:0;display:grid;place-items:center;flex:none}
+.bspin{width:20px;height:20px;border-radius:50%;border:2.5px solid currentColor;border-right-color:transparent;animation:spin .7s linear infinite;opacity:.7}
+@keyframes spin{to{transform:rotate(360deg)}}
+.sbtn.ok,#f-submit.ok{background:var(--m-pos)!important;color:var(--m-pos-fg)!important;border-color:transparent!important;display:inline-flex;align-items:center;justify-content:center;gap:8px}
+.sbtn.ok svg,#f-submit.ok svg{width:18px;height:18px}
+.sbtn.ok:disabled,#f-submit.ok:disabled,.sbtn.busy:disabled,#f-submit.busy:disabled{opacity:1}
+/* o saldo vira o dia */
+.flip{position:fixed;z-index:60;pointer-events:none;transition:all .36s var(--ease-out)}
+.flip.out{opacity:0;transition:opacity .25s}
+/* menu */
+.mp-head{display:flex;align-items:center;gap:16px;border-bottom:0}
+.mp-head .mp-name{font-size:24px}.mp-head .mp-mail{margin-top:4px}
+.mp-who{min-width:0}
+.av{width:60px;height:60px;border-radius:50%;flex:none;display:grid;place-items:center;font-size:23px;font-weight:700;color:#fff;background:linear-gradient(140deg,#9B4FF0,#5E1FB0);overflow:hidden}
+.av img{width:100%;height:100%;object-fit:cover}
+.av.lg{width:96px;height:96px;font-size:36px}
+.menu-page .section-title{padding-top:20px}
+.menu-page .slist2 .srow .sico .duo{width:22px;height:22px}.mi-ic{display:grid;place-items:center}
+.mp-out{margin-top:16px}
+.srow-val{color:var(--muted)}
+/* perfil */
+.pf-top{display:flex;flex-direction:column;align-items:center;gap:8px;padding:24px 20px 18px}
+.pf-av{position:relative;border-radius:50%;padding:0;background:none;border:0}
+.pf-cam{position:absolute;right:-2px;bottom:-2px;width:32px;height:32px;border-radius:50%;background:var(--text);color:var(--bg);display:grid;place-items:center;box-shadow:0 0 0 3px var(--bg)}
+.pf-cam svg{width:17px;height:17px}
+.pf-name{display:flex;align-items:center;gap:6px;font-size:22px;font-weight:700;padding:4px 6px;border-bottom:1.5px dashed transparent;cursor:text;max-width:100%}
+.pf-name.editing{border-bottom-color:var(--accent)}
+.pf-nt{outline:none;min-width:40px}
+.pf-pen{color:var(--muted);display:grid;place-items:center}.pf-pen .duo{width:18px;height:18px}
+.pf-name.editing .pf-pen{display:none}
+.pf-mail{color:var(--muted);font-size:14px;max-width:100%}
+/* previsão de diário */
+.pvx-top{text-align:center;padding:18px 20px 6px}
+.pvx-top small{color:var(--muted);font-size:14px;display:block}
+.amt{font-size:46px;font-weight:700;letter-spacing:-.03em;white-space:nowrap;line-height:1.1;display:inline-flex;align-items:flex-start;gap:4px}
+.amt sup{font-size:18px;color:var(--muted);font-weight:600;margin-top:.45em}
+.amt.neg{color:var(--c-saida)}
+.pvx-sub{color:var(--muted);font-size:13px!important;margin-top:2px}
+.pvx-bar{display:flex;gap:3px;height:12px;margin:16px 20px 6px}
+.pvx-bar button{border-radius:6px;min-width:6px;padding:0;transition:opacity .25s,transform .3s var(--spring)}
+.pvx-bar button.sel{transform:scaleY(1.35)}
+.dim{opacity:.28!important}
+.pvx-dot{width:12px;height:12px;border-radius:50%;display:block}
+.pvx-list .srow{transition:opacity .25s,transform .22s var(--spring),background-color .2s}
+.pvx-days{padding:20px 20px 30px}
+.pvx-dl{display:flex;justify-content:space-between;font-size:16px;font-weight:700;margin-bottom:14px}
+.pvx-dl b{color:var(--nav-ic)}
+.pvx-sl{position:relative;height:30px;touch-action:none;cursor:pointer;outline:none}
+.pvx-sl .tr,.pvx-sl .fi{position:absolute;left:0;top:13px;height:4px;border-radius:2px}
+.pvx-sl .tr{right:0;background:var(--surface3)}.pvx-sl .fi{background:var(--nav-ic)}
+.pvx-sl .kn{position:absolute;top:4px;width:22px;height:22px;border-radius:50%;background:#fff;transform:translateX(-50%);box-shadow:0 2px 8px rgba(0,0,0,.35);transition:left .25s var(--spring),transform .15s}
+.pvx-sl.drag .kn{transition:transform .15s;transform:translateX(-50%) scale(1.15)}
+.pvx-sl:focus-visible .kn{box-shadow:0 0 0 3px var(--accent)}
+.pvx-tick{display:flex;justify-content:space-between;font-size:12px;color:var(--muted);margin-top:2px}
+.pvx-chips{display:flex;gap:8px;margin-top:14px}
+.pvx-chips button{padding:8px 14px;border-radius:999px;background:var(--surface2);font-size:14px;font-weight:700;transition:background-color .2s,color .2s}
+.pvx-chips button.on{background:var(--text);color:var(--bg)}
+/* cartões em carteira */
+.wal{position:relative;margin:12px 20px 30px;transition:height .45s var(--spring)}
+.wcard{position:absolute;left:0;right:0;top:0;height:170px;border-radius:24px;padding:18px;color:#fff;text-align:left;display:flex;flex-direction:column;gap:4px;overflow:hidden;transform-origin:50% 0;transition:transform .5s var(--spring);box-shadow:0 -6px 22px rgba(0,0,0,.35)}
+.wcard::after{content:"";position:absolute;width:200px;height:200px;border-radius:50%;right:-70px;top:-80px;background:rgba(255,255,255,.08);pointer-events:none}
+.wc-top{display:flex;justify-content:space-between;align-items:center;gap:12px;position:relative;z-index:1}
+.wc-top b{font-size:18px;min-width:0}.wc-top .num{font-size:17px;font-weight:700;white-space:nowrap}
+.wc-sub{font-size:13px;opacity:.75;position:relative;z-index:1}
+.wal-info{position:absolute;left:0;right:0;opacity:0;transform:translateY(-10px);pointer-events:none;transition:opacity .3s,transform .4s var(--ease-out)}
+.wal-info.on{opacity:1;transform:none;pointer-events:auto}
+.wi-r{display:flex;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--line);font-size:15px}
+.wi-r span{color:var(--muted)}.wi-r b{white-space:nowrap}
+.wal-info .sbtn{width:100%;margin-top:14px}
+/* aparência */
+.ap-prev{display:flex;justify-content:center;align-items:center;gap:14px;padding:24px 20px 10px;min-height:330px}
+.ap-prev>div{display:flex;flex-direction:column;align-items:center;gap:10px;font-size:13px;font-weight:700;color:var(--muted);transition:transform .5s var(--spring),opacity .4s}
+.ap-prev[data-show="dark"] .ap-l,.ap-prev[data-show="light"] .ap-d{transform:scale(.84);opacity:.45}
+.ap-prev[data-show="dark"] .ap-d,.ap-prev[data-show="light"] .ap-l{transform:scale(1.04);color:var(--text)}
+.apm{width:124px;height:262px;border-radius:24px;background:#000;box-shadow:0 0 0 1.5px rgba(237,237,238,.18);padding:12px 9px;display:flex;flex-direction:column;gap:10px;color:#EDEDEE;font-size:9px}
+.apm.l{background:#fff;color:#1D1F23;box-shadow:0 0 0 1.5px #d8d8de}
+.apm-t{display:flex;justify-content:space-between;align-items:center}.apm-t b{font-size:10px}
+.apm-cal{width:14px;height:14px;border-radius:4px;box-shadow:inset 0 0 0 1.3px #BE8CFF}.apm.l .apm-cal{box-shadow:inset 0 0 0 1.3px #820AD1}
+.apm-hz{width:14px;height:14px;border-radius:3px;background:repeating-linear-gradient(90deg,#4C7FEA 0 3px,transparent 3px 5px)}
+.apm-r{display:flex;align-items:center;gap:6px}.apm-r>span:first-child{width:15px;font-weight:700;text-align:center;border-radius:4px}
+.apm-r .td{background:#fff;color:#000}.apm.l .apm-r .td{background:#111;color:#fff}
+.apm-r i{flex:1}
+.apm-p{background:#223A6B;color:#B4CFFF;border-radius:6px;padding:3px 5px;font-weight:700;font-size:8px;white-space:nowrap}.apm.l .apm-p{background:#DCE7FA;color:#2F5DA8}
+.apm-nav{margin-top:auto;height:22px;border-radius:999px;background:#111;display:flex;justify-content:space-around;align-items:center}.apm.l .apm-nav{background:#f1f1f3}
+.apm-nav i{width:7px;height:7px;border-radius:2px;background:#555}.apm-nav i.p{background:#8A3FD9;border-radius:50%;width:11px;height:11px}
+.ap-seg{position:relative;display:grid;grid-template-columns:repeat(3,1fr);background:var(--surface2);border-radius:18px;padding:4px;margin:10px 20px 30px}
+.ap-seg button{position:relative;z-index:1;height:44px;font-size:15px;font-weight:700;color:var(--muted);display:flex;align-items:center;justify-content:center;gap:7px;transition:color .3s}
+.ap-seg button svg{width:17px;height:17px}
+.ap-seg button.on{color:var(--bg)}
+.ap-lens{position:absolute;top:4px;bottom:4px;left:4px;width:calc((100% - 8px)/3);border-radius:14px;background:var(--text);transition:transform .4s var(--spring)}
+/* horizonte em calendários */
+.hzh{overflow-y:auto;height:100%;position:relative;padding-bottom:120px}
+.hzh-chips{position:sticky;top:0;z-index:3;display:flex;gap:6px;overflow-x:auto;padding:8px 16px 12px;background:var(--bg);scrollbar-width:none}
+.hzh-chips::-webkit-scrollbar{display:none}
+.hzh-chips button{flex:none;padding:7px 13px;border-radius:999px;font-size:13px;font-weight:700;color:var(--muted);transition:background-color .25s,color .25s}
+.hzh-chips button.on{background:var(--text);color:var(--bg)}
+.hzh-ms{display:grid;grid-template-columns:1fr;gap:6px;padding:0 16px}
+@media (min-width:701px){.hzh-chips{display:none}.hzh-ms{grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:22px 28px;padding:24px 28px}.hzh{padding-bottom:40px}}
+.hzh-m{padding:4px 0 16px}
+.hzh-h{display:flex;align-items:baseline;justify-content:space-between;gap:10px;padding:6px 2px 10px}
+.hzh-h>b{font-size:17px}.hzh-h span{font-size:13px;color:var(--muted)}.hzh-h span b{color:var(--text)}.hzh-h span b.neg{color:var(--c-saida)}
+.hzh-w,.hzh-g{display:grid;grid-template-columns:repeat(7,1fr);gap:5px}
+.hzh-w i{font-style:normal;font-size:11px;color:var(--muted);text-align:center;padding-bottom:3px}
+.hzh-d{aspect-ratio:1;border-radius:11px;font-size:11.5px;font-weight:700;display:flex;align-items:flex-start;justify-content:flex-start;padding:6px 7px;color:var(--muted);background:var(--surface2);transition:opacity .25s,transform .3s var(--spring),box-shadow .2s}
+.hzh-d.p{background:color-mix(in srgb,#4C7FEA var(--a),var(--bg));color:var(--h-pos-fg)}
+.hzh-d.p.hi{color:#fff}
+.hzh-d.z{background:var(--m-zero);color:var(--m-zero-fg)}
+.hzh-d.n1{background:var(--h-neg1);color:var(--h-neg1-fg)}.hzh-d.n2{background:var(--h-neg2);color:var(--h-neg2-fg)}
+.hzh-d.today{box-shadow:0 0 0 2px var(--text)}
+.hzh.focus .hzh-d{opacity:.28}.hzh.focus .hzh-d.sel{opacity:1;transform:scale(1.14);z-index:2;position:relative}
+.hzh-tip{position:fixed;left:12px;right:12px;bottom:calc(var(--nav-b,20px) + 76px);z-index:25;display:flex;align-items:center;justify-content:space-between;gap:12px;background:var(--pop-bg);border:1px solid var(--line2);border-radius:20px;padding:12px 16px;text-align:left;transform:translateY(30px);opacity:0;pointer-events:none;transition:transform .45s var(--spring),opacity .25s;box-shadow:0 10px 30px rgba(0,0,0,.35)}
+.hzh-tip.on{transform:none;opacity:1;pointer-events:auto}
+.hzh-tip small{display:block;color:var(--muted);font-size:12.5px}.hzh-tip b{font-size:18px}.hzh-tip b.neg{color:var(--c-saida)}
+.hzh-go{display:flex;align-items:center;gap:2px;color:var(--nav-ic);font-weight:700;font-size:14px;white-space:nowrap}.hzh-go svg{width:16px;height:16px}
+@media (min-width:701px){.hzh-tip{left:auto;right:28px;bottom:28px;width:340px}}
+/* totais: cálculos com a conta na linha da situação e o mês anterior na linha da porcentagem */
+@media (max-width:700px){
+  .card.calc{row-gap:0}
+  .calc h3,.calc .big{min-height:28px;display:flex;align-items:center}
+  .calc .big{justify-content:flex-end}
+  .calc .cf,.calc .status{min-height:26px;display:flex;align-items:center}
+  .calc.open .cf,.calc .cf.show{margin-top:0!important}
+  .calc .cf .formula{margin:0}
+  .calc .status{align-self:center}
+  .calc .xp{margin-top:0}
+  .calc.open .xp{margin-top:8px}
+  .calc .xo{min-height:28px}
+}
+/* totais: movimentações em barras */
+.mvb-h{display:flex;justify-content:space-between;align-items:baseline;padding:0 20px 6px}
+.mvb-l{color:var(--muted);font-size:14px}.mvb-v{font-size:19px;font-weight:700}
+.row.mvb-r{flex-direction:column;align-items:stretch;gap:9px;transition:opacity .25s,transform .22s var(--spring),background-color .2s}
+.mvb-top{display:flex;align-items:center;gap:12px;width:100%}
+.mvb-t{display:block;height:8px;border-radius:999px;background:var(--surface2);overflow:hidden}
+.mvb-t i{display:block;height:100%;border-radius:999px;width:0;animation:mvbg .9s var(--ease-out) .15s forwards}
+@keyframes mvbg{to{width:var(--w)}}
+.row.mvb-r.sel{background:transparent}
+.row.mvb-r.sel .mvb-top>svg{color:var(--nav-ic)}
+/* lista do dia */
+.dsal{padding:14px 20px 4px}
+.dsal small{color:var(--muted);font-size:14px;display:block}
+.dsal .amt{font-size:36px}.dsal .amt sup{font-size:15px}
+.lsw{position:relative;overflow:hidden}
+.lsw-del{position:absolute;right:0;top:0;bottom:0;width:88px;background:var(--h-neg1);color:var(--h-neg1-fg);font-weight:700;font-size:14px}
+.lsw>.lrow{position:relative;z-index:1;background:var(--bg);transition:transform .38s var(--spring);touch-action:pan-y}
+/* desfazer */
+#px-undo{position:fixed;left:12px;right:12px;bottom:calc(env(safe-area-inset-bottom,0px) + 104px);z-index:70;display:flex;align-items:center;gap:12px;height:54px;padding:0 18px 0 14px;border-radius:20px;background:var(--pop-bg);border:1px solid var(--line2);box-shadow:0 10px 30px rgba(0,0,0,.35);animation:uIn .45s var(--spring);color:var(--text);transform:none;width:auto;max-width:none;font-weight:600}
+@keyframes uIn{from{opacity:0;transform:translateY(24px) scale(.96)}}
+#px-undo.out{opacity:0;transform:translateY(16px) scale(.97);transition:opacity .25s,transform .3s}
+#px-undo .ur{width:26px;height:26px;transform:rotate(-90deg);flex:none}
+#px-undo .ur circle{fill:none;stroke-width:2.6}
+#px-undo .ur-b{stroke:var(--surface3)}#px-undo .ur-f{stroke:var(--nav-ic);stroke-linecap:round}
+#px-undo .ut{flex:1;min-width:0;font-size:14.5px}
+#px-undo .uc svg{width:18px;height:18px;color:var(--muted);display:block}
+#px-undo .ub{color:var(--nav-ic);font-weight:700;font-size:15px;padding:8px 0 8px 6px}
+@media (min-width:701px){#px-undo{left:50%;right:auto;width:380px;margin-left:-190px;bottom:28px}}
+/* como funciona em stories */
+.scr.story .scr-head{display:none}
+.scr.story .st-top{display:flex;align-items:center;gap:12px;padding:calc(env(safe-area-inset-top,0px) + 14px) 14px 4px 18px}
+.st-bars{flex:1;display:flex;gap:4px}
+.st-bars i{flex:1;height:3px;border-radius:2px;background:var(--surface3);overflow:hidden}
+.st-bars i b{display:block;height:100%;width:0;background:var(--text)}
+.st-bars i.done b{width:100%}
+.st-bars i.run b{animation:stbar var(--dur,7000ms) linear forwards}
+.scr.story.paused .st-bars i.run b{animation-play-state:paused}
+@keyframes stbar{to{width:100%}}
+.st-x{width:38px;height:38px;border-radius:50%;display:grid;place-items:center;color:var(--text)}
+.st-x svg{width:20px;height:20px}
+.scr.story .tu-foot{display:none}
+.scr.story .tu-view{flex:1;user-select:none;-webkit-user-select:none}
 </style></head><body>
 <div id="splash" class="splash" role="img" aria-label="FLUX"><span class="sp-logo"><svg class="logo-svg" width="56" height="56" viewBox="-140 -114 2200 2200" aria-hidden="true"><g transform="translate(0,1980) scale(0.1,-0.1)"><path fill="var(--logo-b)" d="M15530 9714 c-68 -13 -138 -28 -155 -33 -16 -6 -52 -13 -80 -16 -27 -4 -111 -20 -185 -35 -74 -16 -169 -36 -210 -44 -210 -41 -276 -58 -293 -75 -17 -17 -18 -173 -20 -3688 -2 -3594 -2 -3671 -21 -3692 -30 -33 -2372 -33 -2402 0 -19 21 -19 92 -21 3361 -2 2270 -6 3345 -13 3358 -17 31 -56 35 -114 12 -28 -12 -64 -24 -81 -27 -16 -4 -55 -15 -85 -25 -30 -10 -131 -41 -225 -69 -234 -70 -330 -99 -400 -123 -33 -11 -89 -28 -125 -38 -36 -10 -146 -46 -245 -80 -99 -35 -227 -78 -285 -96 -58 -17 -170 -55 -250 -84 -80 -29 -179 -63 -220 -77 -41 -14 -109 -38 -150 -53 -41 -15 -127 -44 -190 -65 -63 -20 -128 -43 -145 -51 -16 -8 -55 -22 -85 -33 -71 -25 -256 -92 -345 -126 -38 -15 -92 -35 -120 -45 -27 -10 -111 -42 -185 -70 -74 -28 -153 -57 -175 -65 -76 -25 -154 -64 -165 -84 -7 -14 -10 -848 -10 -2768 0 -2579 -1 -2749 -17 -2760 -30 -23 -1394 -18 -1422 4 -22 18 -22 18 -22 2437 0 1718 -3 2424 -11 2433 -17 21 -76 15 -116 -12 -20 -14 -42 -25 -49 -25 -12 0 -230 -100 -273 -126 -14 -8 -45 -24 -70 -35 -83 -38 -375 -179 -400 -194 -14 -8 -106 -56 -205 -106 -99 -49 -238 -121 -310 -160 -71 -38 -157 -83 -190 -99 -33 -17 -105 -57 -160 -89 -55 -32 -145 -84 -199 -115 -54 -31 -111 -66 -126 -76 -16 -11 -31 -20 -35 -20 -19 0 -676 -410 -820 -511 -38 -27 -108 -75 -155 -107 -90 -61 -223 -156 -305 -220 -27 -22 -69 -51 -91 -65 -93 -58 -84 67 -84 -1173 0 -668 -4 -1102 -10 -1118 -17 -47 -37 -47 -140 -4 -52 22 -117 49 -145 60 -54 21 -86 40 -226 131 -154 102 -381 358 -440 499 -94 223 -119 308 -119 402 0 91 -62 118 -112 48 -14 -20 -55 -69 -90 -109 -124 -142 -147 -170 -211 -269 -36 -54 -80 -119 -98 -144 -38 -52 -120 -216 -139 -275 -7 -22 -23 -65 -35 -95 -74 -179 -94 -503 -41 -684 33 -113 96 -255 134 -303 162 -201 186 -226 327 -332 146 -109 154 -115 385 -236 195 -102 413 -192 575 -236 39 -10 95 -27 125 -38 30 -11 134 -38 230 -60 96 -23 211 -50 255 -61 44 -11 117 -24 162 -30 46 -5 109 -16 140 -24 32 -8 101 -19 153 -25 135 -16 247 -31 305 -41 28 -5 136 -16 240 -25 105 -9 251 -22 325 -30 74 -8 293 -21 485 -30 193 -8 456 -20 585 -26 166 -9 1611 -13 4919 -16 4398 -4 4685 -3 4702 13 19 17 19 125 19 4453 0 3999 -2 4439 -16 4459 -18 26 -24 26 -184 -4z"/><path fill="var(--logo-a)" d="M12063 19057 c-29 -18 -110 -71 -180 -119 -172 -116 -396 -266 -540 -361 -65 -43 -219 -147 -343 -232 -124 -85 -243 -165 -265 -176 -22 -12 -53 -33 -70 -46 -16 -14 -77 -56 -135 -94 -123 -82 -176 -118 -285 -194 -44 -30 -109 -74 -145 -98 -36 -23 -179 -118 -319 -212 -139 -93 -309 -207 -377 -251 -68 -45 -139 -96 -158 -112 -19 -17 -45 -33 -58 -37 -13 -4 -39 -19 -58 -34 -19 -14 -53 -37 -76 -51 -23 -14 -88 -56 -143 -95 -56 -38 -136 -93 -179 -122 -120 -80 -140 -96 -152 -122 -7 -16 -10 -510 -10 -1704 0 -1555 -1 -1682 -16 -1699 -27 -29 -76 -23 -123 15 -22 17 -62 47 -88 65 -27 18 -89 61 -140 97 -50 36 -95 65 -99 65 -4 0 -18 10 -31 22 -13 12 -43 34 -67 48 -24 14 -61 37 -82 51 -22 15 -118 79 -214 142 -96 64 -200 134 -230 156 -30 23 -71 49 -91 60 -19 11 -41 27 -49 36 -7 9 -27 23 -44 32 -17 9 -74 45 -128 80 -113 74 -112 74 -174 27 -27 -21 -67 -49 -91 -63 -23 -14 -59 -38 -80 -52 -21 -14 -104 -71 -186 -125 -81 -54 -225 -152 -320 -217 -94 -65 -191 -130 -215 -145 -24 -15 -82 -53 -130 -85 -48 -32 -121 -80 -162 -107 -41 -27 -85 -56 -96 -64 -66 -46 -339 -229 -539 -362 -126 -84 -246 -164 -265 -179 -34 -25 -105 -73 -215 -145 -29 -19 -127 -84 -217 -144 -90 -61 -242 -162 -338 -227 -96 -64 -217 -145 -267 -180 -51 -35 -117 -80 -146 -99 -119 -78 -194 -130 -210 -148 -16 -18 -17 -165 -17 -2201 -1 -2383 3 -2237 -57 -2263 -15 -7 -46 -24 -68 -39 -22 -14 -83 -53 -135 -85 -221 -136 -555 -365 -675 -463 -27 -23 -67 -53 -88 -68 -21 -16 -62 -48 -91 -73 -29 -25 -110 -94 -182 -155 -155 -131 -479 -454 -587 -585 -43 -52 -95 -115 -116 -140 -34 -41 -91 -119 -166 -225 -27 -38 -88 -131 -156 -235 -37 -57 -189 -360 -215 -430 -97 -252 -135 -379 -181 -600 -80 -387 -61 -864 47 -1205 16 -49 32 -108 36 -130 8 -47 51 -166 65 -180 17 -17 26 12 32 98 14 190 127 495 272 737 25 41 55 93 66 115 12 22 44 66 70 98 27 32 49 62 49 67 0 10 85 124 138 186 23 27 57 68 75 91 109 142 633 685 710 736 24 16 74 58 152 127 27 25 75 66 105 90 30 25 87 72 125 105 64 56 195 158 249 195 12 8 89 67 172 131 125 97 314 231 494 349 20 14 122 82 226 151 104 69 200 132 214 139 14 7 61 36 105 65 44 29 111 70 149 91 38 22 101 58 140 81 39 24 89 52 112 63 22 10 51 28 65 38 13 10 65 40 114 66 99 53 126 68 325 178 141 77 804 408 995 496 61 28 191 87 290 132 99 45 194 90 210 100 17 10 53 26 80 35 28 9 86 34 130 54 44 21 107 49 140 64 33 14 101 44 150 66 50 22 158 67 240 100 83 34 179 74 215 90 87 39 394 163 500 201 46 17 96 38 110 45 14 8 50 23 80 34 30 10 98 36 150 56 100 39 221 84 305 114 73 26 353 130 405 151 25 10 68 26 95 35 62 21 208 72 340 120 55 19 161 56 235 80 74 25 252 84 395 132 289 97 358 119 525 170 63 19 144 45 180 58 36 13 79 27 95 30 30 7 78 21 395 119 96 29 202 61 235 69 195 51 254 68 285 81 19 8 60 20 90 25 30 6 91 22 135 36 44 14 114 34 155 44 41 11 122 33 180 49 230 65 344 95 540 143 219 54 361 90 450 116 50 15 165 42 390 92 47 11 132 31 190 45 271 67 553 131 615 141 22 4 81 17 130 30 50 13 115 26 145 29 30 4 84 16 120 26 36 11 101 26 145 35 44 9 150 29 235 46 85 17 205 41 265 54 61 13 187 38 280 55 94 17 222 42 285 55 63 13 183 36 265 51 83 15 184 33 225 41 41 7 149 27 240 43 262 46 575 103 880 160 58 11 135 25 172 30 37 6 111 19 165 29 54 11 134 25 178 31 44 6 125 20 180 31 55 12 138 27 185 34 47 7 207 34 355 60 149 26 311 53 360 60 50 7 212 34 360 60 149 26 311 51 362 56 96 10 143 22 143 38 0 14 -122 39 -250 51 -63 6 -187 19 -275 30 -615 76 -1709 88 -2585 29 -80 -5 -212 -14 -295 -19 -82 -6 -157 -13 -165 -15 -8 -2 -113 -12 -233 -20 -120 -9 -242 -20 -270 -26 -66 -12 -367 -43 -429 -43 -35 -1 -53 5 -68 19 -20 21 -20 21 -20 2778 l0 2757 -37 40 c-20 23 -50 47 -67 54 -17 7 -88 53 -159 102 -70 49 -153 106 -185 126 -31 20 -102 69 -157 107 -55 39 -116 80 -135 91 -37 21 -128 81 -250 165 -77 52 -128 87 -176 119 -16 10 -53 35 -82 55 -29 20 -74 50 -101 66 -63 39 -404 268 -439 295 -15 11 -76 53 -136 93 -324 214 -387 257 -449 304 -23 18 -46 33 -52 33 -5 0 -29 15 -52 33 -39 30 -74 53 -133 87 -15 8 -53 34 -86 58 -32 23 -115 80 -184 126 -69 45 -174 116 -233 157 -60 41 -123 83 -141 94 -17 11 -47 32 -66 46 -19 14 -62 43 -95 63 -33 21 -75 48 -94 62 -43 31 -64 29 -128 -9z m148 -1747 c19 -5 53 -25 75 -43 21 -18 66 -50 99 -71 33 -20 79 -51 102 -69 52 -39 130 -93 292 -200 197 -130 204 -135 241 -157 19 -12 60 -39 90 -61 30 -22 93 -65 140 -96 47 -31 109 -73 138 -92 28 -20 70 -47 91 -61 21 -14 71 -47 110 -75 39 -27 109 -75 155 -105 142 -94 240 -159 265 -177 13 -10 52 -36 87 -58 54 -34 245 -161 339 -225 17 -11 59 -39 95 -63 60 -39 66 -46 77 -92 10 -39 12 -545 10 -2359 -2 -2309 -2 -2309 -28 -2328 -17 -13 -53 -23 -100 -28 -41 -5 -87 -13 -104 -19 -16 -5 -68 -15 -115 -21 -47 -6 -123 -19 -170 -30 -47 -10 -116 -23 -155 -29 -90 -14 -421 -76 -545 -101 -52 -11 -126 -24 -165 -30 -38 -7 -90 -18 -115 -25 -25 -8 -76 -19 -115 -25 -38 -7 -106 -20 -150 -30 -44 -11 -114 -26 -155 -34 -41 -9 -131 -29 -200 -44 -69 -16 -146 -32 -173 -35 -26 -4 -61 -13 -77 -22 -41 -21 -92 -19 -118 5 -22 21 -22 21 -23 3388 -1 1852 0 3374 1 3382 5 39 35 48 101 30z m-5057 -4869 c25 -22 82 -64 128 -95 46 -30 156 -104 244 -163 89 -59 180 -119 203 -133 23 -14 71 -46 106 -73 58 -43 101 -71 188 -125 16 -9 64 -42 107 -72 43 -30 91 -63 107 -72 86 -51 289 -198 307 -222 21 -27 21 -34 24 -984 1 -526 0 -967 -3 -978 -8 -33 -46 -53 -194 -100 -238 -76 -946 -319 -1048 -359 -34 -14 -70 -25 -81 -25 -11 0 -46 -13 -77 -30 -69 -36 -79 -37 -110 -5 -25 24 -25 24 -25 1723 0 1699 0 1699 21 1726 28 36 50 33 103 -13z"/></g></svg></span><span class="sp-t">FLUX</span></div>
 <div id="app" class="app">
@@ -2178,7 +2370,7 @@ function goTab(tab) {
     const v = $("#view"); v.classList.remove("hz-enter", "hz-leave"); void v.offsetWidth;
     v.classList.add(tab === "horizonte" ? "hz-enter" : "hz-leave");
     v.addEventListener("animationend", function done(e) { if (e.target === v) { v.classList.remove("hz-enter", "hz-leave"); v.removeEventListener("animationend", done); } });
-    stagger($$(isMobile() ? (tab === "horizonte" ? ".pane.cur .hz-row" : ".pane.cur .m-day") : ".mcard", v), 30, 14);
+    stagger($$(tab === "horizonte" ? ".hzh-m" : isMobile() ? ".pane.cur .m-day" : ".mcard", v), 30, 14);
   }
 }
 function goToday() {
@@ -2369,7 +2561,8 @@ function periodHTML() {
       <span class="period-label m-label">${MON3[miM(mi)]}/${String(miY(mi)).slice(2)}</span>
       <button class="icon-btn" data-m="1" aria-label="próximo mês" ${mi >= MAX_MI ? "disabled" : ""}>${I.right}</button>`;
   }
-  if (UI.tab === "saldos" || UI.tab === "horizonte") {
+  if (UI.tab === "horizonte") return "";
+  if (UI.tab === "saldos") {
     return `<button class="icon-btn" data-scroll="-1" id="scroll-back" aria-label="mês anterior">${I.left}</button>
       <span class="period-label num" id="vis-label">${rangeLabel(CUR)}</span>
       <button class="icon-btn" data-scroll="1" aria-label="próximo mês">${I.right}</button>`;
@@ -2739,7 +2932,7 @@ function renderAll() {
   v.dataset.tab = vkey;
   const isBoard = UI.tab === "saldos" || UI.tab === "horizonte";
   if (UI.tab === "buscar" && keep && $("#bs-q", v)) updateBusca(); // não perde o que está sendo digitado
-  else v.innerHTML = isBoard ? (mob ? (UI.tab === "horizonte" ? mobileHorizonHTML() : mobileMonthHTML()) : saldosHTML(UI.tab === "horizonte")) : UI.tab === "totais" ? totaisHTML() : UI.tab === "buscar" ? buscaHTML() : menuHTML();
+  else v.innerHTML = isBoard ? (UI.tab === "horizonte" ? hzHeatHTML() : mob ? mobileMonthHTML() : saldosHTML(false)) : UI.tab === "totais" ? totaisHTML() : UI.tab === "buscar" ? buscaHTML() : menuHTML();
   fitPanes(v);
   const sc2 = $(".board,.page", v);
   if (pos && sc2) { sc2.scrollLeft = pos[0]; sc2.scrollTop = pos[1]; }
@@ -2780,9 +2973,9 @@ function stagger(els, step = 38, max = 18) {
 }
 function enterAnim(v) {
   const sel = UI.tab === "totais" ? ".pane.cur .section-title, .pane.cur .calc, .pane.cur .list .row, .page > .page-inner .section-title, .page > .page-inner .calc, .page > .page-inner .list .row"
-    : UI.tab === "menu" ? ".mp-head, .slist2 .srow"
+    : UI.tab === "menu" ? ".mp-head, .menu-page .section-title, .slist2 .srow"
     : UI.tab === "buscar" ? ".bs-bar, .bs-msg, #bs-res .lrow, .bs-line"
-    : isMobile() ? (UI.tab === "horizonte" ? ".pane.cur .hz-row" : ".pane.cur .m-day") : ".mcard";
+    : UI.tab === "horizonte" ? ".hzh-m" : isMobile() ? ".pane.cur .m-day" : ".mcard";
   stagger($$(sel, v));
 }
 const LAST_COUNT = {};
@@ -2793,9 +2986,8 @@ function countUp(root, force) {
     const from = force ? 0 : (LAST_COUNT[key] ?? to);
     LAST_COUNT[key] = to;
     if (from === to) return;
-    const t0 = performance.now(), dur = 900;
-    const step = now => { const k = Math.min(1, (now - t0) / dur), e = 1 - Math.pow(1 - k, 4); el.textContent = brl(from + (to - from) * e); if (k < 1 && el.isConnected) requestAnimationFrame(step); };
-    requestAnimationFrame(step);
+    // valor que rola: cada número gira até o novo
+    odoPut(el, brl(from)); requestAnimationFrame(() => requestAnimationFrame(() => el.isConnected && odoPut(el, brl(to))));
   });
 }
 // o + fica sempre 14px acima do fim da área de conteúdo (acima da barra de totais do mês, quando ela existe).
@@ -2847,7 +3039,17 @@ function boardAct(el) {
   const act = el.dataset.act, d = el.dataset.d;
   if (act === "check") toggleCheckin(d);
   else if (act === "cell") openPanel(d, [el.dataset.t]);
-  else if (act === "saldo") openPanel(d, null);
+  else if (act === "saldo") { if (isMobile() && el.classList.contains("m-saldo")) flipOpen(el, () => openPanel(d, null)); else openPanel(d, null); }
+}
+/* o saldo vira o dia: a pílula cresce até ocupar a tela e a lista do dia nasce dela */
+function flipOpen(el, then) {
+  if (matchMedia("(prefers-reduced-motion: reduce)").matches) return then();
+  const r = el.getBoundingClientRect(), cs = getComputedStyle(el), f = document.createElement("div");
+  f.className = "flip"; f.setAttribute("aria-hidden", "true");
+  Object.assign(f.style, { left: r.left + "px", top: r.top + "px", width: r.width + "px", height: r.height + "px", borderRadius: cs.borderRadius, background: cs.backgroundColor });
+  document.body.appendChild(f);
+  requestAnimationFrame(() => requestAnimationFrame(() => Object.assign(f.style, { left: "0px", top: "0px", width: innerWidth + "px", height: innerHeight + "px", borderRadius: "0px", background: getComputedStyle(document.body).backgroundColor })));
+  setTimeout(() => { PANEL.flip = true; then(); PANEL.flip = false; f.classList.add("out"); setTimeout(() => f.remove(), 260); }, 360);
 }
 $("#view").addEventListener("click", e => {
   const th = e.target.closest("th[data-col]");
@@ -2926,6 +3128,56 @@ function gridIcon() {
   return h;
 }
 function hzStart() { return Math.max(CUR, Math.min(UI.hzS, HZ_END - 2)); }
+/* ===== horizonte: cada mês vira um calendário e a cor de cada dia é o saldo (mês atual + 11) ===== */
+function hzHeatHTML() {
+  const c = calc(), ms = []; for (let mi = CUR; mi <= Math.min(MAX_MI, CUR + 11); mi++) ms.push(mi);
+  let mx = 1; for (const mi of ms) { const y = miY(mi), m = miM(mi); for (let d = 1; d <= dim(y, m); d++) mx = Math.max(mx, c.saldo[`${y}-${pad(m + 1)}-${pad(d)}`] ?? 0); }
+  const chips = ms.map((mi, i) => `<button class="${i ? "" : "on"}" data-hzm="${i}">${MON3[miM(mi)]}${i === 0 || miM(mi) === 0 ? "/" + String(miY(mi)).slice(2) : ""}</button>`).join("");
+  const months = ms.map((mi, i) => {
+    const y = miY(mi), m = miM(mi), n = dim(y, m), first = new Date(y, m, 1).getDay();
+    const last = c.saldo[`${y}-${pad(m + 1)}-${pad(n)}`] ?? 0;
+    let g = `<span class="hzh-b"></span>`.repeat(first);
+    for (let d = 1; d <= n; d++) {
+      const ds = `${y}-${pad(m + 1)}-${pad(d)}`, v = c.saldo[ds] ?? 0;
+      let cls = "", st = "";
+      if (Math.abs(v) < 0.005) cls = "z"; else if (v < 0) cls = v > -NEG_SMALL ? "n1" : "n2";
+      else { const a = Math.round(16 + 64 * Math.pow(Math.min(1, v / mx), 1.25)); cls = a > 46 ? "p hi" : "p"; st = ` style="--a:${a}%"`; }
+      g += `<button class="hzh-d num ${cls} ${ds === TODAY ? "today" : ""}"${st} data-hzd="${ds}" aria-label="${d} de ${MONTHS[m]}: ${fmt(v)}">${d}</button>`;
+    }
+    return `<section class="hzh-m" data-hzi="${i}"><div class="hzh-h"><b>${MONTHS[m]}${m === 0 || i === 0 ? " " + y : ""}</b><span class="nb">termina com <b class="num ${last < -0.004 ? "neg" : ""}">${brl(last)}</b></span></div>
+      <div class="hzh-w" aria-hidden="true">${["d", "s", "t", "q", "q", "s", "s"].map(w => `<i>${w}</i>`).join("")}</div><div class="hzh-g">${g}</div></section>`;
+  }).join("");
+  return `<div class="page hzh"><div class="hzh-chips" role="tablist" aria-label="meses">${chips}</div><div class="hzh-ms casc">${months}</div>
+    <button class="hzh-tip" data-hztip aria-live="polite"><span><small></small><b class="num"></b></span><span class="hzh-go">ver o dia${I.chev}</span></button></div>`;
+}
+function hzFocus(v, ds) {
+  const pg = $(".hzh", v); if (!pg) return;
+  $$(".hzh-d.sel", pg).forEach(x => x.classList.remove("sel"));
+  const tip = $(".hzh-tip", pg);
+  if (!ds) { pg.classList.remove("focus"); tip.classList.remove("on"); return; }
+  const b = $(`.hzh-d[data-hzd="${ds}"]`, pg); if (!b) return;
+  pg.classList.add("focus"); b.classList.add("sel");
+  const val = calc().saldo[ds] ?? 0, d = parse(ds);
+  $("small", tip).textContent = `${WDL[d.getDay()]}, ${d.getDate()} de ${MONTHS[d.getMonth()]}`;
+  const bb = $("b", tip); bb.classList.toggle("neg", val < -0.004); odoPut(bb, brl(val));
+  tip.dataset.d = ds; tip.classList.add("on");
+}
+$("#view").addEventListener("click", e => {
+  const pg = e.target.closest(".hzh"); if (!pg) return;
+  const ch = e.target.closest("[data-hzm]");
+  if (ch) { const m = $(`.hzh-m[data-hzi="${ch.dataset.hzm}"]`, pg); if (m) pg.scrollTo({ top: m.offsetTop - $(".hzh-chips", pg).offsetHeight - 4, behavior: "smooth" }); return; }
+  const tip = e.target.closest("[data-hztip]"); if (tip) { if (tip.dataset.d) { const d = tip.dataset.d; hzFocus($("#view"), null); openPanel(d, null); } return; }
+  const d = e.target.closest("[data-hzd]");
+  if (d) { if (d.classList.contains("sel")) { hzFocus($("#view"), null); openPanel(d.dataset.hzd, null); } else hzFocus($("#view"), d.dataset.hzd); return; }
+  hzFocus($("#view"), null);
+});
+$("#view").addEventListener("scroll", e => {
+  const pg = e.target; if (!pg.classList || !pg.classList.contains("hzh")) return;
+  const top = pg.scrollTop + $(".hzh-chips", pg).offsetHeight + 40; let cur = 0;
+  $$(".hzh-m", pg).forEach((m, i) => { if (m.offsetTop <= top) cur = i; });
+  $$("[data-hzm]", pg).forEach((b, i) => { const on = i === cur; if (on && !b.classList.contains("on")) b.scrollIntoView({ inline: "center", block: "nearest", behavior: "smooth" }); b.classList.toggle("on", on); });
+}, true);
+
 function mobileHorizonHTML() {
   const s = hzStart();
   return pagerHTML("hz", [s - 3 >= CUR ? s - 3 : null, s, s + 3 <= HZ_END - 2 ? s + 3 : null], hzInner);
@@ -2994,8 +3246,10 @@ function totaisInner(mi) {
   h += calcCard("custo", { formula: fx(ti("saida"), op("+"), ti("diario"), op("+"), ti("cartao"), op("+"), ti("prev")), value: brl(st.custo), s: cvS, num: st.custo, cmp: cmpLine(`em ${pName} ${pv ? brl(pv.custo) : ""}`, rel(st.custo, pv && pv.custo, false)) });
   h += calcCard("diarioMedio", { title: "diário", formula: fx(ti("diario"), op("/"), op(`${st.diarioDias}`)), value: `${brl(st.diarioTot)}${PT > 0.004 ? `<span class="big-of"> / ${brl(PT)}</span>` : ""}`, extra: diarioChart(mi, PT),
     cmp: cmpLine(`média por dia ${brl(st.diarioMedio)} · ${pName} ${pv ? brl(pv.diarioMedio) : ""}`, rel(st.diarioMedio, pv && pv.diarioMedio, false)) });
-  h += `</div></div><div><h2 class="section-title">movimentações do mês</h2><div class="list">`;
-  for (const t of TYPE_ORDER) h += `<button class="row" data-mlist="${t}">${ti(t, true)}<span class="grow">${TYPES[t].label}</span><span class="val num">${brl(st.all[t])}</span>${I.chev}</button>`;
+  /* movimentações do mês: barras deitadas; tocar acende o tipo e o valor de cima rola; tocar de novo abre a lista */
+  const mvTot = r2(TYPE_ORDER.reduce((a, t) => a + (st.all[t] || 0), 0)), mvMax = Math.max(1, ...TYPE_ORDER.map(t => st.all[t] || 0));
+  h += `</div></div><div class="mvb" data-mvtot="${mvTot}"><h2 class="section-title">movimentações do mês</h2><div class="mvb-h"><span class="mvb-l">total do mês</span><b class="num mvb-v">${brl(mvTot)}</b></div><div class="list">`;
+  for (const t of TYPE_ORDER) h += `<button class="row mvb-r" data-mlist="${t}" data-mv="${st.all[t] || 0}"><span class="mvb-top">${ti(t, true)}<span class="grow">${TYPES[t].label}</span><span class="val num">${brl(st.all[t])}</span>${I.chev}</span><span class="mvb-t" aria-hidden="true"><i style="--w:${((st.all[t] || 0) / mvMax * 100).toFixed(1)}%;background:var(--c-${t})"></i></span></button>`;
   h += `<button class="row" data-mlist="all"><span class="grow row-link">ver todas</span><span class="muted">${st.list.length} ${st.list.length === 1 ? "movimentação" : "movimentações"}</span>${I.chev}</button></div></div>`;
   const pdays = prevDaysIn(mi);
   h += `<div><h2 class="section-title">previsão de diário do mês</h2><div class="list"><button class="row" data-openprev aria-label="previsão de diário: ${pdays} ${pdays === 1 ? "dia" : "dias"}, ${brl(st.P)}">${ti("prev", true)}<span class="grow">previsão de diário <span class="pv-x num">x${pdays}</span></span><span class="val num">${brl(st.P)}</span>${I.chev}</button></div></div>`;
@@ -3020,6 +3274,15 @@ function diarioChart(mi, PT) {
   }
   return svg + `</svg>`;
 }
+function mvFocus(row) {
+  $$(".mvb").forEach(box => {
+    const rs = $$(".mvb-r", box), on = row && box.contains(row);
+    rs.forEach(r => { r.classList.toggle("sel", !!on && r === row); r.classList.toggle("dim", !!on && r !== row); });
+    const v = $(".mvb-v", box), l = $(".mvb-l", box);
+    if (on) { l.textContent = TYPES[row.dataset.mlist].label; odoPut(v, brl(+row.dataset.mv)); }
+    else if (l.textContent !== "total do mês") { l.textContent = "total do mês"; odoPut(v, brl(+box.dataset.mvtot)); }
+  });
+}
 function toggleCalc(card) {
   const key = card.dataset.ctog, open = !UI.calcOpen.has(key);
   if (open) UI.calcOpen.add(key); else UI.calcOpen.delete(key);
@@ -3037,7 +3300,9 @@ $("#view").addEventListener("click", e => {
   if (ct) return toggleCalc(ct);
   if (e.target.closest("[data-openprev]")) return openPrevScreen();
   const ml = e.target.closest("[data-mlist]");
+  if (ml && ml.classList.contains("mvb-r") && !ml.classList.contains("sel")) return mvFocus(ml);
   if (ml) openMonthScreen(UI.tMonth, ml.dataset.mlist);
+  const box = e.target.closest(".mvb"); if (box || e.target.closest(".page")) mvFocus(null);
 });
 
 
@@ -3164,14 +3429,51 @@ function renderPanel() {
       <div class="ph-right"><button class="icon-btn flat" data-padd aria-label="adicionar movimentação" aria-haspopup="menu">${I.plus}</button></div>`;
     const dd = `<button class="pill-dd" data-pfilter aria-haspopup="menu" aria-label="filtrar por tipo, atual: ${PANEL.filter ? TYPES[PANEL.filter].col : "todas"}">${filterLabel()}<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 9l6 6 6-6"/></svg></button>`;
     const items = !S.loaded ? `<div class="skel"></div><div class="skel"></div><div class="skel"></div>`
-      : list.length || prevRow ? `<div class="lrows">${list.map(itemHTML).join("")}${prevRow}</div>`
+      : list.length || prevRow ? `<div class="lrows casc">${list.map(x => `<div class="lsw"><button class="lsw-del" data-swdel="${x.tx.id}" data-date="${x.date}" tabindex="-1">apagar</button>${itemHTML(x)}</div>`).join("")}${prevRow}</div>`
       : `<div class="empty"><button class="plus" data-padd aria-label="adicionar movimentação">${I.plus.replace("<svg", '<svg width="26" height="26"')}</button><span>sem movimentações por aqui.<br>toque no + para adicionar.</span></div>`;
-    body = `${PANEL.calcF ? calcFilterBar(PANEL.calcF) : `<div class="pbar">${dd}</div>`}${items}`;
+    // saldo no fim do dia, no topo da lista do dia (o valor rola quando muda)
+    const dsal = day && !PANEL.calcF && S.loaded ? `<div class="dsal"><small>saldo no fim do dia</small><div class="amt num ${(calc().saldo[PANEL.date] ?? 0) < -0.004 ? "neg" : ""}"><sup>R$</sup><span data-dsal></span></div></div>` : "";
+    body = `${dsal}${PANEL.calcF ? calcFilterBar(PANEL.calcF) : `<div class="pbar">${dd}</div>`}${items}`;
   }
-  const fresh = !root.firstChild;
+  const fresh = !root.firstChild && !PANEL.flip;
   root.innerHTML = `<div class="drawer-ov" data-pclose ${fresh ? "" : 'style="animation:none"'}></div><aside class="drawer screen" role="dialog" aria-label="${label || (PANEL.mode === "day" ? "movimentações do dia" : "movimentações do mês")}" ${fresh ? "" : 'style="animation:none"'}><div class="drawer-head ph">${head}</div><div class="drawer-body pb">${body}</div></aside>`;
   if (PANEL.mode === "calc") requestAnimationFrame(() => $$("#drawer-root .bar i").forEach(b => b.style.width = b.dataset.w + "%"));
+  const ds = $("#drawer-root [data-dsal]");
+  if (ds) {
+    const v = calc().saldo[PANEL.date] ?? 0, txt = fmt(Math.abs(v)).replace(/^/, v < -0.004 ? "- " : "");
+    if (PANEL.lastSal != null && PANEL.lastDate === PANEL.date) { odoPut(ds, PANEL.lastSal); requestAnimationFrame(() => requestAnimationFrame(() => odoPut(ds, txt))); } else odoPut(ds, txt);
+    PANEL.lastSal = txt; PANEL.lastDate = PANEL.date;
+  }
 }
+/* lista do dia: arrastar o item para a esquerda mostra "apagar" */
+(() => {
+  const root = $("#drawer-root"); let d = null;
+  const shut = except => $$(".lsw.open", root).forEach(w => { if (w !== except) { w.classList.remove("open"); $(".lrow", w).style.transform = ""; } });
+  root.addEventListener("pointerdown", e => {
+    const row = e.target.closest(".lsw > .lrow"); if (!row || (e.pointerType === "mouse" && e.button)) return;
+    const w = row.parentElement; d = { row, w, x: e.clientX, y: e.clientY, dx: 0, ax: null, base: w.classList.contains("open") ? -88 : 0, id: e.pointerId };
+  });
+  root.addEventListener("pointermove", e => {
+    if (!d) return;
+    const dx = e.clientX - d.x, dy = e.clientY - d.y;
+    if (!d.ax) { if (Math.abs(dx) + Math.abs(dy) < 8) return; d.ax = Math.abs(dx) > Math.abs(dy) ? "x" : "y"; if (d.ax === "x") { try { d.row.setPointerCapture(d.id); } catch { } d.row.style.transition = "none"; shut(d.w); } }
+    if (d.ax !== "x") return;
+    d.dx = Math.max(-120, Math.min(0, d.base + dx)); d.row.style.transform = `translateX(${d.dx}px)`;
+  });
+  const up = () => {
+    if (!d) return; const D = d; d = null; if (D.ax !== "x") return;
+    D.row.style.transition = ""; const open = D.dx < -44;
+    D.w.classList.toggle("open", open); D.row.style.transform = open ? "translateX(-88px)" : "";
+    D.row.dataset.dragged = "1"; setTimeout(() => delete D.row.dataset.dragged, 60);
+  };
+  root.addEventListener("pointerup", up); root.addEventListener("pointercancel", up);
+  root.addEventListener("click", e => {
+    const r = e.target.closest(".lsw > .lrow");
+    if (r && (r.dataset.dragged || r.parentElement.classList.contains("open"))) { e.stopImmediatePropagation(); if (!r.dataset.dragged) shut(null); return; }
+    const del = e.target.closest("[data-swdel]");
+    if (del) { e.stopImmediatePropagation(); const tx = S.txs.find(x => x.id === del.dataset.swdel); shut(null); if (tx) deleteOcc(tx, del.dataset.date); }
+  }, true);
+})();
 $("#drawer-root").addEventListener("click", e => {
   const cy = e.target.closest("[data-cy]");
   if (!cy || cy.disabled || PANEL.mode !== "calc") return;
@@ -3396,9 +3698,9 @@ function openForm({ type = "saida", date = TODAY, tx = null, occ = null, pre = {
     if (t.closest("#f-cancel")) m.close();
   });
   async function submit() {
-    if (!(f.value > 0)) { toast("informe um valor maior que zero", true); $("#f-val", el)?.focus(); return; }
+    if (!(f.value > 0)) { $("#f-val", el)?.focus(); return fieldErr($("#f-val", el).closest(".f-money") || $("#f-val", el), "informe um valor maior que zero"); }
     if (f.type === "cartao" && !(f.cardId && cardName(f.cardId))) { toast("escolha o cartão desse gasto", true); cardSheet(f.cardId, id => { f.cardId = id; draw(); }); return; }
-    if (f.date < miFirst(MIN_MI) || f.date > miLast(MAX_MI)) { toast("a data precisa estar dentro de 5 anos para trás ou para frente", true); return; }
+    if (f.date < miFirst(MIN_MI) || f.date > miLast(MAX_MI)) return fieldErr($("#f-submit", el), "a data precisa estar dentro de 5 anos para trás ou para frente");
     const desc = f.desc.trim() || TYPES[f.type].label;
     const rule = isRule(), shifts = rule && (f.mday === "biz" || f.mday === "prev") && f.rep !== "daily";
     const base = { type: f.type, resg: f.type === "economia" && f.resg, desc, rep: f.rep, until: f.until, count: f.count, installments: f.installments, tags: [], cardId: f.type === "cartao" ? f.cardId : "", skip: [], endBefore: null, mday: rule ? f.mday : "same", nth: rule && f.mday === "nth" ? f.nth : null, aday: shifts && MONTHLY() ? f.aday : null, bdate: shifts ? f.date : null };
@@ -3407,7 +3709,9 @@ function openForm({ type = "saida", date = TODAY, tx = null, occ = null, pre = {
     if (!recurring) {
       const data = { ...base, value: r2(f.value), date: fDate, createdAt: edit ? tx.createdAt || Date.now() : Date.now() };
       if (f.rep === "none") { data.mday = "same"; data.nth = data.aday = data.bdate = null; }
-      m.close(); pxTrail(fDate, f.type); await saveTx(edit ? tx.id : uid("t"), data); if (PANEL.open) renderPanel(); return;
+      const id = edit ? tx.id : uid("t");
+      if (!(await busyBtn($("#f-submit", el), () => saveTx(id, data), edit ? "salvo" : "lançado"))) return;
+      m.close(); pxTrail(fDate, f.type); if (PANEL.open) renderPanel(); return;
     }
     const nd = nextOccDate(tx, occD);
     const s = await chooseScope({ title: "salvar alterações", text: `"${esc(tx.desc)}" se repete. para quais repetições vale essa mudança?`, date: occD, hasNext: !!nd });
@@ -3722,6 +4026,45 @@ function refreshScreens() { SCREENS.forEach(s => { if (s.refresh) s.refresh(); }
 function srow({ attr = "", ico = "", main, sub = "", val = "", chev = true, cls = "" }) {
   return `<button class="srow ${sub ? "stack" : ""} ${cls}" ${attr}>${ico ? `<span class="sico">${ico}</span>` : ""}<span class="grow"><span class="srow-main ellip">${main}</span>${sub ? `<span class="srow-sub">${sub}</span>` : ""}</span>${val ? `<span class="srow-val num">${val}</span>` : ""}${chev ? I.chev : ""}</button>`;
 }
+/* erro sem janela: o campo treme, a linha fica vermelha e a frase abre o próprio espaço embaixo; some ao corrigir */
+function fieldErr(target, msg) {
+  if (!target) return;
+  const box = target.classList && (target.classList.contains("ferr-slot") || target.classList.contains("lfield") || target.classList.contains("frow")) ? target : target.closest(".lfield,.frow,.ferr-slot") || target;
+  let er = box.classList.contains("ferr-slot") ? box : box.nextElementSibling;
+  if (!er || !er.classList.contains("ferr")) { er = document.createElement("div"); er.className = "ferr"; er.setAttribute("role", "alert"); box.classList.contains("ferr-slot") ? box.appendChild(er) : box.after(er); }
+  if (box.classList.contains("ferr-slot")) { er = $(".ferr", box) || er; }
+  er.textContent = msg; requestAnimationFrame(() => er.classList.add("on"));
+  if (!box.classList.contains("ferr-slot")) { box.classList.add("has-err"); box.classList.remove("shk"); void box.offsetWidth; box.classList.add("shk"); }
+  try { navigator.vibrate && navigator.vibrate(18); } catch { }
+  const inp = box.querySelector && box.querySelector("input");
+  const clear = () => { er.classList.remove("on"); box.classList.remove("has-err"); inp && inp.removeEventListener("input", clear); };
+  if (inp) inp.addEventListener("input", clear); else setTimeout(clear, 3000);
+}
+/* valor que rola: cada dígito é uma coluna de 0 a 9 que gira até o número novo */
+function odoPut(el, str) {
+  if (!el) return; str = String(str).replace(/ /g, "\u00a0");
+  if (el.dataset.odo === str) return;
+  const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const same = el.classList.contains("odo") && el.childElementCount === str.length && [...str].every((ch, k) => /\d/.test(ch) === !!el.children[k].firstElementChild);
+  el.dataset.odo = str; el.setAttribute("aria-label", str);
+  if (!same || reduce) {
+    el.classList.add("odo");
+    el.innerHTML = [...str].map(ch => /\d/.test(ch) ? `<span class="od" aria-hidden="true"><span style="transform:translateY(calc(${ch} * -1.2em))">${"0123456789".split("").map(n => `<i>${n}</i>`).join("")}</span></span>` : `<span class="os" aria-hidden="true">${ch}</span>`).join("");
+    return;
+  }
+  [...str].forEach((ch, k) => { const c = el.children[k]; if (c.firstElementChild) c.firstElementChild.style.transform = `translateY(calc(${ch} * -1.2em))`; else c.textContent = ch; });
+}
+/* botão que mostra o que está acontecendo: encolhe e gira enquanto salva, vira "salvo" e só então a tela fecha */
+async function busyBtn(btn, work, done = "salvo") {
+  if (!btn || btn.classList.contains("busy")) return;
+  const w = btn.offsetWidth, html = btn.innerHTML;
+  btn.style.width = w + "px"; btn.classList.add("busy"); btn.innerHTML = '<i class="bspin"></i>'; btn.disabled = true;
+  try { await Promise.all([Promise.resolve(work()), new Promise(r => setTimeout(r, 450))]); }
+  catch (e) { console.warn(e); btn.classList.remove("busy"); btn.innerHTML = html; btn.disabled = false; btn.style.width = ""; return false; }
+  btn.classList.remove("busy"); btn.classList.add("ok"); btn.innerHTML = `${I.check || ""}<span>${done}</span>`;
+  await new Promise(r => setTimeout(r, 650));
+  return true;
+}
 function lfield(id, label, value = "", extra = "") {
   return `<div class="lfield"><label for="${id}">${label}</label><input id="${id}" autocomplete="off" value="${esc(value)}" ${extra}></div>`;
 }
@@ -3749,37 +4092,83 @@ const MENU = [
   ["sair", "sair", "out"],
 ];
 const SIGN_IN = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><path d="M10 17l5-5-5-5"/><path d="M15 12H3"/></svg>';
+/* foto ou inicial do perfil */
+function avatarHTML(cls = "") {
+  const p = prof(), ini = (p.nome || "você").trim().charAt(0).toUpperCase();
+  return `<span class="av ${cls}" aria-hidden="true">${p.photo ? `<img src="${p.photo}" alt="">` : ini}</span>`;
+}
+const themeLabel = () => ({ light: "claro", dark: "escuro", system: "sistema" })[curTheme()] || "escuro";
 function menuHTML() {
   const p = prof();
-  let h = `<div class="page menu-page"><div class="page-inner mp" style="max-width:720px">
-    <div class="mp-head"><div class="mp-name ellip">${esc(p.nome) || "você"}</div><div class="mp-mail ellip">${esc(p.email)}</div></div><div class="slist2">`;
-  if (NET.relogin && !NET.offline) h += srow({ attr: 'data-menu="relogin"', ico: SIGN_IN, main: "entrar de novo", chev: false, cls: "is-acc" });
-  for (const [k, lbl, ic] of MENU)
-    h += srow({ attr: `data-menu="${k}"`, ico: ic ? (I[ic] || SI[ic]) : `${DI.previsao}`, main: lbl, chev: k !== "sair", cls: k === "sair" ? "is-danger" : "" });
-  return h + `</div></div></div>`;
+  const row = (k, lbl, ic, val = "") => srow({ attr: `data-menu="${k}"`, ico: ic, main: lbl, val, chev: k !== "sair", cls: k === "sair" ? "is-danger" : "" });
+  let h = `<div class="page menu-page"><div class="page-inner mp casc" style="max-width:720px">
+    <div class="mp-head">${avatarHTML()}<div class="mp-who"><div class="mp-name ellip">${esc(p.nome) || "você"}</div><div class="mp-mail ellip">${esc(p.email)}</div></div></div>`;
+  if (NET.relogin && !NET.offline) h += `<div class="slist2">${srow({ attr: 'data-menu="relogin"', ico: SIGN_IN, main: "entrar de novo", chev: false, cls: "is-acc" })}</div>`;
+  const ic = (k, c) => `<span class="mi-ic" style="color:${c}">${DI[k]}</span>`;
+  h += `<h2 class="section-title">conta</h2><div class="slist2">${row("perfil", "editar perfil", ic("perfil", "#B98AF0"))}${row("cartoes", "cartões de crédito", ic("cartao", "var(--c-cartao)"))}</div>`;
+  h += `<h2 class="section-title">app</h2><div class="slist2">${row("prev", "previsão de diário", ic("diario", "var(--c-diario)"))}${row("aparencia", "aparência", ic("aparencia", "var(--muted)"), themeLabel())}${row("ajuda", "como funciona", ic("ajuda", "var(--c-economia)"))}</div>`;
+  h += `<div class="slist2 mp-out">${row("sair", "sair", ic("sair", "var(--c-saida)"))}</div>`;
+  return h + `</div></div>`;
 }
 $("#view").addEventListener("click", e => {
   const b = e.target.closest("[data-menu]"); if (!b) return;
   ({ relogin: () => window.fluxRelogin && window.fluxRelogin(), perfil: openProfile, prev: openPrevScreen, cartoes: openCards, aparencia: openAppearance, ajuda: () => openTutorial(false), sair: signOut })[b.dataset.menu]();
 });
 
-/* ===== editar perfil ===== */
-function openProfile() {
-  const p = prof();
-  openScreen({
-    title: "perfil",
-    body: `${lfield("pf-n", "nome", p.nome, 'maxlength="40"')}${lfield("pf-s", "sobrenome", p.sobrenome, 'maxlength="60"')}
-      ${accountRowsHTML()}
-      <div class="sbtns"><button class="sbtn" data-pw>alterar senha</button><button class="sbtn solid" data-savep>salvar</button></div>`,
-    onMount: (el, s) => { bindAccountHold(el); el.addEventListener("click", e => {
-      if (e.target.closest("[data-pw]")) return openPassword();
-      if (e.target.closest("[data-savep]")) {
-        const nome = $("#pf-n", el).value.trim(), sobrenome = $("#pf-s", el).value.trim();
-        if (!nome) { toast("informe seu nome", true); return; }
-        saveProfile({ nome, sobrenome }); s.close();
-      }
-    }); },
+/* ===== editar perfil: toque no nome para escrever, toque na foto para trocar ===== */
+const CAM = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8.5h3l1.6-2.5h6.8L17 8.5h3v10H4z"/><circle cx="12" cy="13" r="3.2"/></svg>';
+// foto reduzida para 192 px antes de salvar, para não pesar
+function photoFrom(file) {
+  return new Promise((res, rej) => {
+    const r = new FileReader();
+    r.onload = () => { const img = new Image(); img.onload = () => {
+      const S2 = 192, c = document.createElement("canvas"); c.width = c.height = S2; const k = Math.max(S2 / img.width, S2 / img.height);
+      const w = img.width * k, h = img.height * k; c.getContext("2d").drawImage(img, (S2 - w) / 2, (S2 - h) / 2, w, h);
+      res(c.toDataURL("image/jpeg", .82)); }; img.onerror = rej; img.src = r.result; };
+    r.onerror = rej; r.readAsDataURL(file);
   });
+}
+function openProfile() {
+  const draw = s => {
+    const p = prof(), full = [p.nome, p.sobrenome].filter(Boolean).join(" ");
+    s.setBody(`<div class="pf-top casc"><button class="pf-av" data-pic aria-label="${p.photo ? "trocar foto" : "escolher foto"}">${avatarHTML("lg")}<span class="pf-cam" aria-hidden="true">${CAM}</span></button>
+      <input type="file" accept="image/*" hidden data-file>
+      <div class="pf-name" data-name role="textbox" tabindex="0" aria-label="nome, toque para editar"><span class="pf-nt">${esc(full) || "seu nome"}</span><span class="pf-pen" aria-hidden="true">${DI.descricao}</span></div>
+      <div class="pf-mail ellip">${esc(p.email)}</div><div class="ferr-slot" data-nerr></div></div>
+      <div class="slist2 casc">${srow({ attr: "data-pw", ico: DI.repete, main: "alterar senha" })}${p.photo ? srow({ attr: "data-rmpic", ico: DI.perfil, main: "remover foto", chev: false }) : ""}</div>
+      <h2 class="section-title">segure para confirmar</h2>${accountRowsHTML()}`);
+    bindAccountHold(s.el);
+  };
+  const s = openScreen({
+    title: "perfil",
+    onMount: (el, sc) => {
+      el.addEventListener("click", async e => {
+        if (e.target.closest("[data-pw]")) return openPassword();
+        if (e.target.closest("[data-pic]")) return $("[data-file]", el).click();
+        if (e.target.closest("[data-rmpic]")) { saveProfile({ photo: "" }); return; }
+        const n = e.target.closest("[data-name]");
+        if (n && !n.isContentEditable) {
+          const t = $(".pf-nt", n); t.textContent = [prof().nome, prof().sobrenome].filter(Boolean).join(" ");
+          n.classList.add("editing"); t.contentEditable = "true"; t.focus(); document.getSelection().selectAllChildren(t);
+        }
+      });
+      el.addEventListener("change", async e => {
+        const f = e.target.closest("[data-file]"); if (!f || !f.files[0]) return;
+        try { saveProfile({ photo: await photoFrom(f.files[0]) }); toast("foto salva"); } catch (err) { console.warn(err); fieldErr($("[data-nerr]", el), "não deu para abrir essa imagem. tente outra."); }
+      });
+      el.addEventListener("focusout", e => {
+        const t = e.target.closest(".pf-nt"); if (!t || t.contentEditable !== "true") return;
+        const v = t.textContent.replace(/\s+/g, " ").trim(); t.contentEditable = "false"; t.closest("[data-name]").classList.remove("editing");
+        if (!v) { draw(sc); fieldErr($("[data-nerr]", el), "informe seu nome"); return; }
+        const [nome, ...rest] = v.split(" "); const p = prof();
+        if (nome !== p.nome || rest.join(" ") !== (p.sobrenome || "")) { saveProfile({ nome: nome.slice(0, 40), sobrenome: rest.join(" ").slice(0, 60) }); toast("nome salvo"); }
+        else draw(sc);
+      });
+      el.addEventListener("keydown", e => { if (e.key === "Enter" && e.target.closest(".pf-nt")) { e.preventDefault(); e.target.blur(); } });
+    },
+    refresh: () => draw(s),
+  });
+  draw(s);
 }
 function openPassword() {
   openScreen({
@@ -3790,10 +4179,10 @@ function openPassword() {
       el.addEventListener("click", e => {
         if (!e.target.closest("[data-savepw]")) return;
         const a = $("#pw1", el).value, b = $("#pw2", el).value;
-        if (a.length < 6) { toast("a senha precisa ter pelo menos 6 caracteres", true); return; }
-        if (a !== b) { toast("as senhas não são iguais", true); return; }
-        if (!backend.setPassword) { toast("a troca de senha só funciona com login", true); return; }
-        backend.setPassword(a).then(() => s.close()).catch(err => { console.warn(err); toast("não deu para trocar a senha. tente de novo", true); });
+        if (a.length < 6) return fieldErr($("#pw1", el), "a senha precisa ter pelo menos 6 caracteres");
+        if (a !== b) return fieldErr($("#pw2", el), "as senhas não são iguais");
+        if (!backend.setPassword) return fieldErr($("#pw2", el), "a troca de senha só funciona com login");
+        busyBtn(e.target.closest("[data-savepw]"), () => backend.setPassword(a)).then(ok => ok === false ? fieldErr($("#pw2", el), "não deu para trocar a senha. tente de novo") : s.close());
       });
     },
   });
@@ -3802,23 +4191,56 @@ function openPassword() {
 /* ===== previsão de diário ===== */
 const prevSorted = () => [...S.prev].sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0));
 function openPrevScreen() {
+  const PAL = ["#EC5DA8", "#B98AF0", "#4DB6F7", "#E2B93B", "#FF8A65", "#7FA7FF", "#F07EC0", "#C9A6F5"];
+  let focus = null;
   const draw = s => {
-    const list = prevSorted();
-    s.setBody(`<div class="pv-list">${list.length
-      ? list.map(p => `<button class="pv-row" data-editprev="${p.id}"><b class="ellip">${esc(p.desc)}</b><span class="num">${brl(p.value)}</span></button>`).join("")
-      : `<div class="sempty"><button class="circ" data-addprev aria-label="adicionar gasto">${I.plus}</button><span>sem gastos por aqui.<br>toque no botão acima para criar.</span></div>`}</div>
-      <div class="pv-foot"><div class="pv-line"><b>total mensal</b><span class="num">${brl(prevTotal())}</span></div>
-      <button class="pv-line pv-div" data-prevdiv aria-haspopup="dialog" aria-label="dividido por ${prevDiv()} dias, alterar"><b>dividido por</b><span class="pv-dd"><span class="num">${prevDiv()} dias</span><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg></span></button>
-      <div class="pv-res num" aria-label="previsão por dia: ${brl(perDayPrev())}">${brl(perDayPrev())}</div></div>`);
+    const list = prevSorted(), tot = prevTotal(), n = prevDiv();
+    if (!list.length) {
+      s.setBody(`<div class="sempty"><button class="circ" data-addprev aria-label="adicionar gasto">${I.plus}</button><span>sem gastos por aqui.<br>toque no botão acima para criar.</span></div>`); return;
+    }
+    s.setBody(`<div class="pvx casc"><div class="pvx-top"><small data-pvl>você pode gastar por dia</small><div class="amt num" aria-live="polite"><sup>R$</sup><span data-pvv></span></div><small class="pvx-sub num">${brl(tot)} por mês</small></div>
+      <div class="pvx-bar" role="group" aria-label="gastos por categoria">${list.map((p, k) => `<button data-pvk="${k}" style="flex-grow:${Math.max(p.value, tot * .02)};background:${PAL[k % PAL.length]}" aria-label="${esc(p.desc)}: ${brl(p.value)}"></button>`).join("")}</div>
+      <div class="slist2 pvx-list">${list.map((p, k) => `<button class="srow" data-editprev="${p.id}" data-pvk="${k}"><span class="sico"><i class="pvx-dot" style="background:${PAL[k % PAL.length]}"></i></span><span class="grow"><span class="srow-main ellip">${esc(p.desc)}</span></span><span class="srow-val num">${brl(p.value)}</span>${I.chev}</button>`).join("")}</div>
+      <div class="pvx-days"><div class="pvx-dl"><span>dividido por</span><b class="num" data-pvd>${n} dias</b></div>
+        <div class="pvx-sl" data-pvsl role="slider" tabindex="0" aria-label="dias do mês" aria-valuemin="28" aria-valuemax="31" aria-valuenow="${n}"><i class="tr"></i><i class="fi"></i><i class="kn"></i></div>
+        <div class="pvx-tick num"><span>28</span><span>29</span><span>30</span><span>31</span></div>
+        <div class="pvx-chips">${[28, 30, 31].map(d => `<button data-pvn="${d}" class="${d === n ? "on" : ""}">${d} dias</button>`).join("")}</div></div></div>`);
+    setDays(s.el, n, false); paintFocus(s.el);
+  };
+  const paintFocus = el => {
+    const list = prevSorted(), n = prevDiv(), on = focus != null && list[focus];
+    $$("[data-pvk]", el).forEach(b => { b.classList.toggle("sel", on && +b.dataset.pvk === focus); b.classList.toggle("dim", on && +b.dataset.pvk !== focus); });
+    const v = $("[data-pvv]", el), l = $("[data-pvl]", el); if (!v) return;
+    odoPut(v, fmt(r2((on ? list[focus].value : prevTotal()) / n)));
+    l.textContent = on ? `${list[focus].desc} por dia` : "você pode gastar por dia";
+  };
+  // 28 a 31 dias: arrasta, toca nos atalhos ou usa as setas do teclado; salva ao soltar
+  const setDays = (el, n, save) => {
+    const p = (n - 28) / 3 * 100, sl = $("[data-pvsl]", el); if (!sl) return;
+    $(".kn", sl).style.left = p + "%"; $(".fi", sl).style.width = p + "%"; sl.setAttribute("aria-valuenow", n);
+    $("[data-pvd]", el).textContent = `${n} dias`;
+    $$("[data-pvn]", el).forEach(b => b.classList.toggle("on", +b.dataset.pvn === n));
+    el._pvn = n; if (save && n !== prevDiv()) saveProfile({ prevDias: n }); else paintFocus(el);
   };
   const s = openScreen({
     title: "previsão de diário",
     right: `<button class="icon-btn flat" data-addprev aria-label="adicionar gasto">${I.plus}</button>`,
-    onMount: el => el.addEventListener("click", e => {
-      if (e.target.closest("[data-addprev]")) return openPrevForm(null);
-      if (e.target.closest("[data-prevdiv]")) return openPrevDays();
-      const r = e.target.closest("[data-editprev]"); if (r) openPrevForm(r.dataset.editprev);
-    }),
+    onMount: el => {
+      el.addEventListener("click", e => {
+        if (e.target.closest("[data-addprev]")) return openPrevForm(null);
+        const c = e.target.closest("[data-pvn]"); if (c) return setDays(el, +c.dataset.pvn, true);
+        const k = e.target.closest(".pvx-bar [data-pvk]"); if (k) { focus = focus === +k.dataset.pvk ? null : +k.dataset.pvk; return paintFocus(el); }
+        const r = e.target.closest("[data-editprev]"); if (r) return openPrevForm(r.dataset.editprev);
+        if (focus != null && !e.target.closest("[data-pvsl]")) { focus = null; paintFocus(el); }
+      });
+      let drag = false;
+      const pick = e => { const sl = $("[data-pvsl]", el), r = sl.getBoundingClientRect(); return 28 + Math.round(Math.max(0, Math.min(1, (e.clientX - r.left) / r.width)) * 3); };
+      el.addEventListener("pointerdown", e => { const sl = e.target.closest("[data-pvsl]"); if (!sl) return; drag = true; sl.classList.add("drag"); try { sl.setPointerCapture(e.pointerId); } catch { } setDays(el, pick(e), false); });
+      el.addEventListener("pointermove", e => { if (drag) setDays(el, pick(e), false); });
+      const up = () => { if (!drag) return; drag = false; $("[data-pvsl]", el)?.classList.remove("drag"); setDays(el, el._pvn, true); };
+      el.addEventListener("pointerup", up); el.addEventListener("pointercancel", up);
+      el.addEventListener("keydown", e => { if (!e.target.closest("[data-pvsl]")) return; const d = e.key === "ArrowRight" ? 1 : e.key === "ArrowLeft" ? -1 : 0; if (d) { e.preventDefault(); setDays(el, Math.min(31, Math.max(28, prevDiv() + d)), true); } });
+    },
     refresh: () => draw(s),
   });
   draw(s);
@@ -3847,32 +4269,58 @@ function openPrevForm(id) {
       el.addEventListener("click", async e => {
         if (e.target.closest("[data-saveprev]")) {
           const value = parseMoney($("#pv-v", el).value), desc = $("#pv-d", el).value.trim();
-          if (!(value > 0)) { toast("informe um valor maior que zero", true); return; }
-          s.close();
-          await backend.put("prev", p ? p.id : uid("p"), { value, desc: desc || "gasto do dia a dia", createdAt: p ? p.createdAt || Date.now() : Date.now() });
+          if (!(value > 0)) return fieldErr($("#pv-v", el), "informe um valor maior que zero");
+          if (await busyBtn(e.target.closest("[data-saveprev]"), () => backend.put("prev", p ? p.id : uid("p"), { value, desc: desc || "gasto do dia a dia", createdAt: p ? p.createdAt || Date.now() : Date.now() }))) s.close();
         }
       });
     },
   });
 }
 
-/* ===== cartões ===== */
+/* ===== cartões: empilhados como na carteira; toque num para abrir ===== */
+const CARD_BG = ["linear-gradient(135deg,#8A3FD9,#4C1A8C)", "linear-gradient(135deg,#3a3a42,#141417)", "linear-gradient(135deg,#2F5DA8,#132447)", "linear-gradient(135deg,#7C2330,#2c0e13)", "linear-gradient(135deg,#B98AF0,#6236A8)", "linear-gradient(135deg,#55515f,#232129)"];
+function cardMonth(id) {
+  let v = 0, n = 0;
+  for (const x of occs(miFirst(CUR), miLast(CUR))) if (x.tx.type === "cartao" && x.tx.cardId === id) { v += x.value; n++; }
+  return { v: r2(v), n };
+}
 function openCards() {
+  let open = null;
+  const place = el => {
+    const cs = $$(".wcard", el), STEP = 64, H = 170, k = cs.findIndex(c => c.dataset.cid === open);
+    cs.forEach((c, i) => {
+      let top, sc = 1;
+      if (k < 0) top = i * STEP;
+      else if (i === k) top = 0;
+      else { const j = i < k ? i : i - 1; top = H + 150 + j * 14; sc = .92; }
+      c.style.transform = `translateY(${top}px) scale(${sc})`; c.style.zIndex = i === k ? 50 : i;
+      c.setAttribute("aria-expanded", i === k);
+    });
+    const wal = $(".wal", el); if (wal) wal.style.height = (k < 0 ? (cs.length - 1) * STEP + H : H + 150 + (cs.length - 1) * 14 + 40) + "px";
+    const info = $(".wal-info", el);
+    if (info) {
+      const c = S.cards.find(x => x.id === open);
+      if (!c) { info.classList.remove("on"); return; }
+      const m = cardMonth(c.id);
+      info.innerHTML = `<div class="wi-r"><span>gasto em ${MONTHS[miM(CUR)]}</span><b class="num">${brl(m.v)}</b></div><div class="wi-r"><span>movimentações no mês</span><b class="num">${m.n}</b></div><div class="wi-r"><span>cartão padrão</span><b>${c.id === defCardId() ? "sim" : "não"}</b></div><button class="sbtn" data-editcard="${c.id}">editar cartão</button>`;
+      info.style.top = (H + 12) + "px"; info.classList.add("on");
+    }
+  };
   const draw = s => {
-    s.setBody(S.cards.length
-      ? `<div class="slist2">${cardsSorted().map(c => {
-        const n = S.txs.filter(t => t.cardId === c.id).length;
-        const mov = n ? `${n} ${n === 1 ? "movimentação" : "movimentações"}` : "nenhuma movimentação";
-        return srow({ attr: `data-editcard="${c.id}"`, ico: I.card, main: esc(c.name), sub: c.id === defCardId() ? `cartão padrão, ${mov}` : mov });
-      }).join("")}</div>`
-      : `<div class="sempty"><button class="circ" data-addcard aria-label="adicionar cartão">${SI.cardAdd}</button><span>sem cartões por aqui.<br>toque no botão acima para criar.</span></div>`);
+    if (!S.cards.length) { s.setBody(`<div class="sempty"><button class="circ" data-addcard aria-label="adicionar cartão">${SI.cardAdd}</button><span>sem cartões por aqui.<br>toque no botão acima para criar.</span></div>`); return; }
+    if (open && !S.cards.some(c => c.id === open)) open = null;
+    s.setBody(`<div class="wal">${cardsSorted().map((c, i) => { const m = cardMonth(c.id);
+      return `<button class="wcard" data-cid="${c.id}" style="background:${CARD_BG[i % CARD_BG.length]}" aria-label="${esc(c.name)}, gasto em ${MONTHS[miM(CUR)]}: ${brl(m.v)}"><span class="wc-top"><b class="ellip">${esc(c.name)}</b><span class="num">${brl(m.v)}</span></span><span class="wc-sub">${c.id === defCardId() ? "cartão padrão · " : ""}gasto em ${MONTHS[miM(CUR)]}</span></button>`; }).join("")}
+      <div class="wal-info"></div></div>`);
+    place(s.el);
   };
   const s = openScreen({
     title: "cartões",
     right: `<button class="icon-btn flat" data-addcard aria-label="adicionar cartão">${SI.cardAdd}</button>`,
     onMount: el => el.addEventListener("click", e => {
       if (e.target.closest("[data-addcard]")) return openCardForm(null);
-      const r = e.target.closest("[data-editcard]"); if (r) openCardForm(r.dataset.editcard);
+      const ed = e.target.closest("[data-editcard]"); if (ed) return openCardForm(ed.dataset.editcard);
+      const c = e.target.closest(".wcard"); if (c) { open = open === c.dataset.cid ? null : c.dataset.cid; place(el); }
     }),
     refresh: () => draw(s),
   });
@@ -3894,32 +4342,51 @@ function openCardForm(id) {
       if (e.target.closest("[data-defcc]") && !only) { def = !def; $(".cc-def", el).innerHTML = defRow(); return; }
       if (e.target.closest("[data-savecc]")) {
         const name = $("#cc-name", el).value.trim();
-        if (!name) { toast("informe um nome para o cartão", true); $("#cc-name", el).focus(); return; }
-        if (S.cards.some(x => x.id !== id && x.name.toLowerCase() === name.toLowerCase())) { toast("já tem um cartão com esse nome", true); return; }
-        s.close();
+        if (!name) { $("#cc-name", el).focus(); return fieldErr($("#cc-name", el), "informe um nome para o cartão"); }
+        if (S.cards.some(x => x.id !== id && x.name.toLowerCase() === name.toLowerCase())) return fieldErr($("#cc-name", el), "já tem um cartão com esse nome");
         const cid = c ? c.id : uid("c");
-        if (def && !only) saveProfile({ defCard: cid });
-        else if (!def && prof().defCard === cid) saveProfile({ defCard: "" });
-        await backend.put("cards", cid, { name, createdAt: c ? c.createdAt || Date.now() : Date.now() });
+        const ok = await busyBtn(e.target.closest("[data-savecc]"), async () => {
+          if (def && !only) saveProfile({ defCard: cid });
+          else if (!def && prof().defCard === cid) saveProfile({ defCard: "" });
+          await backend.put("cards", cid, { name, color: c ? c.color || "" : "", createdAt: c ? c.createdAt || Date.now() : Date.now() });
+        });
+        if (ok) s.close();
       }
     }); },
   });
 }
 
-/* ===== aparência ===== */
-const THEMES = [["light", "modo claro"], ["dark", "modo escuro"], ["system", "modo do sistema"]];
+/* ===== aparência: o próprio app nos dois temas, lado a lado; a pílula desliza entre as opções ===== */
+const THEMES = [["light", "claro", "sun"], ["dark", "escuro", "moon"], ["system", "sistema", "sys"]];
 const curTheme = () => prof().theme || lsGet("ae.theme", null) || "dark";
+const AP_IC = {
+  sun: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="12" r="4.2" fill="currentColor" stroke="none"/><path d="M12 2.5v2M12 19.5v2M2.5 12h2M19.5 12h2M5.3 5.3l1.4 1.4M17.3 17.3l1.4 1.4M5.3 18.7l1.4-1.4M17.3 6.7l1.4-1.4"/></svg>',
+  moon: '<svg viewBox="0 0 24 24"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z" fill="currentColor"/></svg>',
+  sys: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="12" rx="2.5"/><path d="M9 20h6M12 16v4"/></svg>'
+};
+function apMini(light) {
+  const rows = [[14, 4800], [15, 4670.84], [16, 3040.84]];
+  return `<div class="apm ${light ? "l" : ""}" aria-hidden="true"><div class="apm-t"><i class="apm-cal"></i><b>${MON3[miM(CUR)]}/${String(miY(CUR)).slice(2)}</b><i class="apm-hz"></i></div>
+    ${rows.map(([d, v], k) => `<div class="apm-r"><span class="${k === 1 ? "td" : ""}">${d}</span><i></i><span class="apm-p">${brl(v)}</span></div>`).join("")}<div class="apm-nav"><i></i><i></i><i class="p"></i><i></i><i></i></div></div>`;
+}
 function openAppearance() {
   const draw = s => {
-    const th = curTheme();
-    s.setBody(`<div class="slist2" role="radiogroup" aria-label="aparência">${THEMES.map(([k, l]) =>
-      `<button class="srow" role="radio" aria-checked="${th === k}" data-theme-k="${k}"><span class="grow"><span class="srow-main">${l}</span></span><span class="s-check ${th === k ? "on" : ""}">${SI.check}</span></button>`).join("")}</div>`);
+    const th = curTheme(), k = THEMES.findIndex(t => t[0] === th);
+    const show = th === "system" ? (matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark") : th;
+    s.setBody(`<div class="ap-prev" data-show="${show}"><div class="ap-d">${apMini(false)}<span>escuro</span></div><div class="ap-l">${apMini(true)}<span>claro</span></div></div>
+      <div class="ap-seg" role="radiogroup" aria-label="aparência"><i class="ap-lens" style="transform:translateX(${k * 100}%)"></i>${THEMES.map(([key, l, ic]) =>
+      `<button role="radio" aria-checked="${th === key}" class="${th === key ? "on" : ""}" data-theme-k="${key}">${AP_IC[ic]}<span>${l}</span></button>`).join("")}</div>`);
   };
   const s = openScreen({
     title: "aparência",
     onMount: el => el.addEventListener("click", e => {
-      const b = e.target.closest("[data-theme-k]"); if (!b) return;
-      lsSet("ae.theme", b.dataset.themeK); saveProfile({ theme: b.dataset.themeK });
+      const b = e.target.closest("[data-theme-k]"); if (!b || b.classList.contains("on")) return;
+      const k = THEMES.findIndex(t => t[0] === b.dataset.themeK);
+      $(".ap-lens", el).style.transform = `translateX(${k * 100}%)`;
+      $$("[data-theme-k]", el).forEach(x => { x.classList.toggle("on", x === b); x.setAttribute("aria-checked", x === b); });
+      const key = b.dataset.themeK, show = key === "system" ? (matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark") : key;
+      $(".ap-prev", el).dataset.show = show;
+      setTimeout(() => { lsSet("ae.theme", key); saveProfile({ theme: key }); }, 380); // a pílula chega antes da troca de cores
     }),
     refresh: () => draw(s),
   });
@@ -4045,46 +4512,48 @@ function tuCount(el) {
     requestAnimationFrame(step);
   }, 450);
 }
+/* como funciona em stories: barrinhas no topo, avança sozinho, toque na direita avança e na esquerda volta, segure para pausar */
 function openTutorial(first) {
-  const list = tuSlides(), n = list.length;
-  let i = 0;
+  const list = tuSlides(), n = list.length, DUR = 7000;
+  let i = 0, timer = 0, t0 = 0, left = DUR, paused = false;
   const s = openScreen({
     title: "como funciona",
-    right: first ? `<button class="tu-skip" data-tuskip>pular</button>` : "",
-    body: `<div class="tu-view"><div class="tu-track">${list.map(x => `<section class="tu-slide"><div class="tu-art" aria-hidden="true">${x.art}</div><div class="tu-txt"><h3>${x.t}</h3>${x.p.map(p => `<p>${p}</p>`).join("")}</div></section>`).join("")}</div></div>
-      <div class="tu-foot"><div class="tu-prog" aria-hidden="true">${list.map(() => "<i></i>").join("")}</div><span class="sr-only" aria-live="polite" data-tustep></span>
-      <div class="tu-btns"><button class="sbtn" data-tuprev>voltar</button><button class="sbtn solid" data-tunext></button></div></div>`,
+    body: `<div class="st-top"><div class="st-bars" aria-hidden="true">${list.map(() => "<i><b></b></i>").join("")}</div><button class="st-x" data-tuskip aria-label="fechar">${I.x || "×"}</button></div>
+      <div class="tu-view"><div class="tu-track">${list.map(x => `<section class="tu-slide"><div class="tu-art" aria-hidden="true">${x.art}</div><div class="tu-txt"><h3>${x.t}</h3>${x.p.map(p => `<p>${p}</p>`).join("")}</div></section>`).join("")}</div></div>
+      <span class="sr-only" aria-live="polite" data-tustep></span>`,
   });
-  const el = s.el, view = $(".tu-view", el), track = $(".tu-track", el), slides = $$(".tu-slide", el);
-  el.classList.add("tu");
+  const el = s.el, view = $(".tu-view", el), track = $(".tu-track", el), slides = $$(".tu-slide", el), bars = $$(".st-bars i", el);
+  el.classList.add("tu", "story");
+  const close = () => { clearTimeout(timer); s.close(); };
+  const run = ms => { clearTimeout(timer); t0 = performance.now(); left = ms; timer = setTimeout(() => go(i + 1), ms); };
   const go = k => {
-    i = Math.max(0, Math.min(n - 1, k));
+    if (k >= n) return close();
+    i = Math.max(0, k);
     track.style.setProperty("--i", i);
     slides.forEach((x, j) => { x.classList.remove("on"); x.inert = j !== i; x.setAttribute("aria-hidden", j !== i); });
     void track.offsetWidth; // reinicia as animações do passo que entrou
     slides[i].classList.add("on"); slides[i].scrollTop = 0;
-    $$(".tu-prog i", el).forEach((b, j) => b.classList.toggle("on", j <= i));
-    $(".tu-btns", el).classList.toggle("first", i === 0);
-    $("[data-tunext]", el).textContent = i === n - 1 ? (first ? "começar" : "pronto") : "próximo";
-    $("[data-tustep]", el).textContent = `passo ${i + 1} de ${n}`;
+    bars.forEach((b, j) => { b.className = j < i ? "done" : ""; });
+    void el.offsetWidth; bars[i].style.setProperty("--dur", DUR + "ms"); bars[i].className = "run";
+    $("[data-tustep]", el).textContent = `passo ${i + 1} de ${n}: ${list[i].t}`;
     $$("[data-cnt]", slides[i]).forEach(tuCount);
+    paused = false; el.classList.remove("paused"); run(DUR);
   };
+  const pause = () => { if (paused) return; paused = true; clearTimeout(timer); left = Math.max(300, left - (performance.now() - t0)); el.classList.add("paused"); };
+  const resume = () => { if (!paused) return; paused = false; el.classList.remove("paused"); run(left); };
   go(0);
-  el.addEventListener("click", e => {
-    if (e.target.closest("[data-tuskip]")) return s.close();
-    if (e.target.closest("[data-tuprev]")) return go(i - 1);
-    if (e.target.closest("[data-tunext]")) return i === n - 1 ? s.close() : go(i + 1);
-  });
+  el.addEventListener("click", e => { if (e.target.closest("[data-tuskip]")) close(); });
   el.addEventListener("keydown", e => {
     if (e.key === "ArrowRight") { e.preventDefault(); go(i + 1); }
     if (e.key === "ArrowLeft") { e.preventDefault(); go(i - 1); }
   });
-  // arrastar com o dedo: os passos acompanham e assentam com mola
+  // toque, segurar e arrastar
   let drag = null;
   view.addEventListener("pointerdown", e => {
     if (e.pointerType === "mouse" && e.button !== 0) return;
     if (isMobile() && e.clientX < EDGE_W) return; // borda esquerda continua sendo o voltar
     drag = { x: e.clientX, y: e.clientY, dx: 0, ax: null, t: performance.now(), id: e.pointerId };
+    pause();
   });
   view.addEventListener("pointermove", e => {
     if (!drag) return;
@@ -4098,17 +4567,26 @@ function openTutorial(first) {
     drag.dx = (i === 0 && dx > 0) || (i === n - 1 && dx < 0) ? dx * 0.3 : dx;
     track.style.setProperty("--dx", drag.dx + "px");
   });
-  const end = () => {
-    const D = drag; drag = null; if (!D || D.ax !== "x") return;
-    track.classList.remove("drag"); track.style.setProperty("--dx", "0px");
-    const w = view.clientWidth, v = D.dx / Math.max(1, performance.now() - D.t);
-    if (D.dx < -w * 0.2 || (v < -0.35 && D.dx < -30)) go(i + 1);
-    else if (D.dx > w * 0.2 || (v > 0.35 && D.dx > 30)) go(i - 1);
+  const end = e => {
+    const D = drag; drag = null; if (!D) return;
+    if (D.ax === "x") {
+      track.classList.remove("drag"); track.style.setProperty("--dx", "0px");
+      const w = view.clientWidth, v = D.dx / Math.max(1, performance.now() - D.t);
+      if (D.dx < -w * 0.2 || (v < -0.35 && D.dx < -30)) return go(i + 1);
+      if (D.dx > w * 0.2 || (v > 0.35 && D.dx > 30)) return go(i - 1);
+      return resume();
+    }
+    if (!D.ax && performance.now() - D.t < 280 && e && e.type === "pointerup") {
+      const r = view.getBoundingClientRect();
+      return e.clientX - r.left < r.width * 0.35 ? (i === 0 ? go(0) : go(i - 1)) : go(i + 1);
+    }
+    resume();
   };
   view.addEventListener("pointerup", end);
   view.addEventListener("pointercancel", end);
   const tuWheel = wheelStepper(dir => go(i + dir));
   view.addEventListener("wheel", e => tuWheel(e, () => !drag), { passive: false });
+  const api = s.close; s.close = () => { clearTimeout(timer); api(); };
   return s;
 }
 // conta sem lançamentos: o tutorial abre sozinho uma vez em cada aparelho (site e atalho da tela de início contam separado)
@@ -4368,20 +4846,23 @@ async function deleteUndo(tx, date) {
 let UNDO_T = null;
 const CLOUD_OFF = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m2 2 20 20"/><path d="M5.8 5.8A7 7 0 0 0 9 19h8.5a4.5 4.5 0 0 0 1.3-.2"/><path d="M21.5 16.5A4.5 4.5 0 0 0 17.5 10h-1.8A7 7 0 0 0 10 5.1"/></svg>';
 const UNDO_ICO = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 14L4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11"/></svg>';
-// botão "desfazer" no estilo da barra de baixo
+// desfazer: cartão acima da barra de baixo com o que aconteceu e um anel que esvazia em 3 segundos
+const UNDO_MS = 3000;
 function undoPill(msg, fn, cloud) {
   let el = $("#px-undo"); if (el) el.remove();
   clearTimeout(UNDO_T);
-  el = document.createElement("button"); el.id = "px-undo";
-  el.setAttribute("aria-label", msg + ". desfazer");
-  el.innerHTML = `${UNDO_ICO}<span>desfazer</span>${cloud ? `<span class="sep"></span>${CLOUD_OFF}` : ""}`;
+  el = document.createElement("div"); el.id = "px-undo"; el.setAttribute("role", "status");
+  const R = 9, C = 2 * Math.PI * R;
+  el.innerHTML = `<svg class="ur" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="${R}" class="ur-b"/><circle cx="12" cy="12" r="${R}" class="ur-f" stroke-dasharray="${C} ${C}"/></svg><span class="ut ellip">${esc(msg)}</span>${cloud ? `<span class="uc" aria-label="sem internet">${CLOUD_OFF}</span>` : ""}<button class="ub">desfazer</button>`;
   document.body.appendChild(el);
   // no celular fica logo acima da barra de baixo, onde quer que ela esteja
   const nav = $("#bottom-nav");
   if (isMobile() && nav && nav.offsetHeight) el.style.bottom = Math.round(innerHeight - nav.getBoundingClientRect().top + 10) + "px";
-  const hide = () => { clearTimeout(UNDO_T); el.classList.add("out"); setTimeout(() => el.remove(), 260); };
-  el.onclick = async () => { hide(); await fn(); };
-  UNDO_T = setTimeout(hide, 5000);
+  const f = $(".ur-f", el);
+  requestAnimationFrame(() => requestAnimationFrame(() => { f.style.transition = `stroke-dashoffset ${UNDO_MS}ms linear`; f.style.strokeDashoffset = C; }));
+  const hide = () => { clearTimeout(UNDO_T); el.classList.add("out"); setTimeout(() => el.remove(), 300); };
+  $(".ub", el).onclick = async () => { hide(); await fn(); };
+  UNDO_T = setTimeout(hide, UNDO_MS);
 }
 
 
