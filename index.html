@@ -1525,7 +1525,7 @@ body.stk-open .bottom-nav{z-index:76!important}
 .hzh{overflow-y:auto;height:100%;position:relative;padding-bottom:120px}
 .hzh-chips{position:sticky;top:0;z-index:3;display:flex;gap:6px;overflow-x:auto;padding:8px 16px 12px;background:var(--bg);scrollbar-width:none;overscroll-behavior-x:contain;-webkit-overflow-scrolling:touch;touch-action:pan-x}
 .hzh-chips::-webkit-scrollbar{display:none}
-.hzh-chips button{position:relative;z-index:1;flex:none;padding:7px 13px;border-radius:999px;font-size:13px;font-weight:700;color:var(--muted);transition:color .3s,transform .2s var(--spring)}
+.hzh-chips button{position:relative;z-index:1;flex:none;padding:7px 13px;border-radius:999px;font-size:13px;font-weight:700;color:var(--muted);transition:color .18s,transform .2s var(--spring)}
 .hzh-chips button:active{transform:scale(.94)}
 .hzh-chips button.on{color:var(--bg)}
 .hzh-chips:not(.ready) button.on{background:var(--text)}
@@ -3215,7 +3215,11 @@ function hzSync(i, anim) {
   if (!anim) { lens.style.transition = "none"; bar.classList.add("ready"); }
   lens.style.width = b.offsetWidth + "px"; lens.style.transform = `translateX(${b.offsetLeft}px)`;
   if (!anim) { void lens.offsetWidth; lens.style.transition = ""; }
-  bs.forEach((x, k) => { x.classList.toggle("on", k === i); x.setAttribute("aria-selected", k === i); });
+  // o texto só fica escuro quando a pílula chega nele; antes disso continua cinza e legível
+  clearTimeout(HZL.on); lens.ontransitionend = null;
+  const mark = () => { clearTimeout(HZL.on); lens.ontransitionend = null; bs.forEach((x, k) => x.classList.toggle("on", k === i)); };
+  bs.forEach((x, k) => { if (k !== i || !anim) x.classList.remove("on"); x.setAttribute("aria-selected", k === i); });
+  if (!anim) mark(); else { lens.ontransitionend = e => { if (e.propertyName === "transform") mark(); }; HZL.on = setTimeout(mark, 420); }
   if (HZL.cur !== i || !anim) bar.scrollTo({ left: b.offsetLeft - (bar.clientWidth - b.offsetWidth) / 2, behavior: anim ? "smooth" : "auto" });
   HZL.cur = i;
 }
