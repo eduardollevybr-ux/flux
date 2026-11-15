@@ -1402,7 +1402,7 @@ body.stk-open .bottom-nav{z-index:76!important}
    o iOS 26 desfoca uma faixa logo abaixo dela, então o conteúdo do topo desce --edge (o fundo liso desfocado não aparece);
    e ele informa a tela mais curta embaixo, então o que encosta no pé da tela desce --gb para fechar o vão */
 :root{--edge:0px;--gb:0px;--top-in:calc(env(safe-area-inset-top,0px) + var(--edge))}
-html.ios-app{--edge:22px}
+html.ios-app{--edge:8px}
 html.ios-app :is(.overlay,.drawer-ov,.drawer,.scr,.scr-ov,.auth,.splash,.mail-ov,.full-screen,.stk,.qk,.qk-box){bottom:calc(0px - var(--gb))!important}
 html.ios-app .main::after{bottom:calc(0px - var(--gb))}
 </style></head><body>
@@ -2110,11 +2110,16 @@ document.addEventListener("touchcancel", edgeEnd, { capture: true });
 function iosFit() {
   const r = document.documentElement, app = navigator.standalone === true;
   r.classList.toggle("ios-app", app);
+  // o vão é o quanto um elemento fixo de cima a baixo fica mais curto que a tela de verdade
   let g = 0;
-  if (app && innerHeight > innerWidth) { g = Math.round(screen.height - innerHeight); if (g < 0 || g > 120) g = 0; }
+  if (app && innerHeight > innerWidth) {
+    let pr = document.getElementById("vh-probe");
+    if (!pr && document.body) { pr = document.createElement("div"); pr.id = "vh-probe"; pr.style.cssText = "position:fixed;top:0;bottom:0;left:0;width:1px;visibility:hidden;pointer-events:none"; document.body.appendChild(pr); }
+    if (pr) { g = Math.round(screen.height - pr.getBoundingClientRect().height); if (g < 0 || g > 120) g = 0; }
+  }
   r.style.setProperty("--gb", g + "px");
 }
-iosFit(); addEventListener("resize", iosFit); addEventListener("orientationchange", () => setTimeout(iosFit, 300));
+iosFit(); addEventListener("load", iosFit); addEventListener("resize", iosFit); addEventListener("orientationchange", () => setTimeout(iosFit, 300));
 function applyTheme() {
   const pref = (S.profile && S.profile.theme) || lsGet("ae.theme", null) || "dark";
   if (S.profile && S.profile.theme) lsSet("ae.theme", S.profile.theme);
@@ -2239,6 +2244,7 @@ function closeQuick() {
   const { el, onKey } = QK; QK = null;
   document.removeEventListener("keydown", onKey, true);
   el.classList.remove("in"); el.classList.add("out");
+  document.documentElement.style.backgroundColor = "";
   applyTheme(); // a barra do celular volta para a cor do app
   setTimeout(() => el.remove(), 320);
 }
@@ -2277,7 +2283,7 @@ function openQuick({ date = TODAY, type = "diario" } = {}) {
     $(".qk-go", el).textContent = `lançar em ${TYPES[t].label}`;
     if (!first) barTint();
   };
-  const barTint = () => { if (QK && QK.el === el) setBar(toHex(getComputedStyle($(".qk-tone", el)).backgroundColor)); };
+  const barTint = () => { if (QK && QK.el === el) { const c = toHex(getComputedStyle($(".qk-tone", el)).backgroundColor); setBar(c); document.documentElement.style.backgroundColor = c; } };
   const key = k => {
     if (k === "del") { if (dec !== null) { if (dec) dec = dec.slice(0, -1); else dec = null; } else ip = ip.slice(0, -1); }
     else if (k === ",") { if (dec === null) dec = ""; }
