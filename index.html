@@ -1536,17 +1536,16 @@ body.stk-open .bottom-nav{z-index:76!important}
 .hzh-chips::after{content:"";flex:none;width:10px}
 .hzh-ms{display:grid;grid-template-columns:1fr;gap:6px;padding:0 16px}
 @media (min-width:701px){.hzh-chips{display:none}.hzh-ms{grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:22px 28px;padding:24px 28px}.hzh{padding-bottom:40px}}
-/* horizonte no computador: 3 meses por linha e saldo da semana ao passar o mouse (opção C, 15/11) */
+/* horizonte: 3 meses por linha no computador; semana acesa ao passar o mouse ou tocar no dia; mês inteiro ao tocar no nome (15/11) */
 @media (min-width:1100px){.hzh-ms{grid-template-columns:repeat(3,minmax(0,1fr))}}
-.hzh-v{display:none}
-@media (min-width:701px){
-  .hzh-g .hzh-d{flex-direction:column;justify-content:space-between}
-  .hzh-n{line-height:1}
-  .hzh-v{display:block;align-self:flex-end;font-size:10.5px;line-height:1;white-space:nowrap;letter-spacing:-.15px;opacity:0;transform:translateY(4px);transition:opacity .25s,transform .35s var(--spring)}
-  .hzh-d.wkon .hzh-v{opacity:1;transform:none}
-  .hzh-g .hzh-d.hov{transform:scale(1.08);filter:brightness(1.25);z-index:2;position:relative}
-  .hzh-g .hzh-d{transition:opacity .25s,transform .35s var(--spring),box-shadow .2s,filter .25s}
-}
+.hzh-g .hzh-d{flex-direction:column;justify-content:space-between;transition:opacity .25s,transform .35s var(--spring),box-shadow .2s,filter .25s}
+.hzh-n{line-height:1}
+.hzh-v{display:block;align-self:flex-end;font-size:10.5px;line-height:1;white-space:nowrap;letter-spacing:-.15px;opacity:0;transform:translateY(4px);transition:opacity .25s,transform .35s var(--spring)}
+.hzh-d.wkon .hzh-v,.hzh-m.all .hzh-v{opacity:1;transform:none}
+.hzh-g .hzh-d.hov{transform:scale(1.08);filter:brightness(1.25);z-index:2;position:relative}
+.hzh-h{cursor:pointer}
+.hzh-h>b{transition:color .25s}
+.hzh-m.all .hzh-h>b{color:var(--nav-ic)}
 .hzh-m{padding:4px 0 16px}
 .hzh-h{display:flex;align-items:baseline;justify-content:space-between;gap:10px;padding:6px 2px 10px}
 .hzh-h>b{font-size:17px}.hzh-h span{font-size:13px;color:var(--muted)}.hzh-h span b{color:var(--text)}.hzh-h span b.neg{color:var(--c-saida)}
@@ -1558,7 +1557,6 @@ body.stk-open .bottom-nav{z-index:76!important}
 .hzh-d.z{background:var(--m-zero);color:var(--m-zero-fg)}
 .hzh-d.n1{background:var(--h-neg1);color:var(--h-neg1-fg)}.hzh-d.n2{background:var(--h-neg2);color:var(--h-neg2-fg)}
 .hzh-d.today{box-shadow:0 0 0 2px var(--text)}
-.hzh.focus .hzh-d{opacity:.28}.hzh.focus .hzh-d.sel{opacity:1;transform:scale(1.14);z-index:2;position:relative}
 .hzh-tip{position:fixed;left:12px;right:12px;bottom:calc(var(--nav-b,20px) + 76px);z-index:25;display:flex;align-items:center;justify-content:space-between;gap:12px;background:var(--pop-bg);border:1px solid var(--line2);border-radius:20px;padding:12px 16px;text-align:left;transform:translateY(30px);opacity:0;pointer-events:none;transition:transform .45s var(--spring),opacity .25s;box-shadow:0 10px 30px rgba(0,0,0,.35)}
 .hzh-tip.on{transform:none;opacity:1;pointer-events:auto}
 .hzh-tip small{display:block;color:var(--muted);font-size:12.5px}.hzh-tip b{font-size:18px}.hzh-tip b.neg{color:var(--c-saida)}
@@ -3226,9 +3224,9 @@ function hzFocus(v, ds) {
   const pg = $(".hzh", v); if (!pg) return;
   $$(".hzh-d.sel", pg).forEach(x => x.classList.remove("sel"));
   const tip = $(".hzh-tip", pg);
-  if (!ds) { pg.classList.remove("focus"); tip.classList.remove("on"); return; }
+  if (!ds) { hzWeek(null); tip.classList.remove("on"); return; }
   const b = $(`.hzh-d[data-hzd="${ds}"]`, pg); if (!b) return;
-  pg.classList.add("focus"); b.classList.add("sel");
+  b.classList.add("sel"); hzWeek(b);
   const val = calc().saldo[ds] ?? 0, d = parse(ds);
   $("small", tip).textContent = `${WDL[d.getDay()]}, ${d.getDate()} de ${MONTHS[d.getMonth()]}`;
   const bb = $("b", tip); bb.classList.toggle("neg", val < -0.004); odoPut(bb, brl(val));
@@ -3239,6 +3237,7 @@ $("#view").addEventListener("click", e => {
   const ch = e.target.closest("[data-hzm]");
   if (ch) { const i = +ch.dataset.hzm, m = $(`.hzh-m[data-hzi="${i}"]`, pg); HZL.lock = i; hzSync(i, true); clearTimeout(HZL.t); HZL.t = setTimeout(() => HZL.lock = null, 900); if (m) pg.scrollTo({ top: m.offsetTop - $(".hzh-chips", pg).offsetHeight - 4, behavior: "smooth" }); return; }
   const tip = e.target.closest("[data-hztip]"); if (tip) { if (tip.dataset.d) { const d = tip.dataset.d; hzFocus($("#view"), null); openPanel(d, null); } return; }
+  const mh = e.target.closest(".hzh-h"); if (mh) { mh.parentElement.classList.toggle("all"); return; }
   const d = e.target.closest("[data-hzd]");
   if (d) { if (d.classList.contains("sel")) { hzFocus($("#view"), null); openPanel(d.dataset.hzd, null); } else hzFocus($("#view"), d.dataset.hzd); return; }
   hzFocus($("#view"), null);
@@ -3258,7 +3257,7 @@ $("#view").addEventListener("mouseover", e => {
   if (t && !t.classList.contains("hzh-d")) return; // espaço entre os dias: mantém o dia que estava
   hzWeek(t);
 });
-$("#view").addEventListener("mouseleave", () => hzWeek(null));
+$("#view").addEventListener("mouseleave", () => { if (!isMobile() && matchMedia("(hover: hover)").matches) hzWeek(null); });
 /* barra dos meses: a pílula desliza até o mês, e a barra rola sozinha para deixá-lo no meio */
 const HZL = { lock: null, t: 0, cur: -1 };
 function hzSync(i, anim) {
