@@ -1513,7 +1513,8 @@ body.stk-open .bottom-nav{z-index:76!important}
 .ccf-l b{font-size:25px;font-weight:700;line-height:1.15;white-space:nowrap}
 .ccf-l b small{font-size:.6em;opacity:.75;font-weight:600}
 .wal{position:relative;margin:12px 20px 30px;transition:height .45s var(--spring)}
-.wal .ccf{position:absolute;left:0;right:0;top:0;transform-origin:50% 0;transition:transform .5s var(--spring),color .3s}
+.wal .ccf{position:absolute;left:0;right:0;top:0;transform-origin:50% 0;transition:transform .55s var(--spring),filter .4s ease,color .3s}
+.wal.open{margin-bottom:0;overflow-x:visible;overflow-y:clip} /* aberto: a pilha do pé da tela mostra só a ponta dos cartões */
 .wal-info{position:absolute;left:0;right:0;z-index:60;opacity:0;transform:translateY(-10px);pointer-events:none;transition:opacity .3s,transform .4s var(--ease-out)}
 .wal-info.on{opacity:1;transform:none;pointer-events:auto}
 .wi-r{display:flex;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--line);font-size:15px}
@@ -4464,19 +4465,25 @@ function openCards() {
       else {
         const m = cardMonth(c.id);
         info.innerHTML = `<div class="wi-r"><span>gasto em ${MONTHS[miM(CUR)]}</span><b class="num">${brl(m.v)}</b></div><div class="wi-r"><span>movimentações no mês</span><b class="num">${m.n}</b></div><div class="wi-r"><span>cartão padrão</span><b>${c.id === defCardId() ? "sim" : "não"}</b></div><button class="sbtn" data-editcard="${c.id}">editar cartão</button>`;
-        info.style.top = (H + 12) + "px"; info.classList.add("on");
-        rest = H + 12 + info.offsetHeight + 24;
+        info.style.top = (H + 16) + "px"; info.classList.add("on");
+        rest = H + 16 + info.offsetHeight + 20;
       }
     }
+    // cartão aberto: ele sobe e os outros descem juntos para o pé da tela, um atrás do outro (como na carteira do celular)
+    const wal = $(".wal", el), body = $(".scr-body", el), n = cs.length;
+    const pileTop = Math.max(rest, (body ? body.clientHeight : 700) - 12 - 62 - Math.max(0, n - 2) * 10);
+    let j = 0;
     cs.forEach((cd, i) => {
-      let top, sc = 1;
-      if (k < 0) top = i * STEP;
+      let top, sc = 1, br = 1, dl = 0;
+      if (k < 0) { top = i * STEP; dl = i * 30; }
       else if (i === k) top = 0;
-      else { const j = i < k ? i : i - 1; top = rest + j * 14; sc = .92; }
+      else { top = pileTop + j * 10; sc = .94 - (n - 2 - j) * .02; br = .72 + j * .09; dl = 40 + j * 45; j++; }
+      cd.style.transitionDelay = `${dl}ms,0ms,0ms`;
       cd.style.transform = `translateY(${top}px) scale(${sc})`; cd.style.zIndex = i === k ? 50 : i;
+      cd.style.filter = br < 1 ? `brightness(${Math.min(1, br).toFixed(2)})` : "";
       cd.setAttribute("aria-expanded", i === k);
     });
-    const wal = $(".wal", el); if (wal) wal.style.height = (k < 0 ? (cs.length - 1) * STEP + H : rest + (cs.length - 2) * 14 + H * .92 + 10) + "px";
+    if (wal) { wal.classList.toggle("open", k >= 0); wal.style.height = (k < 0 ? (n - 1) * STEP + H : pileTop + Math.max(0, n - 2) * 10 + 62) + "px"; }
   };
   const draw = s => {
     if (!S.cards.length) { s.setBody(`<div class="sempty"><button class="circ" data-addcard aria-label="adicionar cartão">${SI.cardAdd}</button><span>sem cartões por aqui.<br>toque no botão acima para criar.</span></div>`); return; }
@@ -4490,7 +4497,7 @@ function openCards() {
     onMount: el => el.addEventListener("click", e => {
       if (e.target.closest("[data-addcard]")) return openCardForm(null);
       const ed = e.target.closest("[data-editcard]"); if (ed) return openCardForm(ed.dataset.editcard);
-      const c = e.target.closest(".wal .ccf"); if (c) { open = open === c.dataset.cid ? null : c.dataset.cid; place(el); }
+      const c = e.target.closest(".wal .ccf"); if (c) { open = open ? null : c.dataset.cid; place(el); }
     }),
     refresh: () => draw(s),
   });
