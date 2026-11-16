@@ -1538,15 +1538,14 @@ body.stk-open .bottom-nav{z-index:76!important}
 @media (min-width:701px){.hzh-chips{display:none}.hzh-ms{grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:22px 28px;padding:24px 28px}.hzh{padding-bottom:40px}}
 /* horizonte no computador: 3 meses por linha e saldo da semana ao passar o mouse (opção C, 15/11) */
 @media (min-width:1100px){.hzh-ms{grid-template-columns:repeat(3,minmax(0,1fr))}}
-.hzh-g{position:relative}
-.hzh-band{position:absolute;left:-4px;right:-4px;top:0;border-radius:15px;background:var(--line);opacity:0;pointer-events:none;transition:opacity .25s,top .35s var(--spring)}
-.hzh-g.wk .hzh-band{opacity:1}
 .hzh-v{display:none}
 @media (min-width:701px){
   .hzh-g .hzh-d{flex-direction:column;justify-content:space-between}
   .hzh-n{line-height:1}
   .hzh-v{display:block;align-self:flex-end;font-size:10.5px;line-height:1;white-space:nowrap;letter-spacing:-.15px;opacity:0;transform:translateY(4px);transition:opacity .25s,transform .35s var(--spring)}
   .hzh-d.wkon .hzh-v{opacity:1;transform:none}
+  .hzh-g .hzh-d.hov{transform:scale(1.08);filter:brightness(1.25);z-index:2;position:relative}
+  .hzh-g .hzh-d{transition:opacity .25s,transform .35s var(--spring),box-shadow .2s,filter .25s}
 }
 .hzh-m{padding:4px 0 16px}
 .hzh-h{display:flex;align-items:baseline;justify-content:space-between;gap:10px;padding:6px 2px 10px}
@@ -3217,7 +3216,7 @@ function hzHeatHTML() {
       g += `<button class="hzh-d num ${cls} ${ds === TODAY ? "today" : ""}"${st} data-hzd="${ds}" data-hzw="${Math.floor((first + d - 1) / 7)}" aria-label="${d} de ${MONTHS[m]}: ${fmt(v)}"><span class="hzh-n">${d}</span><span class="hzh-v">${abbr(v)}</span></button>`;
     }
     return `<section class="hzh-m" data-hzi="${i}"><div class="hzh-h"><b>${MONTHS[m]}${m === 0 || i === 0 ? " " + y : ""}</b><span class="nb">termina com <b class="num ${last < -0.004 ? "neg" : ""}">${brl(last)}</b></span></div>
-      <div class="hzh-w" aria-hidden="true">${["d", "s", "t", "q", "q", "s", "s"].map(w => `<i>${w}</i>`).join("")}</div><div class="hzh-g"><i class="hzh-band" aria-hidden="true"></i>${g}</div></section>`;
+      <div class="hzh-w" aria-hidden="true">${["d", "s", "t", "q", "q", "s", "s"].map(w => `<i>${w}</i>`).join("")}</div><div class="hzh-g">${g}</div></section>`;
   }).join("");
   requestAnimationFrame(() => hzSync(null, false));
   return `<div class="page hzh"><div class="hzh-chips" role="tablist" aria-label="meses"><i class="hzh-lens" aria-hidden="true"></i>${chips}<div class="hzh-ink" aria-hidden="true">${ms.map((mi, i) => `<span>${MON3[miM(mi)]}${i === 0 || miM(mi) === 0 ? "/" + String(miY(mi)).slice(2) : ""}</span>`).join("")}</div></div><div class="hzh-ms casc">${months}</div>
@@ -3247,16 +3246,17 @@ $("#view").addEventListener("click", e => {
 /* horizonte no computador: ao passar o mouse, a semana inteira mostra os saldos */
 function hzWeek(d) {
   const v = $("#view");
-  $$(".hzh-g.wk", v).forEach(g => { if (!d || g !== d.closest(".hzh-g")) { g.classList.remove("wk"); $$(".hzh-d.wkon", g).forEach(x => x.classList.remove("wkon")); } });
+  $$(".hzh-g.wk", v).forEach(g => { if (!d || g !== d.closest(".hzh-g")) { g.classList.remove("wk"); $$(".hzh-d.wkon", g).forEach(x => x.classList.remove("wkon", "hov")); } });
   if (!d) return;
-  const g = d.closest(".hzh-g"), w = d.dataset.hzw, band = $(".hzh-band", g);
-  $$(".hzh-d", g).forEach(x => x.classList.toggle("wkon", x.dataset.hzw === w));
-  band.style.top = (d.offsetTop - 5) + "px"; band.style.height = (d.offsetHeight + 10) + "px";
+  const g = d.closest(".hzh-g"), w = d.dataset.hzw;
+  $$(".hzh-d", g).forEach(x => { x.classList.toggle("wkon", x.dataset.hzw === w); x.classList.toggle("hov", x === d); });
   g.classList.add("wk");
 }
 $("#view").addEventListener("mouseover", e => {
   if (isMobile() || UI.tab !== "horizonte" || !matchMedia("(hover: hover)").matches) return;
-  hzWeek(e.target.closest && e.target.closest(".hzh-d"));
+  const t = e.target.closest && e.target.closest(".hzh-d, .hzh-g");
+  if (t && !t.classList.contains("hzh-d")) return; // espaço entre os dias: mantém o dia que estava
+  hzWeek(t);
 });
 $("#view").addEventListener("mouseleave", () => hzWeek(null));
 /* barra dos meses: a pílula desliza até o mês, e a barra rola sozinha para deixá-lo no meio */
