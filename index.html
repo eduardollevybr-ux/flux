@@ -1492,18 +1492,90 @@ body.stk-open .bottom-nav{z-index:76!important}
 .pvx-chips button{padding:8px 14px;border-radius:999px;background:var(--surface2);font-size:14px;font-weight:700;transition:background-color .25s,color .25s,transform .2s var(--spring)}
 .pvx-chips button:active{transform:scale(.94)}
 .pvx-chips button.on{background:var(--text);color:var(--bg)}
-/* cartões em carteira */
-.wal{position:relative;margin:12px 20px 30px;transition:height .45s var(--spring)}
-.wcard{position:absolute;left:0;right:0;top:0;height:170px;border-radius:24px;padding:18px;color:#fff;text-align:left;display:flex;flex-direction:column;gap:4px;overflow:hidden;transform-origin:50% 0;transition:transform .5s var(--spring);box-shadow:0 -6px 22px rgba(0,0,0,.35)}
-.wcard::after{content:"";position:absolute;width:200px;height:200px;border-radius:50%;right:-70px;top:-80px;background:rgba(255,255,255,.08);pointer-events:none}
-.wc-top{display:flex;justify-content:space-between;align-items:center;gap:12px;position:relative;z-index:1}
-.wc-top b{font-size:18px;min-width:0}.wc-top .num{font-size:17px;font-weight:700;white-space:nowrap}
-.wc-sub{font-size:13px;opacity:.75;position:relative;z-index:1}
-.wal-info{position:absolute;left:0;right:0;z-index:60;opacity:0;transform:translateY(-10px);pointer-events:none;transition:opacity .3s,transform .4s var(--ease-out)}
-.wal-info.on{opacity:1;transform:none;pointer-events:auto}
-.wi-r{display:flex;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--line);font-size:15px}
-.wi-r span{color:var(--muted)}.wi-r b{white-space:nowrap}
-.wal-info .sbtn{width:100%;margin-top:14px}
+/* cartões: pilha, prévia ao vivo, passo a passo e faturas */
+.ccf{position:relative;height:200px;border-radius:24px;padding:18px 20px;color:#fff;overflow:hidden;display:flex;flex-direction:column;text-align:left;width:100%;isolation:isolate;box-shadow:0 -6px 22px rgba(0,0,0,.32);transition:color .3s}
+:root.light .ccf{box-shadow:0 -4px 18px rgba(29,31,35,.12)}
+.ccf.dk{color:#1D1F23}
+.ccf-bg{position:absolute;inset:0;z-index:-2;opacity:0;transition:opacity .25s ease .3s}
+.ccf-bg.on{opacity:1;z-index:-1;transition:opacity .3s ease}
+.ccf::before{content:"";position:absolute;width:260px;height:260px;border-radius:50%;right:-90px;top:-120px;background:rgba(255,255,255,.1);pointer-events:none}
+.ccf::after{content:"";position:absolute;width:220px;height:220px;border-radius:50%;left:-80px;bottom:-140px;background:rgba(255,255,255,.06);pointer-events:none}
+.ccf-top{display:flex;justify-content:space-between;align-items:center;gap:12px;min-height:24px;position:relative}
+.ccf-top b{flex:1;font-size:18px;font-weight:700;min-width:0}
+.ccf-top b.ccph{opacity:.55}
+.ccf-top svg{flex:none;width:22px;height:22px;opacity:.85}
+.ccf-chip{display:block;margin-top:16px;width:40px;height:30px;border-radius:7px;background:linear-gradient(135deg,#F4DFA0,#C9A24F);position:relative;overflow:hidden;box-shadow:inset 0 0 0 1px rgba(0,0,0,.12)}
+.ccf-chip::before{content:"";position:absolute;inset:8px 0;border-top:1px solid rgba(0,0,0,.18);border-bottom:1px solid rgba(0,0,0,.18)}
+.ccf-chip::after{content:"";position:absolute;inset:0 14px;border-left:1px solid rgba(0,0,0,.18);border-right:1px solid rgba(0,0,0,.18)}
+.ccf-bot{margin-top:auto;display:flex;justify-content:space-between;align-items:flex-end;gap:10px;position:relative}
+.ccf-l{display:flex;flex-direction:column;min-width:0}
+.ccf-l small{font-size:13px;opacity:.8}
+.ccf-l b{font-size:25px;font-weight:700;line-height:1.15;white-space:nowrap}
+.ccf-l b small,.ccd-v small{font-size:.6em;opacity:.75;font-weight:600}
+.ccf-d4{font-size:15px;font-weight:600;letter-spacing:.06em;opacity:.9;white-space:nowrap;transition:opacity .25s,transform .35s var(--spring)}
+.ccf-d4.off{opacity:0;transform:translateY(6px)}
+/* pilha */
+.ccstk{position:relative;margin:12px 20px 30px}
+.ccstk .ccf{position:absolute;left:0;right:0;top:0;transform:translateY(var(--y));transition:transform .45s var(--spring);cursor:pointer}
+.ccstk .ccf:active{transform:translateY(var(--y)) scale(.975)}
+.ccstk .ccf.in{animation:ccIn .85s var(--spring) both .1s}
+@keyframes ccIn{from{transform:translateY(calc(var(--y) + 140px)) scale(.92);opacity:0}}
+/* formulário */
+.ccp,.cc-lbl,.ccpal,.ccdots,.cst-bar,.cst-box,.ccstk,.ccd-hero,.ccd-cur,.ccd-list,.ccd-def,.scr-body>.lfield{flex-shrink:0}
+.ccp{position:sticky;top:0;z-index:3;background:var(--screen);padding:4px 20px 6px}
+.cc-lbl{display:flex;justify-content:space-between;align-items:baseline;padding:24px 20px 10px;font-size:14px;color:var(--muted)}
+.cc-lbl b{color:var(--text);font-weight:600}
+.ccpal{display:grid;grid-template-columns:repeat(6,1fr);gap:12px 0;padding:6px 14px 4px;justify-items:center}
+.ccsw{width:40px;height:40px;border-radius:50%;transition:box-shadow .25s,transform .25s ease}
+.ccsw:active{transform:scale(.9)}
+.ccsw.on{box-shadow:0 0 0 3px var(--screen),0 0 0 5.5px var(--text)}
+.ccdots{position:relative;display:flex;gap:6px;overflow-x:auto;padding:4px 20px 8px;scrollbar-width:none;overscroll-behavior-x:contain}
+.ccdots::-webkit-scrollbar{display:none}
+.ccdots button{flex:none;width:42px;height:42px;border-radius:50%;font-weight:600;font-size:16px;color:var(--muted);transition:background-color .25s,color .25s}
+.ccdots button.on{background:var(--text);color:var(--screen)}
+.cst-bar{display:flex;gap:5px;padding:2px 20px 12px}
+.cst-bar i{flex:1;height:4px;border-radius:9px;background:var(--surface3);overflow:hidden;position:relative}
+.cst-bar i::after{content:"";position:absolute;inset:0;background:var(--nav-ic);transform:scaleX(0);transform-origin:0 50%;transition:transform .45s var(--ease-out)}
+.cst-bar i.on::after{transform:scaleX(1)}
+.cst-q{margin:0;padding:18px 20px 4px;font-size:23px;font-weight:700;letter-spacing:-.01em}
+.cst-q+.ccpal,.cst-q+.ccdots{margin-top:16px}
+.cst.in-r{animation:cstR .4s var(--ease-out)}
+.cst.in-l{animation:cstL .4s var(--ease-out)}
+@keyframes cstR{from{opacity:0;transform:translateX(36px)}}
+@keyframes cstL{from{opacity:0;transform:translateX(-36px)}}
+.cst-foot{margin-top:auto}
+/* detalhes */
+.scr.instant{animation:none}
+.ccd-hero{padding:4px 20px 0}
+.ccd-rise>:not(.ccd-hero){animation:ccdRise .55s var(--ease-out) both .15s}
+@keyframes ccdRise{from{opacity:0;transform:translateY(16px)}}
+.scr .cc-sec,.ccd-hero~.section-title{padding:28px 20px 12px;margin:0;font-size:15px;color:var(--muted);font-weight:600}
+.ccd-cur{padding:0 20px}
+.ccd-v{font-size:34px;font-weight:700;letter-spacing:-.02em;line-height:1.1}
+.ccd-s{font-size:14px;color:var(--muted);margin-top:4px}
+.ccd-pb{height:16px;border-radius:999px;border:1.5px solid var(--c);padding:2px;margin:14px 0 6px}
+.ccd-pb i{display:block;height:100%;width:var(--w);border-radius:999px;background:color-mix(in srgb,var(--c) 45%,var(--screen))}
+.ccd-pl{display:flex;justify-content:space-between;gap:10px;font-size:13px;color:var(--muted)}
+.ccd-f .srow{cursor:pointer}
+.ccd-f .srow-main{display:flex;align-items:center;gap:8px}
+.ccd-tag{font-style:normal;font-size:12px;font-weight:700;padding:2px 9px;border-radius:999px;background:var(--surface2);color:var(--muted)}
+.ccd-tag.ab{background:var(--accent-soft);color:var(--nav-ic)}
+.ccd-tag.fe{background:var(--neg1);color:var(--neg1-fg)}
+.ccd-x{max-height:0;overflow:hidden;transition:max-height .4s var(--ease-out)}
+.ccd-f.open .ccd-x{max-height:900px}
+.ccd-i{display:flex;justify-content:space-between;gap:12px;padding:9px 20px 9px 64px;font-size:15px}
+.ccd-i span{color:var(--muted);min-width:0}
+.ccd-i b{white-space:nowrap;font-weight:600}
+.ccd-i.e{color:var(--muted)}
+.ccd-f.open .ccd-x>:last-child{padding-bottom:16px}
+.ccd-def{margin-top:18px}
+.ccd-end{height:40px;flex:none}
+/* fatura na lista do dia em que vence: tocar abre as compras dela */
+.fat-chev{transition:transform .3s cubic-bezier(.3,1.3,.5,1);flex:none}
+.fat-row.on .fat-chev{transform:rotate(180deg)}
+.fat-list{animation:fatIn .3s ease both}
+.fat-list .lrow{padding-left:44px}
+@keyframes fatIn{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:none}}
 /* aparência */
 .ap-prev{display:flex;justify-content:center;align-items:center;gap:14px;padding:24px 20px 10px;min-height:330px}
 .ap-prev>div{display:flex;flex-direction:column;align-items:center;gap:10px;font-size:13px;font-weight:700;color:var(--muted);transition:transform .5s var(--spring),opacity .4s}
@@ -2133,6 +2205,14 @@ function expand(tx, from, to, cb) {
     if (!emit(d, i, b)) break;
   }
 }
+/* fatura do cartão: com dia de fechamento e de vencimento, a compra só sai do saldo no vencimento da fatura */
+const cardOf = id => S.cards.find(c => c.id === id) || null;
+const hasFat = c => !!(c && c.fecha >= 1 && c.vence >= 1);
+// mês (índice) da fatura em que cai uma compra: no dia do fechamento ou depois, vai para a fatura seguinte
+const fatMi = (c, ds) => { const d = parse(ds); return miOf(d) + (d.getDate() >= Math.min(c.fecha, dim(d.getFullYear(), d.getMonth())) ? 1 : 0); };
+const fatClose = (c, mi) => `${miY(mi)}-${pad(miM(mi) + 1)}-${pad(Math.min(c.fecha, dim(miY(mi), miM(mi))))}`;
+const fatDueMi = (c, mi) => { const due = mi + (c.vence > c.fecha ? 0 : 1); return `${miY(due)}-${pad(miM(due) + 1)}-${pad(Math.min(c.vence, dim(miY(due), miM(due))))}`; };
+function fatDue(c, ds) { return hasFat(c) ? fatDueMi(c, fatMi(c, ds)) : null; }
 function occs(from, to) {
   const out = [];
   for (const tx of S.txs) expand(tx, from, to, (date, value, n, total) => out.push({ tx, date, value, n, total }));
@@ -2147,11 +2227,20 @@ function calc() {
   let gStart = miFirst(MIN_MI);
   for (const tx of S.txs) if (tx.date && tx.date < gStart) gStart = tx.date;
   const day = {};
+  const D = d => day[d] || (day[d] = { entrada: 0, saida: 0, diario: 0, economia: 0, cartao: 0, bal: 0, fat: 0, fats: null });
   for (const tx of S.txs) {
     const ig = ignores(tx, "saldos", tm);
+    const card = tx.type === "cartao" ? cardOf(tx.cardId) : null, fat = hasFat(card);
     expand(tx, gStart, gEnd, (d, v) => {
-      const o = day[d] || (day[d] = { entrada: 0, saida: 0, diario: 0, economia: 0, cartao: 0, bal: 0 });
+      const o = D(d);
       o[tx.type] = r2(o[tx.type] + v);
+      if (fat) { // compra no cartão com fatura: o saldo cai no vencimento
+        const f = D(fatDue(card, d));
+        f.fat = r2(f.fat + v);
+        (f.fats || (f.fats = {}))[card.id] = r2((f.fats[card.id] || 0) + v);
+        if (!ig) f.bal = r2(f.bal - v);
+        return;
+      }
       if (!ig) o.bal = r2(o.bal + (tx.type === "entrada" ? v : -v));
     });
   }
@@ -2177,7 +2266,12 @@ const defCardId = () => { if (S.cards.length === 1) return S.cards[0].id; const 
 const prevDiv = () => { const n = +prof().prevDias; return n >= 28 && n <= 31 ? n : 30; };
 function perDayPrev() { return r2(prevTotal() / prevDiv()); }
 /* valor exibido numa célula: real + previsão (só diário, só dias depois de hoje) */
-function cellVal(o, t, ds) { const real = o ? o[t] : 0; const fc = t === "diario" && ds > TODAY ? perDayPrev() : 0; return { v: r2(real + fc), real, fc }; }
+function cellVal(o, t, ds) {
+  const real = o ? o[t] : 0;
+  // cartão: no dia do vencimento a célula mostra a fatura (é o que sai do saldo nesse dia)
+  if (t === "cartao" && o && o.fat > 0.004) return { v: o.fat, real, fc: 0, fat: true };
+  const fc = t === "diario" && ds > TODAY ? perDayPrev() : 0; return { v: r2(real + fc), real, fc };
+}
 function prevDaysIn(mi) { const n = dim(miY(mi), miM(mi)); if (mi < CUR) return 0; if (mi > CUR) return n; return n - NOW.getDate(); }
 
 function monthStats(mi) {
@@ -3100,8 +3194,8 @@ function monthCard(mi, horizon) {
     const s = c.saldo[ds] ?? 0;
     body += `<tr class="${cls}" data-row="${ds}"><td class="c-dia num" data-act="check" data-d="${ds}" role="button" tabindex="0" aria-label="dia ${d} de ${MONTHS[m]}: ${S.checkins[ds] ? "desmarcar" : "marcar"} check-in">${d}${S.checkins[ds] ? `<span class="check ${UI.popCheck === ds ? "pop" : ""}" aria-hidden="true">${I.checkW}</span>` : ""}</td>`;
     for (const t of cols) {
-      const { v, real, fc } = cellVal(o, t, ds); tot[t] = r2(tot[t] + v);
-      body += `<td class="cell num ${v ? "" : "z"} ${fc ? "fc" : ""} ${hid[t] ? "col-min" : ""}" data-act="cell" data-d="${ds}" data-t="${t}" role="button" tabindex="0" aria-label="${TYPES[t].col} em ${d} de ${MONTHS[m]}: ${fmt(v)}${fc ? " (com previsão)" : ""}. clique para ver, botão direito para adicionar"><span class="in">${ti(fc && !real ? "prev" : t)}<span class="v">${brl(v)}</span></span></td>`;
+      const { v, real, fc, fat } = cellVal(o, t, ds); tot[t] = r2(tot[t] + (fat ? real : v));
+      body += `<td class="cell num ${v ? "" : "z"} ${fc || fat ? "fc" : ""} ${fat ? "fat" : ""} ${hid[t] ? "col-min" : ""}" data-act="cell" data-d="${ds}" data-t="${t}" role="button" tabindex="0" aria-label="${TYPES[t].col} em ${d} de ${MONTHS[m]}: ${fmt(v)}${fc ? " (com previsão)" : ""}${fat ? " (fatura)" : ""}. clique para ver, botão direito para adicionar"><span class="in">${ti(fc && !real ? "prev" : t)}<span class="v">${brl(v)}</span></span></td>`;
     }
     body += `<td class="c-saldo num ${saldoCls(s)}" data-act="saldo" data-d="${ds}" role="button" tabindex="0" aria-label="saldo em ${d} de ${MONTHS[m]}: ${fmt(s)}">${horizon ? abbr(s) : brl(s)}</td></tr>`;
   }
@@ -3163,8 +3257,8 @@ function mMonthInner(cols) {
     const ds = `${y}-${pad(m + 1)}-${pad(d)}`, o = c.day[ds], wd = new Date(y, m, d).getDay(), s = c.saldo[ds] ?? 0;
     const cls = [(wd === 0 || wd === 6) ? "we" : "", ds === TODAY ? "today" : ""].join(" ");
     const vals = k => `<div class="m-vals">${types(k).map(t => {
-      const { v, real, fc } = cellVal(o, t, ds);
-      return `<button class="m-cell num ${v ? "" : "z"} ${fc ? "fc" : ""}" data-act="cell" data-d="${ds}" data-t="${t}" aria-label="${TYPES[t].col} em ${d} de ${MONTHS[m]}: ${fmt(v)}${fc ? " (com previsão)" : ""}. toque para ver, segure para adicionar">${ti(fc && !real ? "prev" : t)}<span>${brl(v)}</span></button>`;
+      const { v, real, fc, fat } = cellVal(o, t, ds);
+      return `<button class="m-cell num ${v ? "" : "z"} ${fc || fat ? "fc" : ""} ${fat ? "fat" : ""}" data-act="cell" data-d="${ds}" data-t="${t}" aria-label="${TYPES[t].col} em ${d} de ${MONTHS[m]}: ${fmt(v)}${fc ? " (com previsão)" : ""}${fat ? " (fatura)" : ""}. toque para ver, segure para adicionar">${ti(fc && !real ? "prev" : t)}<span>${brl(v)}</span></button>`;
     }).join("")}</div>`;
     h += `<div class="m-day ${cls}" data-row="${ds}"><button class="m-dia num" data-act="check" data-d="${ds}" aria-label="dia ${d} de ${MONTHS[m]}: ${S.checkins[ds] ? "desmarcar" : "marcar"} check-in">${d}${S.checkins[ds] ? `<span class="check ${UI.popCheck === ds ? "pop" : ""}" aria-hidden="true">${I.checkW}</span>` : ""}</button>`;
     h += strip(vals);
@@ -3417,7 +3511,7 @@ $("#view").addEventListener("click", e => {
 /* ================= painel do dia / movimentações do mês (tela cheia) ================= */
 const PANEL = { open: false, mode: "day", date: TODAY, mi: CUR, filter: null };
 function openPanel(date, types) {
-  Object.assign(PANEL, { open: true, mode: "day", calc: null, calcF: null, date, filter: types && types.length === 1 ? types[0] : null });
+  Object.assign(PANEL, { open: true, mode: "day", calc: null, calcF: null, fatOpen: null, date, filter: types && types.length === 1 ? types[0] : null });
   renderPanel();
 }
 function openMonthScreen(mi, type) {
@@ -3500,6 +3594,13 @@ function itemHTML(x) {
     <span class="lrow-top">${ti(x.tx.type, true)}<b class="ellip">${esc(x.tx.desc)}</b><span class="lrow-val num">${brl(x.value)}</span></span>
     <span class="lrow-sub"><span class="num">${[txCard(x.tx), ddmm(x.date)].filter(Boolean).join(" · ")}${pendIco(x.tx)}</span>${r ? `<span class="lrow-rep num">${r}</span>` : ""}</span></button>`;
 }
+/* compras de um cartão que caem na fatura que vence em "due" */
+function fatBuys(cid, due) {
+  const c = cardOf(cid); if (!hasFat(c)) return [];
+  const from = miFirst(miOf(parse(due)) - 2);
+  return occs(from, due).filter(x => x.tx.type === "cartao" && x.tx.cardId === cid && fatDue(c, x.date) === due).sort((a, b) => b.date.localeCompare(a.date));
+}
+const FAT_CHEV = '<svg class="fat-chev" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 9l6 6 6-6"/></svg>';
 function filterLabel() { const f = PANEL.filter; return f ? `${ti(f)}<span>${TYPES[f].col}</span>` : `${ti("all")}<span>todas</span>`; }
 function renderPanel() {
   const root = $("#drawer-root");
@@ -3531,6 +3632,12 @@ function renderPanel() {
       const pd = perDayPrev();
       if (day && PANEL.date > TODAY && pd > 0.004 && (!PANEL.filter || PANEL.filter === "diario"))
         prevRow = `<div class="lrow static" role="group" aria-label="previsão de diário: ${brl(pd)}"><span class="lrow-top">${ti("prev")}<b class="ellip">previsão de diário</b><span class="lrow-val num">${brl(pd)}</span></span><span class="lrow-sub">previsão para o dia</span></div>`;
+      // faturas que vencem no dia: tocar abre as compras que fazem parte dela
+      const fo = day && calc().day[PANEL.date];
+      if (fo && fo.fats && (!PANEL.filter || PANEL.filter === "cartao")) for (const [cid, val] of Object.entries(fo.fats)) {
+        const buys = fatBuys(cid, PANEL.date), open = PANEL.fatOpen === cid;
+        prevRow = `<button class="lrow fat-row ${open ? "on" : ""}" data-fat="${cid}" aria-expanded="${open}" aria-label="fatura ${esc(cardName(cid))}: ${brl(val)}, ${buys.length} ${buys.length === 1 ? "compra" : "compras"}"><span class="lrow-top">${ti("cartao", true)}<b class="ellip">fatura ${esc(cardName(cid))}</b><span class="lrow-val num">${brl(val)}</span></span><span class="lrow-sub"><span class="num">${buys.length} ${buys.length === 1 ? "compra" : "compras"}</span>${FAT_CHEV}</span></button>${open ? `<div class="fat-list">${buys.map(itemHTML).join("")}</div>` : ""}` + prevRow;
+      }
     }
     head = `<button class="icon-btn flat" ${PANEL.calcF ? "data-pcalcback" : "data-pclose"} aria-label="voltar">${I.back}</button>
       <div class="ph-mid"><button class="icon-btn flat" data-pstep="-1" aria-label="${day ? "dia anterior" : "mês anterior"}" ${prevOk ? "" : "disabled"}>${I.left}</button>${mid}<button class="icon-btn flat" data-pstep="1" aria-label="${day ? "próximo dia" : "próximo mês"}" ${nextOk ? "" : "disabled"}>${I.right}</button></div>
@@ -3596,10 +3703,12 @@ $("#drawer-root").addEventListener("click", e => {
   const st = t.closest("[data-pstep]");
   if (st) {
     const d = +st.dataset.pstep;
-    if (PANEL.mode === "day") PANEL.date = ymd(addDays(parse(PANEL.date), d)); else PANEL.mi += d;
+    PANEL.fatOpen = null; if (PANEL.mode === "day") PANEL.date = ymd(addDays(parse(PANEL.date), d)); else PANEL.mi += d;
     renderPanel(); const el = $("#drawer-root .lrows, #drawer-root .empty"); if (el) animateSlideEl(el, d); return;
   }
-  const pc = t.closest("[data-pcal]"); if (pc) { datePicker(pc, PANEL.date, v => { PANEL.date = v; renderPanel(); }); return; }
+  const fb = t.closest("[data-fat]");
+  if (fb) { PANEL.fatOpen = PANEL.fatOpen === fb.dataset.fat ? null : fb.dataset.fat; renderPanel(); return; }
+  const pc = t.closest("[data-pcal]"); if (pc) { datePicker(pc, PANEL.date, v => { PANEL.fatOpen = null; PANEL.date = v; renderPanel(); }); return; }
   const pf = t.closest("[data-pfilter]");
   if (pf) {
     const opt = (k, lbl, ic) => `<button class="pop-item ${(PANEL.filter || "all") === k ? "on" : ""}" data-fk="${k}" role="menuitemradio" aria-checked="${(PANEL.filter || "all") === k}">${ic}${lbl}</button>`;
@@ -3888,16 +3997,10 @@ function datePicker(anchor, value, onPick) {
 // escolher o cartão do lançamento (ou cadastrar um na hora, só com o nome)
 function cardSheet(cur, onPick) {
   const s = openSheet({ title: "cartão", body: `${S.cards.length ? `<div class="slist">${cardsSorted().map(c => `<button class="sitem ${c.id === cur ? "on" : ""}" data-card="${c.id}"><span class="si-ico">${ti("cartao", true)}</span><span class="si-txt"><b class="ellip">${esc(c.name)}</b></span></button>`).join("")}</div>` : ""}
-    <div class="sheet-new"><div class="field"><label for="nc-name">${S.cards.length ? "ou adicione um novo" : "adicione seu primeiro cartão"}</label><input class="input" id="nc-name" autocomplete="off" maxlength="40" placeholder="ex.: nubank"></div>
-    <button class="btn block primary" data-savecard>adicionar e usar</button></div>` });
+    <div class="sheet-new"><button class="btn block primary" data-newcard>${S.cards.length ? "novo cartão" : "adicionar cartão"}</button></div>` });
   s.el.addEventListener("click", async e => {
     const c = e.target.closest("[data-card]"); if (c) { s.close(); onPick(c.dataset.card); return; }
-    if (e.target.closest("[data-savecard]")) {
-      const name = $("#nc-name", s.el).value.trim();
-      if (!name) { toast("informe um nome para o cartão", true); $("#nc-name", s.el).focus(); return; }
-      if (S.cards.some(x => x.name.toLowerCase() === name.toLowerCase())) { toast("já tem um cartão com esse nome", true); return; }
-      const id = uid("c"); await backend.put("cards", id, { name, createdAt: Date.now() }); s.close(); onPick(id);
-    }
+    if (e.target.closest("[data-newcard]")) { s.close(); openCardForm(null, { pick: true, onCreate: onPick }); }
   });
 }
 const cardsSorted = () => [...S.cards].sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0));
@@ -4012,6 +4115,7 @@ function bsInsights() {
     [2, "gastos", () => { const lim = miLast(CUR + 1); let best = null; for (const tx of S.txs) { const fin = tx.rep === "installment" || ((tx.rep || "none") !== "none" && (tx.until === "count" || tx.endBefore)); if (!fin) continue; let last = null, val = 0, after = false; expand(tx, tomorrow, miLast(MAX_MI), (d, v) => { if (d > lim) after = true; else { last = d; if (v != null) val = v; } }); if (!last || after) continue; if (!best || last < best.last) best = { tx, last }; }
       if (!best) return null; const ld = parse(best.last), when = `${MON3[ld.getMonth()]}/${String(ld.getFullYear()).slice(2)}`, inc = best.tx.type === "entrada";
       return m(inc ? "info" : "good", I.cal, best.tx.rep === "installment" ? `a última parcela de <b class="bs-nm">${esc(best.tx.desc)}</b> é em ${when}.` : `${inc ? "o último recebimento" : "o último pagamento"} de <b class="bs-nm">${esc(best.tx.desc)}</b> é em ${when}.`, { item: { tx: best.tx, date: best.last } }); }],
+    [2, "fatura", () => { const c = calc(); for (let d = NOW, end = parse(miLast(CUR + 2)); d <= end; d = addDays(d, 1)) { const o = c.day[ymd(d)]; if (o && o.fats) { const [cid, v] = Object.entries(o.fats)[0]; return m("info", I.card, `${ymd(d) === TODAY ? "hoje vence a" : "a próxima"} fatura do <b class="bs-nm">${esc(cardName(cid))}</b>${ymd(d) === TODAY ? `, de <b>${bm(v)}</b>.` : ` é de <b>${bm(v)}</b> e vence em ${ddmm(ymd(d))}.`}`, { day: ymd(d) }); } } return null; }],
     [3, "gastos", () => { const v = sum(monthOcc.filter(x => x.tx.type === "cartao")); return v > 0 ? m("info", I.card, `em ${mName}, <b>${bm(v)}</b> foram no cartão.`, { month: "cartao" }) : null; }],
     [3, "economia", () => { const v = sum(occs(miFirst(MIN_MI), TODAY).filter(x => x.tx.type === "economia")); return v > 0.004 ? m("good", BI.guardar, `sua reserva está em <b>${bm(v)}</b>, somando o que já foi guardado e resgatado.`, { month: "economia" }) : null; }],
     [3, "saldo", () => urgent ? null : m("good", BI.wallet, "nenhum dia com saldo <b>negativo</b> nos próximos 12 meses.", { tab: "horizonte" })],
@@ -4437,86 +4541,207 @@ function openPrevForm(id) {
   });
 }
 
-/* ===== cartões: empilhados como na carteira; toque num para abrir ===== */
-const CARD_BG = ["linear-gradient(135deg,#8A3FD9,#4C1A8C)", "linear-gradient(135deg,#3a3a42,#141417)", "linear-gradient(135deg,#2F5DA8,#132447)", "linear-gradient(135deg,#7C2330,#2c0e13)", "linear-gradient(135deg,#B98AF0,#6236A8)", "linear-gradient(135deg,#55515f,#232129)"];
-function cardMonth(id) {
-  let v = 0, n = 0;
-  for (const x of occs(miFirst(CUR), miLast(CUR))) if (x.tx.type === "cartao" && x.tx.cardId === id) { v += x.value; n++; }
-  return { v: r2(v), n };
+/* ===== cartões: pilha como na carteira; toque num cartão para ver as faturas ===== */
+// cores do cartão (sem verde); a chave é o que fica salvo
+const CC_COLORS = [["preto", "preto", "#2a2a30", "#050506"], ["grafite", "grafite", "#5b5b66", "#2a2a31"], ["prata", "prata", "#ECECF0", "#B4B4BE", 1], ["dourado", "dourado", "#F0D58E", "#C09A4A", 1], ["roxo", "roxo", "#9B4BEB", "#4C1A8C"], ["lilas", "lilás", "#C6A2F5", "#7448BF"],
+  ["azul", "azul", "#3A72EA", "#14307A"], ["ceu", "céu", "#5CC0FA", "#1F72B8"], ["laranja", "laranja", "#FF9A4D", "#E0561A"], ["vermelho", "vermelho", "#F2585C", "#9B1F25"], ["rosa", "rosa", "#F073B6", "#A62A6C"], ["vinho", "vinho", "#8E2A3A", "#2C0E13"]];
+const CC_OLD = ["roxo", "preto", "azul", "vinho", "lilas", "grafite"]; // cartões de antes das cores: mantém o visual que já tinham
+const ccKey = c => { const k = c && c.color; if (CC_COLORS.some(x => x[0] === k)) return k; const i = cardsSorted().findIndex(x => x.id === (c && c.id)); return CC_OLD[(i < 0 ? 0 : i) % CC_OLD.length]; };
+const ccC = k => CC_COLORS.find(x => x[0] === k) || CC_COLORS[4];
+const ccGrad = k => { const c = ccC(k); return `linear-gradient(135deg,${c[2]},${c[3]})`; };
+const ccDark = k => !!ccC(k)[4];
+const ccTone = k => { const c = ccC(k); return k === "preto" ? "var(--muted)" : c[4] ? c[3] : c[2]; }; // prata e dourado: tom mais forte para a barra aparecer no claro
+const CC_WAVE = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M8 8.5a5 5 0 0 1 0 7M11.5 6a8.5 8.5 0 0 1 0 12M15 3.5a12 12 0 0 1 0 17"/></svg>';
+const bigMoney = v => { const [a, b] = fmt(Math.abs(v)).split(","); return `${v < -0.004 ? "- " : ""}R$ ${a}<small>,${b}</small>`; };
+
+/* faturas de um cartão: mês da fatura (pelo fechamento), quando fecha, quando vence e as compras dela */
+function cardFats(c) {
+  const fat = hasFat(c), open = fat ? fatMi(c, TODAY) : CUR, by = {};
+  for (const x of occs(miFirst(open - 4), miLast(open + 10))) {
+    if (x.tx.type !== "cartao" || x.tx.cardId !== c.id) continue;
+    const k = fat ? fatMi(c, x.date) : miOf(parse(x.date));
+    (by[k] || (by[k] = [])).push(x);
+  }
+  const out = [];
+  for (let k = open - 3; k <= open + 10; k++) {
+    const items = (by[k] || []).sort((a, b) => b.date.localeCompare(a.date)), v = r2(items.reduce((a, x) => a + x.value, 0));
+    const due = fat ? fatDueMi(c, k) : null, close = fat ? fatClose(c, k) : null;
+    const st = k === open ? "aberta" : k > open ? "futura" : fat && due >= TODAY ? "fechada" : "anterior";
+    if (st === "anterior" && !v) continue;
+    out.push({ k, v, items, due, close, st, mi: due ? miOf(parse(due)) : k });
+  }
+  return out;
 }
+const cardOpenFat = c => cardFats(c).find(f => f.st === "aberta");
+
+/* o desenho do cartão: o mesmo na pilha, na prévia e nos detalhes; duas camadas de cor para trocar sem travar */
+function ccFace(c, { attrs = "", cls = "", val = null } = {}) {
+  const k = ccKey(c), f = val == null ? cardOpenFat(c) : null, v = val != null ? val : f ? f.v : 0;
+  return `<div class="ccf ${ccDark(k) ? "dk" : ""} ${cls}" ${attrs}><i class="ccf-bg on" style="background:${ccGrad(k)}"></i><i class="ccf-bg"></i>
+    <span class="ccf-top"><b class="ellip ${c.name ? "" : "ccph"}" data-ccn>${esc(c.name || "seu cartão")}</b>${CC_WAVE}</span><i class="ccf-chip"></i>
+    <span class="ccf-bot"><span class="ccf-l"><small>${hasFat(c) || val != null ? "fatura atual" : `gasto em ${MONTHS[miM(CUR)]}`}</small><b class="num">${bigMoney(v)}</b></span><span class="ccf-d4 num ${c.last4 ? "" : "off"}" data-ccd>•••• ${esc(c.last4 || "")}</span></span></div>`;
+}
+// troca de cor: a camada de baixo recebe a cor nova e aparece por cima; nada é criado nem apagado, então trocas rápidas não travam
+function ccPaint(el, k) {
+  if (!el) return;
+  const [a, b] = $$(".ccf-bg", el), on = a.classList.contains("on") ? a : b, off = on === a ? b : a;
+  off.style.background = ccGrad(k); on.classList.remove("on"); off.classList.add("on");
+  el.classList.toggle("dk", ccDark(k));
+}
+
 function openCards() {
-  let open = null;
-  const place = el => {
-    const cs = $$(".wcard", el), STEP = 64, H = 170, k = cs.findIndex(c => c.dataset.cid === open);
-    const info = $(".wal-info", el), c = S.cards.find(x => x.id === open);
-    let rest = H + 150;
-    if (info) {
-      if (!c) info.classList.remove("on");
-      else {
-        const m = cardMonth(c.id);
-        info.innerHTML = `<div class="wi-r"><span>gasto em ${MONTHS[miM(CUR)]}</span><b class="num">${brl(m.v)}</b></div><div class="wi-r"><span>movimentações no mês</span><b class="num">${m.n}</b></div><div class="wi-r"><span>cartão padrão</span><b>${c.id === defCardId() ? "sim" : "não"}</b></div><button class="sbtn" data-editcard="${c.id}">editar cartão</button>`;
-        info.style.top = (H + 12) + "px"; info.classList.add("on");
-        rest = H + 12 + info.offsetHeight + 24;
-      }
-    }
-    cs.forEach((cd, i) => {
-      let top, sc = 1;
-      if (k < 0) top = i * STEP;
-      else if (i === k) top = 0;
-      else { const j = i < k ? i : i - 1; top = rest + j * 14; sc = .92; }
-      cd.style.transform = `translateY(${top}px) scale(${sc})`; cd.style.zIndex = i === k ? 50 : i;
-      cd.setAttribute("aria-expanded", i === k);
-    });
-    const wal = $(".wal", el); if (wal) wal.style.height = (k < 0 ? (cs.length - 1) * STEP + H : rest + (cs.length - 2) * 14 + H * .92 + 10) + "px";
-  };
+  let enter = null;
   const draw = s => {
     if (!S.cards.length) { s.setBody(`<div class="sempty"><button class="circ" data-addcard aria-label="adicionar cartão">${SI.cardAdd}</button><span>sem cartões por aqui.<br>toque no botão acima para criar.</span></div>`); return; }
-    if (open && !S.cards.some(c => c.id === open)) open = null;
-    s.setBody(`<div class="wal">${cardsSorted().map((c, i) => { const m = cardMonth(c.id);
-      return `<button class="wcard" data-cid="${c.id}" style="background:${CARD_BG[i % CARD_BG.length]}" aria-label="${esc(c.name)}, gasto em ${MONTHS[miM(CUR)]}: ${brl(m.v)}"><span class="wc-top"><b class="ellip">${esc(c.name)}</b><span class="num">${brl(m.v)}</span></span><span class="wc-sub">${c.id === defCardId() ? "cartão padrão · " : ""}gasto em ${MONTHS[miM(CUR)]}</span></button>`; }).join("")}
-      <div class="wal-info"></div></div>`);
-    place(s.el);
+    const cs = cardsSorted(), STEP = 62, H = 200;
+    const top = SCREENS[SCREENS.length - 1] === s, go = top ? enter : null; // o cartão novo entra na pilha quando a pilha está à vista
+    s.setBody(`<div class="ccstk" style="height:${(cs.length - 1) * STEP + H}px">${cs.map((c, i) => ccFace(c, { attrs: `role="button" tabindex="0" data-ccid="${c.id}" aria-label="${esc(c.name)}" style="--y:${i * STEP}px;z-index:${i}"`, cls: c.id === go ? "in" : "" })).join("")}</div>`);
+    if (go) enter = null;
   };
   const s = openScreen({
     title: "cartões",
     right: `<button class="icon-btn flat" data-addcard aria-label="adicionar cartão">${SI.cardAdd}</button>`,
     onMount: el => el.addEventListener("click", e => {
-      if (e.target.closest("[data-addcard]")) return openCardForm(null);
-      const ed = e.target.closest("[data-editcard]"); if (ed) return openCardForm(ed.dataset.editcard);
-      const c = e.target.closest(".wcard"); if (c) { open = open === c.dataset.cid ? null : c.dataset.cid; place(el); }
+      if (e.target.closest("[data-addcard]")) return openCardForm(null, { onCreate: id => { enter = id; } });
+      const c = e.target.closest("[data-ccid]"); if (c) openCardDetail(c.dataset.ccid);
     }),
     refresh: () => draw(s),
   });
   draw(s);
 }
-function openCardForm(id) {
-  const c = id && S.cards.find(x => x.id === id);
-  const only = c ? S.cards.length === 1 : S.cards.length === 0; // único cartão: é o padrão e não dá para desmarcar
-  let def = only || (c && c.id === defCardId());
-  const defRow = () => `<button class="srow" role="switch" aria-checked="${def}" data-defcc ${only ? "disabled" : ""}><span class="grow"><span class="srow-main">cartão padrão</span></span><span class="sw ${def ? "on" : ""}" aria-hidden="true"></span></button>`;
-  openScreen({
-    title: c ? "editar cartão" : "novo cartão",
-    body: `${lfield("cc-name", "nome do cartão", c ? c.name : "", 'maxlength="40" placeholder="ex.: nubank"')}
-      <div class="slist2 cc-def">${defRow()}</div>
-      <div class="sbtns">${c ? `<button class="sbtn is-danger" data-delcard><span class="hold-lbl">apagar</span></button>` : ""}<button class="sbtn solid" data-savecc>salvar</button></div>`,
-    onMount: (el, s) => {
-      if (c) bindHold($("[data-delcard]", el), async () => { s.close(); if (prof().defCard === c.id) saveProfile({ defCard: "" }); await backend.del("cards", c.id); });
-      el.addEventListener("click", async e => {
-      if (e.target.closest("[data-defcc]") && !only) { def = !def; $(".cc-def", el).innerHTML = defRow(); return; }
-      if (e.target.closest("[data-savecc]")) {
-        const name = $("#cc-name", el).value.trim();
-        if (!name) { $("#cc-name", el).focus(); return fieldErr($("#cc-name", el), "informe um nome para o cartão"); }
-        if (S.cards.some(x => x.id !== id && x.name.toLowerCase() === name.toLowerCase())) return fieldErr($("#cc-name", el), "já tem um cartão com esse nome");
-        const cid = c ? c.id : uid("c");
-        const ok = await busyBtn(e.target.closest("[data-savecc]"), async () => {
-          if (def && !only) saveProfile({ defCard: cid });
-          else if (!def && prof().defCard === cid) saveProfile({ defCard: "" });
-          await backend.put("cards", cid, { name, color: c ? c.color || "" : "", createdAt: c ? c.createdAt || Date.now() : Date.now() });
-        });
-        if (ok) s.close();
-      }
-    }); },
+
+/* detalhes: fatura atual e a lista de faturas (anteriores, a atual e as próximas) */
+function openCardDetail(id, from = null) {
+  const opened = new Set();
+  const draw = s => {
+    const c = cardOf(id); if (!c) return s.close();
+    $(".scr-title", s.el).textContent = c.name;
+    const fs = cardFats(c), ab = fs.find(f => f.st === "aberta"), fat = hasFat(c);
+    let h = `<div class="ccd-hero">${ccFace(c, { attrs: "data-cchero" })}</div>`;
+    if (fat) {
+      const prev = parse(fatClose(c, ab.k - 1)), close = parse(ab.close), tot = Math.max(1, (close - prev) / 864e5), gone = Math.min(tot, Math.max(0, (parse(TODAY) - prev) / 864e5));
+      const left = Math.round((close - parse(TODAY)) / 864e5);
+      h += `<h2 class="section-title">fatura atual</h2><div class="ccd-cur" style="--c:${ccTone(ccKey(c))}"><div class="ccd-v num">${bigMoney(ab.v)}</div><div class="ccd-s num">fecha ${ddmm(ab.close)} · vence ${ddmm(ab.due)}</div>
+        <div class="ccd-pb" aria-hidden="true"><i style="--w:${Math.max(4, gone / tot * 100).toFixed(1)}%"></i></div><div class="ccd-pl"><span>${left <= 0 ? "fecha hoje" : left === 1 ? "fecha amanhã" : `fecha em ${left} dias`}</span><span>melhor dia de compra: ${c.fecha}</span></div></div>`;
+    }
+    const TAG = { aberta: "ab", fechada: "fe" };
+    h += `<h2 class="section-title">${fat ? "faturas" : "gastos por mês"}</h2><div class="ccd-list">${fs.map(f => {
+      const op = opened.has(f.k), name = MONTHS[miM(f.mi)] + (miY(f.mi) !== miY(CUR) ? ` ${miY(f.mi)}` : "");
+      return `<div class="ccd-f ${op ? "open" : ""}"><button class="srow stack" data-ccf="${f.k}" aria-expanded="${op}"><span class="sico" style="color:${f.st === "aberta" ? "var(--nav-ic)" : "var(--muted)"}">${I.card}</span><span class="grow"><span class="srow-main">${name}${fat && TAG[f.st] ? `<i class="ccd-tag ${TAG[f.st]}">${f.st}</i>` : ""}</span><span class="srow-sub num">${f.due ? `vence ${ddmm(f.due)}` : `${f.items.length} ${f.items.length === 1 ? "compra" : "compras"}`}</span></span><span class="srow-val num">${brl(f.v)}</span></button>
+        <div class="ccd-x">${f.items.length ? f.items.map(x => `<div class="ccd-i"><span class="ellip">${esc(x.tx.desc)}${x.total > 1 ? ` · ${x.n}/${x.total}` : ""}</span><b class="num">${brl(x.value)}</b></div>`).join("") : `<div class="ccd-i e">sem compras nesta fatura.</div>`}</div></div>`; }).join("")}</div>`;
+    if (S.cards.length > 1) { const on = defCardId() === c.id; h += `<div class="slist2 ccd-def"><button class="srow" role="switch" aria-checked="${on}" data-ccdef><span class="grow"><span class="srow-main">cartão padrão</span></span><span class="sw ${on ? "on" : ""}" aria-hidden="true"></span></button></div>`; }
+    const b = $(".scr-body", s.el), y = b.scrollTop; s.setBody(h + `<div class="ccd-end"></div>`); b.scrollTop = y;
+  };
+  const s = openScreen({
+    title: (cardOf(id) || {}).name || "cartão",
+    right: `<button class="icon-btn flat" data-ccedit aria-label="editar cartão">${I.pencil}</button>`,
+    onMount: el => el.addEventListener("click", e => {
+      if (e.target.closest("[data-ccedit]")) return openCardForm(id);
+      if (e.target.closest("[data-ccdef]")) { const on = defCardId() === id; saveProfile({ defCard: on ? "" : id }); const sw = $("[data-ccdef] .sw", el); sw.classList.toggle("on", !on); $("[data-ccdef]", el).setAttribute("aria-checked", !on); return; }
+      const f = e.target.closest("[data-ccf]");
+      if (f) { const k = +f.dataset.ccf, box = f.parentElement; opened.has(k) ? opened.delete(k) : opened.add(k); box.classList.toggle("open", opened.has(k)); f.setAttribute("aria-expanded", opened.has(k)); }
+    }),
+    refresh: () => draw(s),
   });
+  const close0 = s.close; // ao voltar, a tela de baixo se atualiza (a pilha mostra o cartão novo entrando)
+  s.close = () => { close0(); const t = SCREENS[SCREENS.length - 1]; if (t && t.refresh) t.refresh(); };
+  if (from) s.el.classList.add("instant");
+  draw(s);
+  if (from) { // o cartão da prévia vira o cartão dos detalhes
+    const hero = $("[data-cchero]", s.el), r = hero.getBoundingClientRect();
+    hero.style.transformOrigin = "0 0"; hero.style.transition = "none";
+    hero.style.transform = `translate(${from.left - r.left}px,${from.top - r.top}px) scale(${from.width / r.width},${from.height / r.height})`;
+    $(".scr-body", s.el).classList.add("ccd-rise");
+    requestAnimationFrame(() => requestAnimationFrame(() => { hero.style.transition = "transform .65s var(--spring)"; hero.style.transform = ""; }));
+    setTimeout(() => { hero.style.transition = ""; hero.style.transformOrigin = ""; }, 700);
+  }
+  return s;
+}
+
+/* novo cartão: passo a passo com a prévia mudando junto; editar: tudo numa tela só */
+function openCardForm(id, { onCreate = null, pick = false } = {}) {
+  const c = id && cardOf(id), edit = !!c;
+  const D = c ? { name: c.name, color: ccKey(c), last4: c.last4 || "", fecha: c.fecha || 3, vence: c.vence || 10 } : { name: "", color: "roxo", last4: "", fecha: 3, vence: 10 };
+  const STEPS = ["name", "color", "last4", "fecha", "vence"];
+  const Q = { name: "qual é o nome do cartão?", color: "qual é a cor?", last4: "quais são os últimos 4 dígitos?", fecha: "em que dia a fatura fecha?", vence: "em que dia a fatura vence?" };
+  let step = 0, s;
+  const field = (k, head) => {
+    if (k === "name") return lfield("cc-name", "nome do cartão", D.name, 'maxlength="24" placeholder="exemplo: nubank" enterkeyhint="next"');
+    if (k === "last4") return lfield("cc-d4", "últimos 4 dígitos (opcional)", D.last4, 'class="num" inputmode="numeric" maxlength="4" placeholder="0000" enterkeyhint="next"');
+    if (k === "color") return `${head ? `<div class="cc-lbl"><span>cor do cartão</span><b data-ccln>${ccC(D.color)[1]}</b></div>` : ""}<div class="ccpal" role="radiogroup" aria-label="cor do cartão">${CC_COLORS.map(x => `<button class="ccsw ${x[0] === D.color ? "on" : ""}" role="radio" aria-checked="${x[0] === D.color}" data-ccol="${x[0]}" style="background:${ccGrad(x[0])}" aria-label="${x[1]}"></button>`).join("")}</div>`;
+    return `${head ? `<div class="cc-lbl"><span>${k === "fecha" ? "fecha no dia" : "vence no dia"}</span></div>` : ""}<div class="ccdots" data-ccday="${k}" role="radiogroup" aria-label="${k === "fecha" ? "dia de fechamento" : "dia de vencimento"}">${Array.from({ length: 31 }, (_, i) => i + 1).map(d => `<button class="num ${d === D[k] ? "on" : ""}" role="radio" aria-checked="${d === D[k]}" data-d="${d}">${d}</button>`).join("")}</div>`;
+  };
+  const bar = () => `<div class="cst-bar" aria-hidden="true">${STEPS.map((_, i) => `<i class="${i <= step ? "on" : ""}"></i>`).join("")}</div>`;
+  const stepHTML = dir => `<div class="cst ${dir ? "in-" + dir : ""}"><h2 class="cst-q">${Q[STEPS[step]]}</h2>${field(STEPS[step], false)}</div>`;
+  const nextLbl = () => step === STEPS.length - 1 ? "criar cartão" : STEPS[step] === "last4" && !D.last4 ? "pular" : "continuar";
+  const body = () => edit
+    ? `<div class="ccp">${ccFace(D, { attrs: "data-ccprev", val: (cardOpenFat(c) || { v: 0 }).v })}</div>${["name", "color", "last4", "fecha", "vence"].map(k => field(k, true)).join("")}
+      <div class="sbtns"><button class="sbtn is-danger" data-delcard><span class="hold-lbl">apagar</span></button><button class="sbtn solid" data-ccsave>salvar</button></div>`
+    : `${bar()}<div class="ccp">${ccFace(D, { attrs: "data-ccprev", val: 0 })}</div><div class="cst-box">${stepHTML("")}</div><div class="sbtns cst-foot"><button class="sbtn solid" data-ccnext>${nextLbl()}</button></div>`;
+  const prev = () => $("[data-ccprev]", s.el);
+  const upName = () => { const n = $("[data-ccn]", prev()); n.textContent = D.name || "seu cartão"; n.classList.toggle("ccph", !D.name); };
+  const upD4 = () => { const d = $("[data-ccd]", prev()); d.textContent = "•••• " + D.last4; d.classList.toggle("off", !D.last4); };
+  const center = (box, smooth) => { const b = $(".on", box); if (b) box.scrollTo({ left: b.offsetLeft - (box.clientWidth - b.offsetWidth) / 2, behavior: smooth ? "smooth" : "auto" }); };
+  const bindFields = root => {
+    const nm = $("#cc-name", root); if (nm) nm.addEventListener("input", () => { D.name = nm.value; upName(); });
+    const d4 = $("#cc-d4", root); if (d4) d4.addEventListener("input", () => { d4.value = d4.value.replace(/\D/g, "").slice(0, 4); D.last4 = d4.value; upD4(); const b = $("[data-ccnext]", s.el); if (b) b.textContent = nextLbl(); });
+    $$("[data-ccday]", root).forEach(box => requestAnimationFrame(() => center(box, false)));
+  };
+  const validName = () => {
+    const name = D.name.trim(), nm = $("#cc-name", s.el);
+    if (!name) { nm && nm.focus(); fieldErr(nm, "informe um nome para o cartão"); return false; }
+    if (S.cards.some(x => x.id !== id && x.name.toLowerCase() === name.toLowerCase())) { fieldErr(nm, "já tem um cartão com esse nome"); return false; }
+    return true;
+  };
+  const goStep = n => {
+    const dir = n > step ? "r" : "l"; step = n;
+    $(".cst-bar", s.el).outerHTML = bar();
+    $(".cst-box", s.el).innerHTML = stepHTML(dir); bindFields($(".cst-box", s.el));
+    $("[data-ccnext]", s.el).textContent = nextLbl();
+    const f = $(".cst-box input", s.el); if (f) setTimeout(() => f.focus({ preventScroll: true }), 280);
+  };
+  const create = async btn => {
+    const cid = uid("c"), data = { name: D.name.trim(), color: D.color, last4: D.last4, fecha: D.fecha, vence: D.vence, createdAt: Date.now() };
+    const r = prev().getBoundingClientRect();
+    const ok = await busyBtn(btn, () => backend.put("cards", cid, data), "criado");
+    if (!ok) return;
+    if (pick) { s.close(); onCreate && onCreate(cid); return; } // criado na hora de lançar: volta para o lançamento já com ele
+    onCreate && onCreate(cid);
+    const i = SCREENS.indexOf(s), j = modals.indexOf(s);
+    openCardDetail(cid, r); // os detalhes abrem por cima e a tela do formulário sai por baixo, sem animação
+    if (i >= 0) SCREENS.splice(i, 1); if (j >= 0) modals.splice(j, 1); s.el.remove(); syncScreens();
+  };
+  s = openScreen({
+    title: edit ? "editar cartão" : "novo cartão",
+    body: body(),
+    onMount: (el, api) => {
+      bindFields(el);
+      if (edit) bindHold($("[data-delcard]", el), async () => {
+        while (SCREENS.length && SCREENS[SCREENS.length - 1] !== api) SCREENS[SCREENS.length - 1].close();
+        api.close(); const d = SCREENS[SCREENS.length - 1]; if (d && $("[data-cchero]", d.el)) d.close();
+        if (prof().defCard === id) saveProfile({ defCard: "" }); await backend.del("cards", id);
+      });
+      if (!edit) $("[data-sback]", el).onclick = () => (step > 0 ? goStep(step - 1) : api.close());
+      el.addEventListener("click", async e => {
+        const sw = e.target.closest("[data-ccol]");
+        if (sw) { if (sw.dataset.ccol === D.color) return; D.color = sw.dataset.ccol; $$("[data-ccol]", el).forEach(b => { b.classList.toggle("on", b === sw); b.setAttribute("aria-checked", b === sw); }); const ln = $("[data-ccln]", el); if (ln) ln.textContent = ccC(D.color)[1]; ccPaint(prev(), D.color); return; }
+        const dy = e.target.closest("[data-ccday] [data-d]");
+        if (dy) { const box = dy.parentElement, k = box.dataset.ccday; D[k] = +dy.dataset.d; $$("[data-d]", box).forEach(b => { b.classList.toggle("on", b === dy); b.setAttribute("aria-checked", b === dy); }); center(box, true); return; }
+        const nx = e.target.closest("[data-ccnext]");
+        if (nx) { if (STEPS[step] === "name" && !validName()) return; if (step < STEPS.length - 1) goStep(step + 1); else create(nx); return; }
+        const sv = e.target.closest("[data-ccsave]");
+        if (sv) {
+          if (!validName()) return;
+          const { id: _id, ...keep } = c;
+          const ok = await busyBtn(sv, () => backend.put("cards", id, { ...keep, name: D.name.trim(), color: D.color, last4: D.last4, fecha: D.fecha, vence: D.vence, createdAt: c.createdAt || Date.now() }));
+          if (ok) api.close();
+        }
+      });
+      el.addEventListener("keydown", e => { if (e.key === "Enter" && e.target.matches("input")) { e.preventDefault(); const b = $("[data-ccnext], [data-ccsave]", el); if (b) b.click(); } });
+      if (!edit) setTimeout(() => { const f = $("#cc-name", el); f && f.focus({ preventScroll: true }); }, 380);
+    },
+  });
+  return s;
 }
 
 /* ===== aparência: o próprio app nos dois temas, lado a lado; a pílula desliza entre as opções ===== */
