@@ -1536,7 +1536,7 @@ body.stk-open .bottom-nav{z-index:76!important}
 .hzh-chips::after{content:"";flex:none;width:10px}
 .hzh-ms{display:grid;grid-template-columns:1fr;gap:6px;padding:0 16px}
 @media (min-width:701px){.hzh-chips{display:none}.hzh-ms{grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:22px 28px;padding:24px 28px}.hzh{padding-bottom:40px}}
-/* horizonte: 3 meses por linha no computador; semana acesa ao passar o mouse ou tocar no dia; mês inteiro ao tocar no nome (15/11) */
+/* horizonte: 3 meses por linha no computador; semana acesa ao passar o mouse ou clicar no dia (só no computador); mês inteiro ao tocar no nome (15/11) */
 @media (min-width:1100px){.hzh-ms{grid-template-columns:repeat(3,minmax(0,1fr))}}
 .hzh-g .hzh-d{flex-direction:column;justify-content:space-between;transition:opacity .25s,transform .35s var(--spring),box-shadow .2s,filter .25s}
 .hzh-n{line-height:1}
@@ -3224,9 +3224,11 @@ function hzFocus(v, ds) {
   const pg = $(".hzh", v); if (!pg) return;
   $$(".hzh-d.sel", pg).forEach(x => x.classList.remove("sel"));
   const tip = $(".hzh-tip", pg);
+  $$(".hzh-d.hov", pg).forEach(x => x.classList.remove("hov"));
   if (!ds) { hzWeek(null); tip.classList.remove("on"); return; }
   const b = $(`.hzh-d[data-hzd="${ds}"]`, pg); if (!b) return;
-  b.classList.add("sel"); hzWeek(b);
+  // computador: a semana acende (como ao passar o mouse); celular: só o dia em destaque, o mês inteiro abre tocando no nome
+  b.classList.add("sel"); if (isMobile()) b.classList.add("hov"); else hzWeek(b);
   const val = calc().saldo[ds] ?? 0, d = parse(ds);
   $("small", tip).textContent = `${WDL[d.getDay()]}, ${d.getDate()} de ${MONTHS[d.getMonth()]}`;
   const bb = $("b", tip); bb.classList.toggle("neg", val < -0.004); odoPut(bb, brl(val));
