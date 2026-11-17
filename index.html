@@ -1305,31 +1305,6 @@ body.stk-open .bottom-nav{z-index:76!important}
   .crow,.pv-row{padding-top:21px;padding-bottom:21px}
 }
 
-
-/* ===== captura do apple pay ===== */
-.rev-dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--nav-ic);box-shadow:0 0 0 4px var(--accent-soft);margin-right:10px;vertical-align:2px}
-.cap{flex:1;display:flex;flex-direction:column;padding:8px 22px calc(env(safe-area-inset-bottom,0px) + 26px)}
-.cap-pg{display:flex;gap:6px;justify-content:center;margin-top:6px}.cap-pg i{width:22px;height:4px;border-radius:4px;background:var(--surface3)}.cap-pg i.on{background:var(--nav-ic)}
-.cap-art{margin:48px auto 0;width:120px;height:120px;border-radius:36px;background:var(--surface2);display:grid;place-items:center;transition:background-color .4s ease}
-.cap-art.ok{background:var(--nav-pill)}
-.cap-ic{color:var(--nav-ic);display:grid;place-items:center}.cap-ic .duo{width:56px;height:56px}
-.cap-h{font-size:22px;font-weight:700;text-align:center;margin:30px 0 0;letter-spacing:-.01em}
-.cap-sub{text-align:center;color:var(--muted);font-size:15px;margin:8px 0 0;line-height:1.45}
-.cap-sp{flex:1;min-height:24px}
-.cap-sec{height:46px;width:100%;color:var(--muted);font-weight:600;font-size:15px;margin-top:6px}
-.cap-spin{width:46px;height:46px;border-radius:50%;border:4px solid var(--nav-ic);border-top-color:transparent;animation:capSpin 1s linear infinite}
-@keyframes capSpin{to{transform:rotate(360deg)}}
-.cap-ok{width:56px;height:56px;border-radius:50%;background:var(--accent);display:grid;place-items:center;color:#fff;animation:qkPop .35s var(--spring)}.cap-ok svg{width:28px;height:28px}
-.cap-st .slist2+.slist2{margin-top:16px}
-.qk-rev .qk-mid{flex:none;padding:22px 0 18px;gap:8px}
-.qk-rev .qk-mid .qk-tabs{order:3;margin:14px 0 0}
-.qk-rev .qk-d{text-align:center;opacity:.7}.qk-rev .qk-d span{white-space:nowrap}
-.qk-card{display:flex;align-items:center;gap:10px;height:48px;padding:0 14px;margin-top:4px;border-radius:16px;background:color-mix(in srgb,currentColor 9%,transparent);font-weight:600;font-size:15px;text-align:left}
-.qk-card[hidden]{display:none}.qk-card b{flex:1;min-width:0;font-weight:600}.qk-card-ic .duo{width:20px;height:20px}.qk-card svg.chev{width:18px;height:18px;opacity:.6}
-.qk-no{height:44px;margin-top:4px;font-size:15px;font-weight:600;opacity:.7;color:inherit}
-@keyframes rvNx{from{opacity:.3;transform:translateX(18px)}}
-.qk-rev .qk-box.rv-nx .qk-mid{animation:rvNx .35s var(--ease-out)}
-@media (min-width:701px){.qk-rev .qk-box{height:auto}}
 </style>
 <script>try{var t=JSON.parse(localStorage.getItem("ae.theme")||"null")||"dark";if(t==="system")t=matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light";if(t==="light")document.documentElement.classList.add("light")}catch(e){}</script>
 <style>
@@ -1953,40 +1928,124 @@ window.addEventListener("offline", () => { clearTimeout(OFF_T); OFF_T = setTimeo
 window.addEventListener("online", () => { clearTimeout(OFF_T); setNet({ offline: false }); });
 renderNet();
 
+/* ===== banco: cada lançamento, cartão, previsão e check é uma linha própria (tabelas flux_*) =====
+   antes tudo ficava num bloco só (previsao_state), regravado inteiro a cada mudança; agora só o que mudou sobe */
+const T_TX = "flux_lancamentos", T_CARD = "flux_cartoes", T_PREV = "flux_previsoes", T_PERF = "flux_perfil", T_CHK = "flux_checkins";
+const OPS_KEY = "flux.ops"; // o que mudou no aparelho e ainda não subiu: { "tx:id": n, "profile": n, ... }
+const toIso = v => new Date(v || Date.now()).toISOString();
+const toMs = s => (s ? Date.parse(s) : Date.now());
+const TX_CORE = ["id", "type", "desc", "value", "date", "cardId", "rep", "createdAt"];
+const txRow = (u, t) => {
+  const regras = {}; for (const k in t) if (!TX_CORE.includes(k)) regras[k] = t[k];
+  return { user_id: u, id: t.id, tipo: t.type, descricao: t.desc || "", valor: r2(+t.value || 0), data: t.date, cartao_id: t.cardId || null, repeticao: t.rep || "none", regras, criado_em: toIso(t.createdAt) };
+};
+const txDoc = r => ({ ...(r.regras || {}), id: r.id, type: r.tipo, desc: r.descricao, value: +r.valor, date: r.data, cardId: r.cartao_id || "", rep: r.repeticao, createdAt: toMs(r.criado_em) });
+const cardRow = (u, c) => ({ user_id: u, id: c.id, nome: c.name || "", cor: c.color || null, criado_em: toIso(c.createdAt) });
+const cardDoc = r => ({ id: r.id, name: r.nome, color: r.cor || "", createdAt: toMs(r.criado_em) });
+const prevRow = (u, p) => { const { id, desc, value, createdAt, ...dados } = p; return { user_id: u, id, descricao: desc || "", valor: r2(+value || 0), dados, criado_em: toIso(createdAt) }; };
+const prevDoc = r => ({ ...(r.dados || {}), id: r.id, desc: r.descricao, value: +r.valor, createdAt: toMs(r.criado_em) });
+const perfRow = (u, p) => { const { nome, sobrenome, photo, defCard, email, ...preferencias } = p || {}; return { user_id: u, nome: nome || "", sobrenome: sobrenome || "", foto: photo || null, cartao_padrao: defCard || null, preferencias }; };
+const perfDoc = r => ({ ...DEFAULT_PROFILE, ...(r.preferencias || {}), nome: r.nome, sobrenome: r.sobrenome, photo: r.foto || "", defCard: r.cartao_padrao || "" });
+// lê a tabela inteira em páginas de 1000 (limite padrão do Supabase por pedido)
+async function selectAll(table, u, key = "id") {
+  const out = [];
+  for (let from = 0; ; from += 1000) {
+    const { data, error } = await SB.from(table).select("*").eq("user_id", u).order(key).range(from, from + 999);
+    if (error) throw error;
+    out.push(...data);
+    if (data.length < 1000) return out;
+  }
+}
+async function fetchAll(u) {
+  const [tx, cards, prev, chk, perf] = await Promise.all([selectAll(T_TX, u), selectAll(T_CARD, u), selectAll(T_PREV, u), selectAll(T_CHK, u, "dia"),
+    SB.from(T_PERF).select("*").eq("user_id", u).maybeSingle().then(r => { if (r.error) throw r.error; return r.data; })]);
+  return { tx, cards, prev, chk, perf };
+}
+
 async function initSupabase() {
   S.mode = "supabase";
   try { navigator.storage && navigator.storage.persist && navigator.storage.persist(); } catch { }
   let cache = lsGet(CACHE_KEY, null);
   if (cache && !cache.uid) cache = null;
-  let saveT = null, saving = false, lastSaved = cache ? cache.updated_at || null : null;
-  const writeCache = dirty => {
-    if (!SB_USER) return;
-    cache = { uid: SB_USER.id, email: SB_USER.email, data: snapshotData(), updated_at: lastSaved, dirty: !!dirty };
-    lsSet(CACHE_KEY, cache);
-    setNet({ dirty: !!dirty });
+  let saveT = null, saving = false, SEQ = 0;
+  const OPS = lsGet(OPS_KEY, {}) || {};
+  const pendingN = () => Object.keys(OPS).length;
+  const saveOps = () => lsSet(OPS_KEY, OPS);
+  const mark = key => { OPS[key] = ++SEQ + Date.now(); saveOps(); };
+  const markAll = () => {
+    S.txs.forEach(x => mark("tx:" + x.id)); S.cards.forEach(x => mark("cards:" + x.id)); S.prev.forEach(x => mark("prev:" + x.id));
+    mark("profile"); mark("checkins");
   };
+  const writeCache = () => {
+    if (!SB_USER) return;
+    const dirty = pendingN() > 0;
+    cache = { uid: SB_USER.id, email: SB_USER.email, data: snapshotData(), dirty, v: 2 };
+    lsSet(CACHE_KEY, cache);
+    setNet({ dirty });
+  };
+  // envia só o que mudou; se a internet cair no meio, o que faltou continua marcado e sobe depois
   const push = async () => {
     if (!SB_USER || !SB || !isOnline() || NET.relogin) return false;
+    if (!pendingN()) { writeCache(); return true; }
+    if (saving) { schedulePush(); return false; }
     saving = true;
-    const row = { user_id: SB_USER.id, data: snapshotData(), updated_at: new Date().toISOString() };
-    let error = null;
-    try { ({ error } = await SB.from(SB_TABLE).upsert(row)); } catch (e) { error = e; }
+    const u = SB_USER.id, sent = { ...OPS };
+    const K = { tx: "txs", cards: "cards", prev: "prev" }, T = { tx: T_TX, cards: T_CARD, prev: T_PREV }, ROW = { tx: txRow, cards: cardRow, prev: prevRow };
+    const ups = { tx: [], cards: [], prev: [] }, dels = { tx: [], cards: [], prev: [] };
+    for (const key of Object.keys(sent)) {
+      if (key === "profile" || key === "checkins") continue;
+      const i = key.indexOf(":"), c = key.slice(0, i), id = key.slice(i + 1);
+      if (!K[c]) continue;
+      const doc = S[K[c]].find(x => x.id === id);
+      if (doc) ups[c].push(ROW[c](u, doc)); else dels[c].push(id);
+    }
+    let ok = true;
+    const run = async q => { try { const { error } = await q; if (error) throw error; } catch (e) { console.warn(e); ok = false; } };
+    for (const c of ["cards", "tx", "prev"]) {
+      for (let j = 0; j < ups[c].length; j += 500) await run(SB.from(T[c]).upsert(ups[c].slice(j, j + 500), { onConflict: "user_id,id" }));
+      if (dels[c].length) await run(SB.from(T[c]).delete().eq("user_id", u).in("id", dels[c]));
+    }
+    if (sent.profile && S.profile) await run(SB.from(T_PERF).upsert(perfRow(u, S.profile), { onConflict: "user_id" }));
+    if (sent.checkins) {
+      const days = Object.keys(S.checkins || {}).filter(d => S.checkins[d]);
+      await run(days.length ? SB.from(T_CHK).delete().eq("user_id", u).not("dia", "in", `(${days.join(",")})`) : SB.from(T_CHK).delete().eq("user_id", u));
+      if (days.length) await run(SB.from(T_CHK).upsert(days.map(d => ({ user_id: u, dia: d })), { onConflict: "user_id,dia", ignoreDuplicates: true }));
+    }
     saving = false;
-    if (error) { console.warn(error); if (isOnline()) toast("não deu para salvar agora. tente de novo em instantes", true); return false; }
-    lastSaved = row.updated_at; writeCache(false); return true;
+    if (!ok) { if (isOnline()) toast("não deu para salvar agora. tente de novo em instantes", true); writeCache(); return false; }
+    // só sai da fila o que não mudou de novo enquanto enviava
+    for (const k of Object.keys(sent)) if (OPS[k] === sent[k]) delete OPS[k];
+    saveOps(); writeCache();
+    if (pendingN()) schedulePush();
+    return !pendingN();
   };
   const schedulePush = () => { clearTimeout(saveT); saveT = setTimeout(push, 600); };
-  backend = memBackend(() => { writeCache(true); schedulePush(); });
+  const changed = key => { if (key) mark(key); writeCache(); schedulePush(); dataChanged(); };
+  const KC = { tx: "txs", cards: "cards", prev: "prev", tags: "tags" };
+  backend = {
+    put: async (c, id, data) => { const arr = S[KC[c]]; const i = arr.findIndex(x => x.id === id); const doc = { id, ...data }; if (i >= 0) arr[i] = doc; else arr.push(doc); changed(c === "tags" ? null : c + ":" + id); },
+    del: async (c, id) => { S[KC[c]] = S[KC[c]].filter(x => x.id !== id); changed(c === "tags" ? null : c + ":" + id); },
+    putProfile: async data => { S.profile = data; changed("profile"); },
+    putCheckins: async dates => { S.checkins = dates; changed("checkins"); },
+  };
   backend.setPassword = async pw => {
     if (!SB || !isOnline()) throw new Error("sem internet. conecte-se para trocar a senha");
     const { error } = await SB.auth.updateUser({ password: pw }); if (error) throw error;
   };
   backend.signOut = async () => {
     clearTimeout(saveT);
-    if (cache && cache.dirty && !(await push())) { toast(NET.relogin ? "entre de novo para sincronizar antes de sair" : "sem internet. conecte-se para sair sem perder o que você adicionou", true); return; }
-    lsSet(CACHE_KEY, null); cache = null;
+    if (pendingN() && !(await push())) { toast(NET.relogin ? "entre de novo para sincronizar antes de sair" : "sem internet. conecte-se para sair sem perder o que você adicionou", true); return; }
+    lsSet(CACHE_KEY, null); cache = null; for (const k of Object.keys(OPS)) delete OPS[k]; saveOps();
     if (SB) await SB.auth.signOut({ scope: "local" });
     else { SB_USER = null; S.loaded = false; applyData(null); showAuth("login"); }
+  };
+  // apagar a conta: tira as linhas de todas as tabelas do FLUX (e o bloco antigo, se ainda existir)
+  backend.wipeAccount = async () => {
+    const u = SB_USER.id;
+    for (const t of [T_TX, T_PREV, T_CARD, T_CHK, T_PERF]) { const { error } = await SB.from(t).delete().eq("user_id", u); if (error) { console.warn(error); return false; } }
+    try { await SB.from(SB_TABLE).delete().eq("user_id", u); } catch { }
+    for (const k of Object.keys(OPS)) delete OPS[k]; saveOps();
+    return true;
   };
 
   // abre na hora com a última cópia salva no aparelho (funciona sem internet)
@@ -1995,7 +2054,7 @@ async function initSupabase() {
     applyData(cache.data);
     if (S.profile) S.profile.email = cache.email;
     UI.autoToday = true; UI.tab = "saldos"; UI.tMonth = CUR;
-    hideAuth(); S.loaded = true; setNet({ dirty: !!cache.dirty }); dataChanged();
+    hideAuth(); S.loaded = true; setNet({ dirty: pendingN() > 0 }); dataChanged();
   };
   if (cache) openFromCache();
 
@@ -2006,31 +2065,45 @@ async function initSupabase() {
   }
   SB = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, { auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true, storageKey: "flux-auth" } });
 
+  const applyServer = d => {
+    applyData({ txs: d.tx.map(txDoc), cards: d.cards.map(cardDoc), prev: d.prev.map(prevDoc), profile: d.perf ? perfDoc(d.perf) : null, checkins: Object.fromEntries(d.chk.map(r => [r.dia, true])) });
+  };
   const load = async () => {
-    // tem coisa lançada offline ainda não enviada: vale a cópia do aparelho
-    if (cache && cache.uid === SB_USER.id && cache.dirty) {
+    // tem coisa lançada sem internet ainda não enviada: vale a cópia do aparelho, sobe e depois busca
+    if (pendingN() && cache && cache.uid === SB_USER.id) {
       applyData(cache.data); S.profile && (S.profile.email = SB_USER.email);
-      S.loaded = true; dataChanged(); if (await push()) { CAP_READY = true; capImport(); } return;
+      S.loaded = true; dataChanged();
+      if (!(await push())) return;
     }
     if (!isOnline() || NET.relogin) { if (!S.loaded && cache && cache.uid === SB_USER.id) openFromCache(); return; }
-    let data = null, error = null;
-    try { ({ data, error } = await SB.from(SB_TABLE).select("data,updated_at").eq("user_id", SB_USER.id).maybeSingle()); } catch (e) { error = e; }
-    if (error) { console.warn(error); if (!S.loaded) toast("não deu para carregar seus dados. tente de novo", true); return; }
-    let imported = false;
-    if (data) { applyData(data.data); lastSaved = data.updated_at; }
-    else { const loc = lsGet("ae.data", null); applyData(loc); imported = !!(loc && ((loc.txs || []).length || (loc.prev || []).length)); }
-    if (!S.profile) S.profile = { ...DEFAULT_PROFILE, nome: SB_USER.user_metadata?.nome || "", sobrenome: "", email: SB_USER.email };
+    const u = SB_USER.id;
+    let d;
+    try { d = await fetchAll(u); } catch (e) { console.warn(e); if (!S.loaded) toast("não deu para carregar seus dados. tente de novo", true); return; }
+    if (!d.perf && !d.tx.length && !d.cards.length && !d.prev.length && !d.chk.length) {
+      // primeira vez na estrutura nova: traz tudo do bloco antigo (previsao_state), da cópia do aparelho ou do modo sem conta
+      let old = null;
+      if (cache && cache.uid === u && cache.dirty && !cache.v) old = cache.data; // mudanças feitas sem internet na versão antiga
+      if (!old) { try { const r = await SB.from(SB_TABLE).select("data").eq("user_id", u).maybeSingle(); old = r.data && r.data.data; } catch { } }
+      if (!old) old = lsGet("ae.data", null);
+      applyData(old);
+      if (!S.profile) S.profile = { ...DEFAULT_PROFILE, nome: SB_USER.user_metadata?.nome || "", sobrenome: "", email: SB_USER.email };
+      S.profile.email = SB_USER.email;
+      markAll(); S.loaded = true; writeCache(); dataChanged();
+      await push();
+      return;
+    }
+    applyServer(d);
+    if (!S.profile) { S.profile = { ...DEFAULT_PROFILE, nome: SB_USER.user_metadata?.nome || "", sobrenome: "", email: SB_USER.email }; mark("profile"); }
     S.profile.email = SB_USER.email;
-    S.loaded = true; writeCache(false); dataChanged();
-    if (imported) await push();
-    CAP_READY = true; capImport();
+    S.loaded = true; writeCache(); dataChanged();
+    if (pendingN()) schedulePush();
   };
   let synced = false;
   const onSession = async session => {
     if (session && session.user) {
       const same = SB_USER && SB_USER.id === session.user.id;
       if (same && synced) return;
-      if (!same && cache && cache.uid !== session.user.id) { lsSet(CACHE_KEY, null); cache = null; }
+      if (!same && cache && cache.uid !== session.user.id) { lsSet(CACHE_KEY, null); cache = null; for (const k of Object.keys(OPS)) delete OPS[k]; saveOps(); }
       SB_USER = session.user; synced = true; setNet({ relogin: false });
       if (!same) { UI.autoToday = true; UI.tab = "saldos"; UI.tMonth = CUR; }
       hideAuth(); await load();
@@ -2073,15 +2146,19 @@ async function initSupabase() {
     if (!SB_USER) return;
     if (NET.relogin || !synced) { await tryRecover(); return; }
     try { await SB.auth.getSession(); } catch { }
-    if (cache && cache.dirty) await push(); else await load();
+    if (pendingN()) await push(); else await load();
   });
+  // voltou para o app: busca o que mudou em outro aparelho
   document.addEventListener("visibilitychange", async () => {
     if (document.visibilityState !== "visible" || !SB_USER || saving || !isOnline()) return;
     if (NET.relogin || !synced) { await tryRecover(); return; }
-    if (cache && cache.dirty) { await push(); return; }
-    let data = null;
-    try { ({ data } = await SB.from(SB_TABLE).select("data,updated_at").eq("user_id", SB_USER.id).maybeSingle()); } catch { return; }
-    if (data && data.updated_at !== lastSaved && !saving && !(cache && cache.dirty)) { applyData(data.data); lastSaved = data.updated_at; S.profile && (S.profile.email = SB_USER.email); writeCache(false); dataChanged(); }
+    if (pendingN()) { await push(); return; }
+    let d;
+    try { d = await fetchAll(SB_USER.id); } catch { return; }
+    if (saving || pendingN() || (!d.perf && !d.tx.length)) return;
+    const before = JSON.stringify(snapshotData());
+    applyServer(d); S.profile && (S.profile.email = SB_USER.email);
+    if (JSON.stringify(snapshotData()) !== before) { writeCache(); dataChanged(); }
   });
 }
 
@@ -3541,12 +3618,11 @@ function repText(x) {
 const ddmm = s => s.slice(8, 10) + "/" + s.slice(5, 7);
 // gasto no cartão: nome do cartão na linha de baixo, ao lado da data
 const pendIco = tx => isPending(tx.id) ? `<span class="pend" aria-label="salvo no aparelho">${CLOUD_OFF}</span>` : "";
-const revDot = tx => tx.rev ? `<span class="rev-dot" aria-label="para conferir"></span>` : "";
 function txCard(tx) { return tx.type === "cartao" && cardName(tx.cardId) ? esc(cardName(tx.cardId)) : ""; }
 function itemHTML(x) {
   const r = repShort(x);
   return `<button class="lrow" data-item="${x.tx.id}" data-date="${x.date}" aria-label="${esc(TYPES[x.tx.type].label)}: ${esc(x.tx.desc)}, ${brl(x.value)}, ${dBR(x.date)}. editar">
-    <span class="lrow-top">${ti(x.tx.type, true)}<b class="ellip">${esc(x.tx.desc)}</b><span class="lrow-val num">${revDot(x.tx)}${brl(x.value)}</span></span>
+    <span class="lrow-top">${ti(x.tx.type, true)}<b class="ellip">${esc(x.tx.desc)}</b><span class="lrow-val num">${brl(x.value)}</span></span>
     <span class="lrow-sub"><span class="num">${[txCard(x.tx), ddmm(x.date)].filter(Boolean).join(" · ")}${pendIco(x.tx)}</span>${r ? `<span class="lrow-rep num">${r}</span>` : ""}</span></button>`;
 }
 function filterLabel() { const f = PANEL.filter; return f ? `${ti(f)}<span>${TYPES[f].col}</span>` : `${ti("all")}<span>todas</span>`; }
@@ -3636,7 +3712,7 @@ $("#drawer-root").addEventListener("click", e => {
   }
   // tocar no lançamento abre direto o formulário (sem tela de detalhes)
   const it = t.closest("[data-item]");
-  if (it) { const tx = S.txs.find(x => x.id === it.dataset.item); if (tx) tx.rev ? openReview([tx]) : openForm({ tx, occ: it.dataset.date }); }
+  if (it) { const tx = S.txs.find(x => x.id === it.dataset.item); if (tx) openForm({ tx, occ: it.dataset.date }); }
 });
 // iOS só aplica :active em toques quando existe um ouvinte de toque na página
 document.addEventListener("touchstart", () => { }, { passive: true });
@@ -3959,7 +4035,7 @@ function bsItem(x) {
   const r = repShort(x), yr = x.date.slice(0, 4) !== String(NOW.getFullYear());
   const sub = [txCard(x.tx), yr ? dYY(x.date) : ddmm(x.date)].filter(Boolean).join(" · ") + pendIco(x.tx);
   return `<button class="lrow" data-item="${x.tx.id}" data-date="${x.date}" aria-label="${esc(TYPES[x.tx.type].label)}: ${esc(x.tx.desc)}, ${brl(x.value)}, ${dBR(x.date)}. ver o dia">
-    <span class="lrow-top">${ti(x.tx.type, true)}<b class="ellip">${esc(x.tx.desc)}</b><span class="lrow-val num">${revDot(x.tx)}${brl(x.value)}</span></span>
+    <span class="lrow-top">${ti(x.tx.type, true)}<b class="ellip">${esc(x.tx.desc)}</b><span class="lrow-val num">${brl(x.value)}</span></span>
     <span class="lrow-sub"><span class="num">${sub}</span>${r ? `<span class="lrow-rep num">${r}</span>` : ""}</span></button>`;
 }
 function bsResultsHTML(list) {
@@ -4231,14 +4307,14 @@ function menuHTML() {
     <div class="mp-head">${avatarHTML()}<div class="mp-who"><div class="mp-name ellip">${esc(p.nome) || "você"}</div><div class="mp-mail ellip">${esc(p.email)}</div></div></div>`;
   if (NET.relogin && !NET.offline) h += `<div class="slist2">${srow({ attr: 'data-menu="relogin"', ico: SIGN_IN, main: "entrar de novo", chev: false, cls: "is-acc" })}</div>`;
   const ic = (k, c) => `<span class="mi-ic" style="color:${c}">${DI[k]}</span>`;
-  h += `<h2 class="section-title">conta</h2><div class="slist2">${row("perfil", "editar perfil", ic("perfil", "#B98AF0"))}${row("cartoes", "cartões de crédito", ic("cartao", "var(--c-cartao)"))}${row("captura", "captura do apple pay", ic("captura", "var(--nav-ic)"), capOn() ? "ligada" : "")}</div>`;
+  h += `<h2 class="section-title">conta</h2><div class="slist2">${row("perfil", "editar perfil", ic("perfil", "#B98AF0"))}${row("cartoes", "cartões de crédito", ic("cartao", "var(--c-cartao)"))}</div>`;
   h += `<h2 class="section-title">app</h2><div class="slist2">${row("prev", "previsão de diário", ic("diario", "var(--c-diario)"))}${row("aparencia", "aparência", ic("aparencia", "var(--muted)"), themeLabel())}${row("ajuda", "como funciona", ic("ajuda", "var(--c-economia)"))}</div>`;
   h += `<div class="slist2 mp-out">${row("sair", "sair", ic("sair", "var(--c-saida)"))}</div>`;
   return h + `</div></div>`;
 }
 $("#view").addEventListener("click", e => {
   const b = e.target.closest("[data-menu]"); if (!b) return;
-  ({ relogin: () => window.fluxRelogin && window.fluxRelogin(), perfil: openProfile, prev: openPrevScreen, cartoes: openCards, captura: openCaptura, aparencia: openAppearance, ajuda: () => openTutorial(false), sair: signOut })[b.dataset.menu]();
+  ({ relogin: () => window.fluxRelogin && window.fluxRelogin(), perfil: openProfile, prev: openPrevScreen, cartoes: openCards, aparencia: openAppearance, ajuda: () => openTutorial(false), sair: signOut })[b.dataset.menu]();
 });
 
 /* ===== editar perfil: toque no nome para escrever, toque na foto para trocar ===== */
@@ -4652,8 +4728,7 @@ async function accountAction(kind) {
         if (S.mode === "supabase" && (!SB || !isOnline())) { toast("sem internet. conecte-se para apagar a conta", true); return; }
         while (SCREENS.length) SCREENS[SCREENS.length - 1].close();
         if (S.mode === "supabase") {
-          const { error } = await SB.from(SB_TABLE).delete().eq("user_id", SB_USER.id);
-          if (error) { console.warn(error); return; }
+          if (!(await backend.wipeAccount())) { toast("não deu para apagar a conta agora. tente de novo", true); return; }
           applyData(null); lsSet(CACHE_KEY, null); await SB.auth.signOut({ scope: "local" }); return;
         }
         await wipe(["tx", "cards", "prev"]); backend.putCheckins({}); await backend.putProfile({ ...DEFAULT_PROFILE, deleted: true });
@@ -5141,236 +5216,6 @@ ti=function(type,lg){const c="ti ti-"+type+(lg?" lg":"");const lbl=type==="prev"
 Object.assign(I,{horizonte:DI.sobe,saldos:DI.saldos,buscar:DI.buscar,totais:DI.totais,menu:DI.menu,user:DI.perfil,card:DI.cartao,help:DI.ajuda,out:DI.sair,cal:DI.data});
 SI.moon=DI.aparencia;
 Object.assign(BI,{wallet:DI.saldo,warn:DI.aviso,up:DI.sobe,down:DI.desce,receipt:DI.recibo,guardar:DI.economia,inc:DI.entrada});
-
-/* ================= captura do apple pay =================
-   o atalho do iPhone manda a compra para a função flux-captura, que guarda na tabela flux_entrada;
-   o app busca dali depois de carregar a conta, cria o lançamento com a bolinha roxa e marca como importado */
-const CAP_FN = SUPABASE_URL + "/functions/v1/flux-captura";
-const CAP_ATALHO = ""; // link do iCloud do atalho "flux" (cole aqui depois de compartilhar o atalho); vazio abre o app atalhos
-const CAP_STEP = "flux.cap.step";
-let CAP_READY = false, CAP_BUSY = false;
-const REV_SEEN = new Set();
-DI.atalho = DU(Lf(RR(3,3,18,18,5.5)), Ss("M8.5 15.5l7-7M11 8.5h4.5V13", 2.6));
-DI.captura = DU(Lf(RR(2,6,13,12,3.2)), Ss("M18 9a4.5 4.5 0 0 1 0 6", 2.4), Ss("M20.8 6.6a8 8 0 0 1 0 10.8", 2.4));
-const capOn = () => !!(prof().captura && prof().captura.on);
-const capOk = () => S.mode === "supabase" && SB && SB_USER;
-
-async function capHash(s) {
-  const b = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(s));
-  return [...new Uint8Array(b)].map(x => x.toString(16).padStart(2, "0")).join("");
-}
-// gera a chave, guarda só a versão embaralhada (a anterior para de valer) e devolve a chave
-async function capNewKey() {
-  const r = crypto.getRandomValues(new Uint8Array(24));
-  const tok = "flx_" + btoa(String.fromCharCode(...r)).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
-  const { error } = await SB.from("flux_chaves").upsert({ user_id: SB_USER.id, hash: await capHash(tok), criada_em: new Date().toISOString(), usada_em: null });
-  if (error) throw error;
-  return tok;
-}
-// no iPhone o copiar precisa sair do toque: a chave entra na área de transferência como promessa
-async function capCopyKey() {
-  if (!isOnline()) { toast("sem internet. conecte-se para gerar o endereço", true); return false; }
-  const p = capNewKey();
-  try {
-    if (window.ClipboardItem && navigator.clipboard && navigator.clipboard.write) {
-      await navigator.clipboard.write([new ClipboardItem({ "text/plain": p.then(t => new Blob([CAP_FN + "?k=" + t], { type: "text/plain" })) })]);
-    } else await navigator.clipboard.writeText(CAP_FN + "?k=" + (await p));
-    toast("endereço copiado");
-    return true;
-  } catch (e) {
-    console.warn(e);
-    try { await p; } catch { toast("não deu para gerar o endereço agora. tente de novo", true); return false; }
-    toast("não deu para copiar. tente de novo", true);
-    return false;
-  }
-}
-
-/* ===== tela: um passo por tela; depois de ligada, mostra a situação ===== */
-function openCaptura() {
-  if (!capOk()) { toast("entre na sua conta para usar a captura", true); return; }
-  let step = capOn() ? 0 : Math.max(1, Math.min(3, lsGet(CAP_STEP, 1) || 1));
-  let poll = null, since = Date.now();
-  const stopPoll = () => { clearTimeout(poll); poll = null; };
-  const go = n => { step = n; if (n >= 1 && n <= 3) lsSet(CAP_STEP, n); else lsSet(CAP_STEP, null); draw(); };
-  const scr = openScreen({ title: "captura do apple pay", body: "" });
-  const close0 = scr.close; scr.close = () => { stopPoll(); close0(); };
-  const pg = n => `<div class="cap-pg" aria-hidden="true">${[1, 2, 3].map(k => `<i class="${k <= n ? "on" : ""}"></i>`).join("")}</div>`;
-  const page = (n, art, h, sub, btn, sec) => `<div class="cap">${pg(n)}<div class="cap-art">${art}</div><h3 class="cap-h">${h}</h3><p class="cap-sub">${sub}</p><div class="cap-sp"></div>${btn}${sec}</div>`;
-  const spin = `<span class="cap-spin" aria-label="esperando o teste"></span>`;
-  const okIc = `<span class="cap-ok">${SI.check}</span>`;
-  async function status() {
-    let sub = "nenhuma compra ainda";
-    try {
-      const { data } = await SB.from("flux_chaves").select("usada_em").eq("user_id", SB_USER.id).maybeSingle();
-      if (!data) sub = "sem endereço. gere um novo e cole no atalho";
-      else if (data.usada_em) { const d = new Date(data.usada_em); sub = "último envio " + (ymd(d) === TODAY ? "hoje" : ddmm(ymd(d))) + ", " + d.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" }); }
-    } catch { }
-    if (step === 0) { const s = $("[data-capst]", scr.el); if (s) s.textContent = sub; }
-  }
-  function draw() {
-    stopPoll();
-    let h = "";
-    if (step === 0) {
-      h = `<div class="page-inner cap-st"><div class="slist2">${srow({ ico: `<span class="mi-ic" style="color:var(--nav-ic)">${DI.captura}</span>`, main: "ligada", sub: `<span data-capst>…</span>`, chev: false })}</div>
-        <div class="slist2">${srow({ attr: 'data-cap="newkey"', ico: `<span class="mi-ic" style="color:var(--nav-ic)">${DI.captura}</span>`, main: "gerar endereço novo" })}${srow({ attr: 'data-cap="again"', ico: `<span class="mi-ic" style="color:var(--nav-ic)">${DI.repete}</span>`, main: "ligar de novo" })}</div>
-        <div class="slist2">${srow({ attr: 'data-cap="off"', ico: `<span class="mi-ic" style="color:var(--c-saida)">${DI.sair}</span>`, main: "desligar", chev: false, cls: "is-danger" })}</div></div>`;
-      scr.setBody(h); status(); return;
-    }
-    if (step === 1) h = page(1, `<span class="cap-ic">${DI.captura}</span>`, "copie seu endereço", "ele liga o atalho à sua conta.", `<button class="btn block primary" data-cap="copy">copiar endereço</button>`, `<button class="cap-sec" data-cap="close">agora não</button>`);
-    if (step === 2) h = page(2, `<span class="cap-ic">${DI.atalho}</span>`, "adicione o atalho", "cole o endereço no atalho<br>e volte para cá.", `<button class="btn block primary" data-cap="open">abrir no atalhos</button>`, `<button class="cap-sec" data-cap="back">voltar</button>`);
-    if (step === 3) h = page(3, spin, "faça o teste", "no app atalhos, toque no atalho \"flux\".", "", `<button class="cap-sec" data-cap="back">voltar</button>`);
-    if (step === 4) h = page(3, okIc, "captura ligada", "pagou com apple pay,<br>a compra aparece aqui.", `<button class="btn block primary" data-cap="done">concluir</button>`, "");
-    scr.setBody(h);
-    $(".cap-art", scr.el).classList.toggle("ok", step === 4);
-    if (step === 3) { since = Math.min(since, Date.now()); waitTest(); }
-  }
-  // espera o teste chegar na caixa de entrada (atalho rodado na mão, sem compra)
-  async function waitTest() {
-    if (step !== 3 || !document.body.contains(scr.el)) return;
-    if (isOnline()) {
-      try {
-        const { data } = await SB.from("flux_entrada").select("id").eq("user_id", SB_USER.id).eq("origem", "teste").gte("criada_em", new Date(since - 10 * 60000).toISOString()).limit(1);
-        if (data && data.length) {
-          await SB.from("flux_entrada").delete().eq("user_id", SB_USER.id).eq("origem", "teste");
-          saveProfile({ captura: { on: true, at: Date.now() } });
-          go(4); return;
-        }
-      } catch (e) { console.warn(e); }
-    }
-    if (step === 3) poll = setTimeout(waitTest, 2500);
-  }
-  scr.el.addEventListener("click", async e => {
-    const b = e.target.closest("[data-cap]"); if (!b) return;
-    const a = b.dataset.cap;
-    if (a === "copy") { if (await capCopyKey()) go(2); }
-    else if (a === "open") { since = Date.now(); go(3); location.href = CAP_ATALHO || "shortcuts://"; }
-    else if (a === "back") go(step - 1);
-    else if (a === "close" || a === "done") { if (a === "done") lsSet(CAP_STEP, null); scr.close(); }
-    else if (a === "newkey") { if (await capCopyKey()) status(); }
-    else if (a === "again") { since = Date.now(); go(1); }
-    else if (a === "off") {
-      try { await SB.from("flux_chaves").delete().eq("user_id", SB_USER.id); } catch { }
-      saveProfile({ captura: null }); lsSet(CAP_STEP, null); scr.close(); render();
-    }
-  });
-  draw();
-}
-
-/* ===== traz as compras da caixa de entrada para o app ===== */
-async function capImport() {
-  if (!CAP_READY || CAP_BUSY || !capOk() || !S.loaded || !isOnline() || NET.relogin) return;
-  CAP_BUSY = true;
-  try {
-    const { data, error } = await SB.from("flux_entrada").select("id,valor,estabelecimento,cartao,modalidade,quando")
-      .eq("user_id", SB_USER.id).is("importada_em", null).neq("origem", "teste").order("quando").limit(50);
-    if (error) throw error;
-    if (data && data.length) {
-      for (const r of data) {
-        const id = "ap" + r.id.replace(/-/g, "");
-        if (S.txs.some(x => x.id === id) || !(+r.valor > 0)) continue;
-        const card = r.modalidade === "credito" ? defCardId() : "";
-        const type = card ? "cartao" : "diario";
-        await saveTx(id, { type, resg: false, desc: TYPES[type].label, value: r2(+r.valor), date: ymd(new Date(r.quando)), rep: "none", until: "forever", count: 2, installments: 2, tags: [], cardId: card, skip: [], endBefore: null, mday: "same", nth: null, aday: null, createdAt: Date.now(), rev: true, ap: { est: r.estabelecimento || "", card: r.cartao || "", at: r.quando } });
-      }
-      await SB.from("flux_entrada").update({ importada_em: new Date().toISOString() }).in("id", data.map(r => r.id));
-      if (PANEL.open) renderPanel();
-    }
-    // o que já foi importado há mais de 30 dias sai da caixa de entrada
-    await SB.from("flux_entrada").delete().eq("user_id", SB_USER.id).lt("importada_em", new Date(Date.now() - 30 * 864e5).toISOString());
-  } catch (e) { console.warn(e); }
-  finally { CAP_BUSY = false; }
-  capAutoReview();
-}
-const revQueue = () => S.txs.filter(t => t.rev).sort((a, b) => (a.date + (a.ap && a.ap.at || "")).localeCompare(b.date + (b.ap && b.ap.at || "")));
-// ao abrir o app (ou voltar para ele), sobe o pop-up com o que ainda não foi mostrado
-function capAutoReview() {
-  const q = revQueue();
-  if (!q.length || !q.some(t => !REV_SEEN.has(t.id))) return;
-  const sp = document.getElementById("splash");
-  if (sp && !sp.classList.contains("hide")) { setTimeout(capAutoReview, 700); return; }
-  if (QK || STK || modals.length || $("#auth")) return;
-  q.forEach(t => REV_SEEN.add(t.id));
-  openReview(q);
-}
-document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible") setTimeout(capImport, 1200); });
-window.addEventListener("online", () => setTimeout(capImport, 2000));
-
-/* ===== conferir: o mesmo pop-up do +, com "detalhes" no canto de cima para abrir o formulário ===== */
-function openReview(list, i = 0) {
-  closeStack(); closePopover(); closeQuick();
-  list = list.filter(t => S.txs.some(x => x.id === t.id));
-  if (!list.length) return;
-  let tx, t, cardId;
-  const el = document.createElement("div");
-  el.className = "qk qk-rev";
-  el.innerHTML = `<div class="qk-scrim"></div>
-    <div class="qk-box" role="dialog" aria-modal="true" aria-label="conferir compra">
-      <div class="qk-head"><button class="qk-more" data-rmore>detalhes</button><button class="qk-x" data-rclose aria-label="fechar">${I.plus}</button></div>
-      <div class="qk-mid">
-        <div class="qk-tabs" role="tablist" aria-label="tipo">${TYPE_ORDER.map(k => `<button class="qk-t" data-rt="${k}" role="tab">${ti(k)}<span>${TYPES[k].label}</span></button>`).join("")}</div>
-        <div class="qk-v num"></div>
-        <div class="qk-d num"></div>
-      </div>
-      <button class="qk-card" data-rcard hidden><span class="qk-card-ic">${DI.cartao}</span><b class="ellip"></b>${I.chev}</button>
-      <button class="qk-go" data-rgo></button>
-      <button class="qk-no" data-rno>descartar</button>
-    </div>`;
-  document.body.appendChild(el);
-  const box = $(".qk-box", el);
-  const load = () => {
-    tx = S.txs.find(x => x.id === list[i].id) || list[i];
-    t = tx.type; cardId = tx.cardId || (t === "cartao" ? defCardId() : "");
-    const v = $(".qk-v", el); v.textContent = brl(tx.value); v.classList.toggle("qk-sm", brl(tx.value).length > 12);
-    const hr = tx.ap && tx.ap.at ? new Date(tx.ap.at).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" }) : "";
-    const when = tx.date === TODAY ? hr : bsDateTxt(tx.date) + (hr ? ", " + hr : "");
-    $(".qk-d", el).innerHTML = [tx.ap && tx.ap.est ? esc(tx.ap.est.toLowerCase()) : "", when, list.length > 1 ? `${i + 1} de ${list.length}` : ""].filter(Boolean).map(s => `<span>${s}</span>`).join(" · ");
-    paint();
-  };
-  const paint = () => {
-    box.style.setProperty("--c", `var(--c-${t})`);
-    $$("[data-rt]", el).forEach(b => { const on = b.dataset.rt === t; b.classList.toggle("on", on); b.setAttribute("aria-selected", on); });
-    const cb = $("[data-rcard]", el); cb.hidden = t !== "cartao";
-    $("b", cb).textContent = cardId && cardName(cardId) ? cardName(cardId) : "escolher cartão";
-    $("[data-rgo]", el).textContent = `lançar em ${TYPES[t].label}`;
-  };
-  const next = () => {
-    i++;
-    if (i >= list.length) { closeQuick(); return; }
-    box.classList.remove("rv-nx"); void box.offsetWidth; box.classList.add("rv-nx");
-    load();
-  };
-  const current = () => {
-    const { rev, ...rest } = stripId(tx);
-    return { ...rest, type: t, desc: tx.desc === TYPES[tx.type].label ? TYPES[t].label : tx.desc, cardId: t === "cartao" ? cardId : "" };
-  };
-  const pickCard = then => cardSheet(cardId, id => { cardId = id; paint(); then && then(); });
-  const launch = async () => {
-    if (t === "cartao" && !(cardId && cardName(cardId))) return pickCard(launch);
-    const id = tx.id, data = current();
-    pxTrail(data.date, t);
-    next();
-    await saveTx(id, data);
-    if (PANEL.open) renderPanel();
-  };
-  el.addEventListener("click", async e => {
-    const b = e.target;
-    const q = b.closest("[data-rt]"); if (q) { t = q.dataset.rt; if (t === "cartao" && !cardId) cardId = defCardId(); paint(); return; }
-    if (b.closest("[data-rcard]")) return pickCard();
-    if (b.closest("[data-rgo]")) return launch();
-    if (b.closest("[data-rno]")) { const id = tx.id; next(); await delTx(id); if (PANEL.open) renderPanel(); return; }
-    if (b.closest("[data-rclose]") || b.closest(".qk-scrim")) return closeQuick();
-    if (b.closest("[data-rmore]")) { const o = { id: tx.id, ...current() }; closeQuick(); openForm({ tx: o, occ: o.date }); }
-  });
-  const onKey = e => {
-    if (!QK || document.querySelector(".overlay")) return;
-    if (e.key === "Escape") { e.preventDefault(); closeQuick(); }
-    else if (e.key === "Enter") { e.preventDefault(); launch(); }
-  };
-  document.addEventListener("keydown", onKey, true);
-  QK = { el, onKey };
-  load();
-  requestAnimationFrame(() => requestAnimationFrame(() => el.classList.add("in")));
-}
 
 /* ================= início ================= */
 if ("serviceWorker" in navigator && /^https?:$/.test(location.protocol) && !(window.claude && window.claude.use)) {
