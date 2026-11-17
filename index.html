@@ -1967,6 +1967,8 @@ async function initSupabase() {
   try { navigator.storage && navigator.storage.persist && navigator.storage.persist(); } catch { }
   let cache = lsGet(CACHE_KEY, null);
   if (cache && !cache.uid) cache = null;
+  // cópia da versão antiga com mudanças feitas sem internet que ainda não subiram (guardada antes de qualquer gravação nova)
+  let oldDirty = cache && cache.dirty && !cache.v ? { uid: cache.uid, data: cache.data } : null;
   let saveT = null, saving = false, SEQ = 0;
   const OPS = lsGet(OPS_KEY, {}) || {};
   const pendingN = () => Object.keys(OPS).length;
@@ -2086,6 +2088,19 @@ async function initSupabase() {
       if (!old) { try { const r = await SB.from(SB_TABLE).select("data").eq("user_id", u).maybeSingle(); old = r.data && r.data.data; } catch { } }
       if (!old) old = lsGet("ae.data", null);
       applyData(old);
+      if (!S.profile) S.profile = { ...DEFAULT_PROFILE, nome: SB_USER.user_metadata?.nome || "", sobrenome: "", email: SB_USER.email };
+      S.profile.email = SB_USER.email;
+      markAll(); S.loaded = true; writeCache(); dataChanged();
+      await push();
+      return;
+    }
+    if (oldDirty && oldDirty.uid === u) {
+      // mudanças feitas sem internet na versão antiga que ainda não subiram: junta com o que já está no banco, sem apagar nada
+      const old = oldDirty.data || {}; oldDirty = null;
+      const junta = (srv, loc) => { const m = new Map(srv.map(x => [x.id, x])); (loc || []).forEach(x => x && x.id && m.set(x.id, x)); return [...m.values()]; };
+      const chkOld = Object.fromEntries(Object.entries(old.checkins || {}).filter(([, v]) => v));
+      applyData({ txs: junta(d.tx.map(txDoc), old.txs), cards: junta(d.cards.map(cardDoc), old.cards), prev: junta(d.prev.map(prevDoc), old.prev),
+        profile: old.profile || (d.perf ? perfDoc(d.perf) : null), checkins: { ...Object.fromEntries(d.chk.map(r => [r.dia, true])), ...chkOld } });
       if (!S.profile) S.profile = { ...DEFAULT_PROFILE, nome: SB_USER.user_metadata?.nome || "", sobrenome: "", email: SB_USER.email };
       S.profile.email = SB_USER.email;
       markAll(); S.loaded = true; writeCache(); dataChanged();
