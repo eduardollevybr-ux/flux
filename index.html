@@ -1696,6 +1696,22 @@ body.stk-open .bottom-nav{z-index:76!important}
 .st-ic svg{width:64%!important;height:64%!important}
 .tu-slide.on .st-plus{animation:stPop .7s var(--spring) both .1s,stPulse 2.4s ease-in-out infinite .9s}
 @keyframes stPulse{50%{box-shadow:0 0 0 22px color-mix(in srgb,var(--accent) 14%,transparent),0 0 0 44px color-mix(in srgb,var(--accent) 5%,transparent)}}
+/* conexões: chaves de integração (sistemas) e assistentes de IA */
+.kmono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+.kpick .srow .kchk{width:22px;height:22px;border-radius:99px;border:2px solid var(--line2);flex:none;display:grid;place-items:center;transition:background-color .2s,border-color .2s}
+.kpick .srow.on .kchk{background:var(--accent);border-color:var(--accent)}
+.kpick .kchk svg{width:13px;height:13px;color:#fff;opacity:0;transition:opacity .2s}
+.kpick .srow.on .kchk svg{opacity:1}
+.kreveal{margin:8px 20px 0;padding:22px 20px;border-radius:var(--r-lg);background:var(--surface2);font-size:17px;line-height:1.55;word-break:break-all;letter-spacing:.2px;user-select:all;-webkit-user-select:all}
+.kreveal .pre{color:var(--muted)}
+.kline{margin:16px 20px 0;color:var(--muted);font-size:15px}
+.kinfo .srow{cursor:default;pointer-events:none}
+.kconn .section-title{padding:22px 20px 10px;margin:0}
+.kconn .section-title+.slist2{margin-top:0}
+.kload{padding:40px 20px;text-align:center;color:var(--muted)}
+.kaddr{margin:8px 20px 0;padding:16px 16px 16px 18px;border-radius:var(--r-lg);background:var(--surface2);display:flex;align-items:center;gap:12px}
+.kaddr span{flex:1;min-width:0;font-size:15px;line-height:1.45;word-break:break-all}
+.kaddr button{height:36px;padding:0 16px;border-radius:99px;background:var(--text);color:var(--screen);font-weight:700;font-size:14px;flex:none}
 </style></head><body>
 <div id="splash" class="splash" role="img" aria-label="FLUX"><span class="sp-logo"><svg class="logo-svg" width="56" height="56" viewBox="-140 -114 2200 2200" aria-hidden="true"><g transform="translate(0,1980) scale(0.1,-0.1)"><path fill="var(--logo-b)" d="M15530 9714 c-68 -13 -138 -28 -155 -33 -16 -6 -52 -13 -80 -16 -27 -4 -111 -20 -185 -35 -74 -16 -169 -36 -210 -44 -210 -41 -276 -58 -293 -75 -17 -17 -18 -173 -20 -3688 -2 -3594 -2 -3671 -21 -3692 -30 -33 -2372 -33 -2402 0 -19 21 -19 92 -21 3361 -2 2270 -6 3345 -13 3358 -17 31 -56 35 -114 12 -28 -12 -64 -24 -81 -27 -16 -4 -55 -15 -85 -25 -30 -10 -131 -41 -225 -69 -234 -70 -330 -99 -400 -123 -33 -11 -89 -28 -125 -38 -36 -10 -146 -46 -245 -80 -99 -35 -227 -78 -285 -96 -58 -17 -170 -55 -250 -84 -80 -29 -179 -63 -220 -77 -41 -14 -109 -38 -150 -53 -41 -15 -127 -44 -190 -65 -63 -20 -128 -43 -145 -51 -16 -8 -55 -22 -85 -33 -71 -25 -256 -92 -345 -126 -38 -15 -92 -35 -120 -45 -27 -10 -111 -42 -185 -70 -74 -28 -153 -57 -175 -65 -76 -25 -154 -64 -165 -84 -7 -14 -10 -848 -10 -2768 0 -2579 -1 -2749 -17 -2760 -30 -23 -1394 -18 -1422 4 -22 18 -22 18 -22 2437 0 1718 -3 2424 -11 2433 -17 21 -76 15 -116 -12 -20 -14 -42 -25 -49 -25 -12 0 -230 -100 -273 -126 -14 -8 -45 -24 -70 -35 -83 -38 -375 -179 -400 -194 -14 -8 -106 -56 -205 -106 -99 -49 -238 -121 -310 -160 -71 -38 -157 -83 -190 -99 -33 -17 -105 -57 -160 -89 -55 -32 -145 -84 -199 -115 -54 -31 -111 -66 -126 -76 -16 -11 -31 -20 -35 -20 -19 0 -676 -410 -820 -511 -38 -27 -108 -75 -155 -107 -90 -61 -223 -156 -305 -220 -27 -22 -69 -51 -91 -65 -93 -58 -84 67 -84 -1173 0 -668 -4 -1102 -10 -1118 -17 -47 -37 -47 -140 -4 -52 22 -117 49 -145 60 -54 21 -86 40 -226 131 -154 102 -381 358 -440 499 -94 223 -119 308 -119 402 0 91 -62 118 -112 48 -14 -20 -55 -69 -90 -109 -124 -142 -147 -170 -211 -269 -36 -54 -80 -119 -98 -144 -38 -52 -120 -216 -139 -275 -7 -22 -23 -65 -35 -95 -74 -179 -94 -503 -41 -684 33 -113 96 -255 134 -303 162 -201 186 -226 327 -332 146 -109 154 -115 385 -236 195 -102 413 -192 575 -236 39 -10 95 -27 125 -38 30 -11 134 -38 230 -60 96 -23 211 -50 255 -61 44 -11 117 -24 162 -30 46 -5 109 -16 140 -24 32 -8 101 -19 153 -25 135 -16 247 -31 305 -41 28 -5 136 -16 240 -25 105 -9 251 -22 325 -30 74 -8 293 -21 485 -30 193 -8 456 -20 585 -26 166 -9 1611 -13 4919 -16 4398 -4 4685 -3 4702 13 19 17 19 125 19 4453 0 3999 -2 4439 -16 4459 -18 26 -24 26 -184 -4z"/><path fill="var(--logo-a)" d="M12063 19057 c-29 -18 -110 -71 -180 -119 -172 -116 -396 -266 -540 -361 -65 -43 -219 -147 -343 -232 -124 -85 -243 -165 -265 -176 -22 -12 -53 -33 -70 -46 -16 -14 -77 -56 -135 -94 -123 -82 -176 -118 -285 -194 -44 -30 -109 -74 -145 -98 -36 -23 -179 -118 -319 -212 -139 -93 -309 -207 -377 -251 -68 -45 -139 -96 -158 -112 -19 -17 -45 -33 -58 -37 -13 -4 -39 -19 -58 -34 -19 -14 -53 -37 -76 -51 -23 -14 -88 -56 -143 -95 -56 -38 -136 -93 -179 -122 -120 -80 -140 -96 -152 -122 -7 -16 -10 -510 -10 -1704 0 -1555 -1 -1682 -16 -1699 -27 -29 -76 -23 -123 15 -22 17 -62 47 -88 65 -27 18 -89 61 -140 97 -50 36 -95 65 -99 65 -4 0 -18 10 -31 22 -13 12 -43 34 -67 48 -24 14 -61 37 -82 51 -22 15 -118 79 -214 142 -96 64 -200 134 -230 156 -30 23 -71 49 -91 60 -19 11 -41 27 -49 36 -7 9 -27 23 -44 32 -17 9 -74 45 -128 80 -113 74 -112 74 -174 27 -27 -21 -67 -49 -91 -63 -23 -14 -59 -38 -80 -52 -21 -14 -104 -71 -186 -125 -81 -54 -225 -152 -320 -217 -94 -65 -191 -130 -215 -145 -24 -15 -82 -53 -130 -85 -48 -32 -121 -80 -162 -107 -41 -27 -85 -56 -96 -64 -66 -46 -339 -229 -539 -362 -126 -84 -246 -164 -265 -179 -34 -25 -105 -73 -215 -145 -29 -19 -127 -84 -217 -144 -90 -61 -242 -162 -338 -227 -96 -64 -217 -145 -267 -180 -51 -35 -117 -80 -146 -99 -119 -78 -194 -130 -210 -148 -16 -18 -17 -165 -17 -2201 -1 -2383 3 -2237 -57 -2263 -15 -7 -46 -24 -68 -39 -22 -14 -83 -53 -135 -85 -221 -136 -555 -365 -675 -463 -27 -23 -67 -53 -88 -68 -21 -16 -62 -48 -91 -73 -29 -25 -110 -94 -182 -155 -155 -131 -479 -454 -587 -585 -43 -52 -95 -115 -116 -140 -34 -41 -91 -119 -166 -225 -27 -38 -88 -131 -156 -235 -37 -57 -189 -360 -215 -430 -97 -252 -135 -379 -181 -600 -80 -387 -61 -864 47 -1205 16 -49 32 -108 36 -130 8 -47 51 -166 65 -180 17 -17 26 12 32 98 14 190 127 495 272 737 25 41 55 93 66 115 12 22 44 66 70 98 27 32 49 62 49 67 0 10 85 124 138 186 23 27 57 68 75 91 109 142 633 685 710 736 24 16 74 58 152 127 27 25 75 66 105 90 30 25 87 72 125 105 64 56 195 158 249 195 12 8 89 67 172 131 125 97 314 231 494 349 20 14 122 82 226 151 104 69 200 132 214 139 14 7 61 36 105 65 44 29 111 70 149 91 38 22 101 58 140 81 39 24 89 52 112 63 22 10 51 28 65 38 13 10 65 40 114 66 99 53 126 68 325 178 141 77 804 408 995 496 61 28 191 87 290 132 99 45 194 90 210 100 17 10 53 26 80 35 28 9 86 34 130 54 44 21 107 49 140 64 33 14 101 44 150 66 50 22 158 67 240 100 83 34 179 74 215 90 87 39 394 163 500 201 46 17 96 38 110 45 14 8 50 23 80 34 30 10 98 36 150 56 100 39 221 84 305 114 73 26 353 130 405 151 25 10 68 26 95 35 62 21 208 72 340 120 55 19 161 56 235 80 74 25 252 84 395 132 289 97 358 119 525 170 63 19 144 45 180 58 36 13 79 27 95 30 30 7 78 21 395 119 96 29 202 61 235 69 195 51 254 68 285 81 19 8 60 20 90 25 30 6 91 22 135 36 44 14 114 34 155 44 41 11 122 33 180 49 230 65 344 95 540 143 219 54 361 90 450 116 50 15 165 42 390 92 47 11 132 31 190 45 271 67 553 131 615 141 22 4 81 17 130 30 50 13 115 26 145 29 30 4 84 16 120 26 36 11 101 26 145 35 44 9 150 29 235 46 85 17 205 41 265 54 61 13 187 38 280 55 94 17 222 42 285 55 63 13 183 36 265 51 83 15 184 33 225 41 41 7 149 27 240 43 262 46 575 103 880 160 58 11 135 25 172 30 37 6 111 19 165 29 54 11 134 25 178 31 44 6 125 20 180 31 55 12 138 27 185 34 47 7 207 34 355 60 149 26 311 53 360 60 50 7 212 34 360 60 149 26 311 51 362 56 96 10 143 22 143 38 0 14 -122 39 -250 51 -63 6 -187 19 -275 30 -615 76 -1709 88 -2585 29 -80 -5 -212 -14 -295 -19 -82 -6 -157 -13 -165 -15 -8 -2 -113 -12 -233 -20 -120 -9 -242 -20 -270 -26 -66 -12 -367 -43 -429 -43 -35 -1 -53 5 -68 19 -20 21 -20 21 -20 2778 l0 2757 -37 40 c-20 23 -50 47 -67 54 -17 7 -88 53 -159 102 -70 49 -153 106 -185 126 -31 20 -102 69 -157 107 -55 39 -116 80 -135 91 -37 21 -128 81 -250 165 -77 52 -128 87 -176 119 -16 10 -53 35 -82 55 -29 20 -74 50 -101 66 -63 39 -404 268 -439 295 -15 11 -76 53 -136 93 -324 214 -387 257 -449 304 -23 18 -46 33 -52 33 -5 0 -29 15 -52 33 -39 30 -74 53 -133 87 -15 8 -53 34 -86 58 -32 23 -115 80 -184 126 -69 45 -174 116 -233 157 -60 41 -123 83 -141 94 -17 11 -47 32 -66 46 -19 14 -62 43 -95 63 -33 21 -75 48 -94 62 -43 31 -64 29 -128 -9z m148 -1747 c19 -5 53 -25 75 -43 21 -18 66 -50 99 -71 33 -20 79 -51 102 -69 52 -39 130 -93 292 -200 197 -130 204 -135 241 -157 19 -12 60 -39 90 -61 30 -22 93 -65 140 -96 47 -31 109 -73 138 -92 28 -20 70 -47 91 -61 21 -14 71 -47 110 -75 39 -27 109 -75 155 -105 142 -94 240 -159 265 -177 13 -10 52 -36 87 -58 54 -34 245 -161 339 -225 17 -11 59 -39 95 -63 60 -39 66 -46 77 -92 10 -39 12 -545 10 -2359 -2 -2309 -2 -2309 -28 -2328 -17 -13 -53 -23 -100 -28 -41 -5 -87 -13 -104 -19 -16 -5 -68 -15 -115 -21 -47 -6 -123 -19 -170 -30 -47 -10 -116 -23 -155 -29 -90 -14 -421 -76 -545 -101 -52 -11 -126 -24 -165 -30 -38 -7 -90 -18 -115 -25 -25 -8 -76 -19 -115 -25 -38 -7 -106 -20 -150 -30 -44 -11 -114 -26 -155 -34 -41 -9 -131 -29 -200 -44 -69 -16 -146 -32 -173 -35 -26 -4 -61 -13 -77 -22 -41 -21 -92 -19 -118 5 -22 21 -22 21 -23 3388 -1 1852 0 3374 1 3382 5 39 35 48 101 30z m-5057 -4869 c25 -22 82 -64 128 -95 46 -30 156 -104 244 -163 89 -59 180 -119 203 -133 23 -14 71 -46 106 -73 58 -43 101 -71 188 -125 16 -9 64 -42 107 -72 43 -30 91 -63 107 -72 86 -51 289 -198 307 -222 21 -27 21 -34 24 -984 1 -526 0 -967 -3 -978 -8 -33 -46 -53 -194 -100 -238 -76 -946 -319 -1048 -359 -34 -14 -70 -25 -81 -25 -11 0 -46 -13 -77 -30 -69 -36 -79 -37 -110 -5 -25 24 -25 24 -25 1723 0 1699 0 1699 21 1726 28 36 50 33 103 -13z"/></g></svg></span><span class="sp-t">FLUX</span></div>
 <div id="app" class="app">
@@ -1930,7 +1946,7 @@ renderNet();
 
 /* ===== banco: cada lançamento, cartão, previsão e check é uma linha própria (tabelas flux_*) =====
    antes tudo ficava num bloco só (previsao_state), regravado inteiro a cada mudança; agora só o que mudou sobe */
-const T_TX = "flux_lancamentos", T_CARD = "flux_cartoes", T_PREV = "flux_previsoes", T_PERF = "flux_perfil", T_CHK = "flux_checkins";
+const T_TX = "flux_lancamentos", T_CARD = "flux_cartoes", T_PREV = "flux_previsoes", T_PERF = "flux_perfil", T_CHK = "flux_checkins", T_KEY = "flux_chaves";
 const OPS_KEY = "flux.ops"; // o que mudou no aparelho e ainda não subiu: { "tx:id": n, "profile": n, ... }
 const toIso = v => new Date(v || Date.now()).toISOString();
 const toMs = s => (s ? Date.parse(s) : Date.now());
@@ -2044,7 +2060,7 @@ async function initSupabase() {
   // apagar a conta: tira as linhas de todas as tabelas do FLUX (e o bloco antigo, se ainda existir)
   backend.wipeAccount = async () => {
     const u = SB_USER.id;
-    for (const t of [T_TX, T_PREV, T_CARD, T_CHK, T_PERF]) { const { error } = await SB.from(t).delete().eq("user_id", u); if (error) { console.warn(error); return false; } }
+    for (const t of [T_TX, T_PREV, T_CARD, T_CHK, T_PERF, T_KEY]) { const { error } = await SB.from(t).delete().eq("user_id", u); if (error) { console.warn(error); return false; } }
     try { await SB.from(SB_TABLE).delete().eq("user_id", u); } catch { }
     for (const k of Object.keys(OPS)) delete OPS[k]; saveOps();
     return true;
@@ -4205,6 +4221,9 @@ const SI = {
   grid: '<svg viewBox="0 0 24 24" fill="currentColor">' + [3.5, 9.2, 14.8, 20.5].flatMap(x => [6, 12, 18].map(y => `<rect x="${x - 1.8}" y="${y - 1.8}" width="3.6" height="3.6" rx=".7"/>`)).join("") + '</svg>',
   reset: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 9.5A8 8 0 1 1 4 13"/><path d="M4 4.5v5h5"/></svg>',
   check: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>',
+  keyAdd: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="7.5" cy="16.5" r="4.5"/><path d="M10.7 13.3L17 7M14.5 9.5l2 2M18 2.5v6M15 5.5h6"/></svg>',
+  plus: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>',
+  docs: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M9 13h6M9 17h4"/></svg>',
 };
 const SCREENS = [];
 let scrOv = null;
@@ -4304,6 +4323,7 @@ const MENU = [
   ["perfil", "editar perfil", "user"],
   ["prev", "previsão de diário", null],
   ["cartoes", "cartões de crédito", "card"],
+  ["conexoes", "conexões", null],
   ["aparencia", "aparência", "moon"],
   ["ajuda", "como funciona", "help"],
   ["sair", "sair", "out"],
@@ -4323,14 +4343,164 @@ function menuHTML() {
   if (NET.relogin && !NET.offline) h += `<div class="slist2">${srow({ attr: 'data-menu="relogin"', ico: SIGN_IN, main: "entrar de novo", chev: false, cls: "is-acc" })}</div>`;
   const ic = (k, c) => `<span class="mi-ic" style="color:${c}">${DI[k]}</span>`;
   h += `<h2 class="section-title">conta</h2><div class="slist2">${row("perfil", "editar perfil", ic("perfil", "#B98AF0"))}${row("cartoes", "cartões de crédito", ic("cartao", "var(--c-cartao)"))}</div>`;
+  h += `<h2 class="section-title">integrações</h2><div class="slist2">${row("conexoes", "conexões", ic("sistema", "#B98AF0"))}</div>`;
   h += `<h2 class="section-title">app</h2><div class="slist2">${row("prev", "previsão de diário", ic("diario", "var(--c-diario)"))}${row("aparencia", "aparência", ic("aparencia", "var(--muted)"), themeLabel())}${row("ajuda", "como funciona", ic("ajuda", "var(--c-economia)"))}</div>`;
   h += `<div class="slist2 mp-out">${row("sair", "sair", ic("sair", "var(--c-saida)"))}</div>`;
   return h + `</div></div>`;
 }
 $("#view").addEventListener("click", e => {
   const b = e.target.closest("[data-menu]"); if (!b) return;
-  ({ relogin: () => window.fluxRelogin && window.fluxRelogin(), perfil: openProfile, prev: openPrevScreen, cartoes: openCards, aparencia: openAppearance, ajuda: () => openTutorial(false), sair: signOut })[b.dataset.menu]();
+  ({ relogin: () => window.fluxRelogin && window.fluxRelogin(), perfil: openProfile, prev: openPrevScreen, cartoes: openCards, conexoes: openConexoes, aparencia: openAppearance, ajuda: () => openTutorial(false), sair: signOut })[b.dataset.menu]();
 });
+
+/* ===== conexões: sistemas (chaves de integração) e assistentes de IA =====
+   a chave inteira só existe na hora de criar: o banco guarda o resumo dela (hash) e os 4 últimos caracteres */
+const MCP_ON = true; // porta dos assistentes de IA (servidor MCP do FLUX)
+const MCP_URL = SUPABASE_URL + "/functions/v1/mcp";
+/* assistentes conectados: autorizações de OAuth da conta (Supabase Auth) */
+async function iaFetch(method, query = "") {
+  const { data: { session } } = await SB.auth.getSession();
+  if (!session) throw new Error("sem sessão");
+  const r = await fetch(`${SUPABASE_URL}/auth/v1/user/oauth/grants${query}`, { method, headers: { apikey: SUPABASE_ANON_KEY, Authorization: "Bearer " + session.access_token } });
+  if (!r.ok) throw new Error("falha " + r.status);
+  return r.status === 204 ? null : r.json();
+}
+const KEY_PRE = "flux_live_";
+const keyPerm = k => k.pode_lancar ? "ver e lançar" : "só ver";
+function keyWhen(iso) {
+  if (!iso) return "";
+  const d = new Date(iso), hm = `${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`;
+  const dd = new Date(d.getFullYear(), d.getMonth(), d.getDate()), t = new Date(), td = new Date(t.getFullYear(), t.getMonth(), t.getDate());
+  const diff = Math.round((td - dd) / 864e5);
+  if (diff === 0) return `hoje, ${hm}`;
+  if (diff === 1) return `ontem, ${hm}`;
+  return `${String(d.getDate()).padStart(2, "0")}/${String(d.getMonth() + 1).padStart(2, "0")}/${d.getFullYear()}`;
+}
+const keyUse = k => k.ultimo_uso ? `usada ${keyWhen(k.ultimo_uso)}` : "nunca usada";
+const keyDay = iso => { const d = new Date(iso); return `${String(d.getDate()).padStart(2, "0")}/${String(d.getMonth() + 1).padStart(2, "0")}/${d.getFullYear()}`; };
+function keyRandom(n) {
+  const A = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789", b = new Uint8Array(n); crypto.getRandomValues(b);
+  return Array.from(b, x => A[x % A.length]).join("");
+}
+async function keyHash(txt) {
+  const h = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(txt));
+  return Array.from(new Uint8Array(h), x => x.toString(16).padStart(2, "0")).join("");
+}
+async function copyText(btn, txt) {
+  try { await navigator.clipboard.writeText(txt); } catch { toast("não deu para copiar. segure a chave para selecionar", true); return; }
+  const lbl = btn.textContent; btn.textContent = "copiado"; setTimeout(() => { btn.textContent = lbl; }, 1600);
+}
+function openConexoes() {
+  let keys = null, ias = null, err = false;
+  const body = () => {
+    if (err) return `<div class="kload">não deu para carregar agora. tente de novo em instantes</div>`;
+    if (!keys) return `<div class="kload"><i class="bspin"></i></div>`;
+    let h = `<div class="kconn">`;
+    if (MCP_ON) h += `<h2 class="section-title">assistentes de IA</h2><div class="slist2">${(ias || []).map(g => srow({ attr: `data-ia="${esc(g.client.id)}"`, ico: `<span class="mi-ic" style="color:#B98AF0">${DI.ia}</span>`, main: esc(g.client.name || "assistente"), sub: `conectado em ${keyDay(g.granted_at)}` })).join("")}${srow({ attr: "data-addia", ico: `<span class="mi-ic is-acc">${SI.plus}</span>`, main: "conectar uma IA", cls: "is-acc" })}</div>`;
+    h += `<h2 class="section-title">sistemas</h2><div class="slist2">${keys.map(k => srow({ attr: `data-key="${esc(k.id)}"`, ico: `<span class="mi-ic" style="color:#B98AF0">${DI.chave}</span>`, main: esc(k.nome), sub: `${keyPerm(k)} · ${keyUse(k)}` })).join("")}${srow({ attr: "data-addkey", ico: `<span class="mi-ic is-acc">${SI.keyAdd}</span>`, main: "criar chave", cls: "is-acc" })}${srow({ attr: "data-docs", ico: `<span class="mi-ic">${SI.docs}</span>`, main: "ver documentação" })}</div>`;
+    return h + `</div>`;
+  };
+  const load = async () => {
+    err = false;
+    if (!SB || !SB_USER || !isOnline()) { err = true; s.setBody(body()); return; }
+    const [{ data, error }, g] = await Promise.all([
+      SB.from(T_KEY).select("id,nome,final,pode_lancar,criada_em,ultimo_uso").eq("user_id", SB_USER.id).order("criada_em", { ascending: false }),
+      MCP_ON ? iaFetch("GET").catch(e => { console.warn(e); return []; }) : Promise.resolve([]),
+    ]);
+    if (error) { console.warn(error); err = true; } else { keys = data || []; ias = Array.isArray(g) ? g : []; }
+    s.setBody(body());
+  };
+  const s = openScreen({
+    title: "conexões", body: body(),
+    onMount: el => el.addEventListener("click", e => {
+      if (e.target.closest("[data-addkey]")) return openNewKey(k => { keys = [k, ...(keys || [])]; s.setBody(body()); });
+      if (e.target.closest("[data-addia]")) return openConnectIA();
+      if (e.target.closest("[data-docs]")) return window.open("docs.html", "_blank", "noopener");
+      const ia = e.target.closest("[data-ia]");
+      if (ia) { const g = (ias || []).find(x => x.client.id === ia.dataset.ia); if (g) openIADetail(g, () => { ias = ias.filter(x => x !== g); s.setBody(body()); }); return; }
+      const r = e.target.closest("[data-key]");
+      if (r) { const k = (keys || []).find(x => x.id === r.dataset.key); if (k) openKeyDetail(k, () => { keys = keys.filter(x => x !== k); s.setBody(body()); }); }
+    }),
+    refresh: () => s.setBody(body()),
+  });
+  load();
+}
+function openNewKey(onCreate) {
+  let lanca = true;
+  const opt = (v, lbl) => `<button class="srow ${lanca === v ? "on" : ""}" role="radio" aria-checked="${lanca === v}" data-perm="${v ? 1 : 0}"><span class="grow"><span class="srow-main">${lbl}</span></span><span class="kchk" aria-hidden="true">${SI.check}</span></button>`;
+  const pick = () => `<div class="slist2 kpick" role="radiogroup" aria-label="o que ela pode fazer">${opt(true, "ver e lançar")}${opt(false, "só ver")}</div>`;
+  openScreen({
+    title: "nova chave",
+    body: `${lfield("k-name", "nome da chave", "", 'maxlength="32" placeholder="exemplo: site da padaria"')}
+      <div class="cc-lbl"><span>o que ela pode fazer</span></div><div data-pick>${pick()}</div>
+      <div class="sbtns"><button class="sbtn solid" data-create>criar chave</button></div>`,
+    onMount: (el, s) => {
+      const create = async btn => {
+        const inp = $("#k-name", el), nome = inp.value.trim();
+        if (!nome) { inp.focus(); return fieldErr(inp, "informe um nome para a chave"); }
+        if (!SB || !SB_USER || !isOnline()) return toast("sem internet. conecte-se para criar a chave", true);
+        const full = KEY_PRE + keyRandom(32), row = { id: uid("k"), nome, final: full.slice(-4), hash: await keyHash(full), pode_lancar: lanca };
+        let saved = null;
+        const ok = await busyBtn(btn, async () => {
+          const { data, error } = await SB.from(T_KEY).insert(row).select("id,nome,final,pode_lancar,criada_em,ultimo_uso").single();
+          if (error) throw error; saved = data;
+        }, "criada");
+        if (!ok) return toast("não deu para criar a chave. tente de novo", true);
+        onCreate(saved);
+        s.setBody(`<div class="kreveal kmono" data-full><span class="pre">${KEY_PRE}</span>${esc(full.slice(KEY_PRE.length))}</div>
+          <p class="kline">copie agora. ela não aparece de novo.</p>
+          <div class="sbtns"><button class="sbtn solid" data-copy>copiar</button><button class="sbtn" data-done>pronto</button></div>`);
+        $(".scr-title", el).textContent = "sua chave";
+        el.addEventListener("click", ev => {
+          const c = ev.target.closest("[data-copy]"); if (c) copyText(c, full);
+          if (ev.target.closest("[data-done]")) s.close();
+        });
+      };
+      el.addEventListener("click", e => {
+        const p = e.target.closest("[data-perm]"); if (p) { lanca = p.dataset.perm === "1"; $("[data-pick]", el).innerHTML = pick(); return; }
+        const b = e.target.closest("[data-create]"); if (b) create(b);
+      });
+      el.addEventListener("keydown", e => { if (e.key === "Enter" && e.target.matches("#k-name")) { e.preventDefault(); const b = $("[data-create]", el); b && create(b); } });
+    },
+  });
+}
+function openConnectIA() {
+  openScreen({
+    title: "conectar uma IA",
+    body: `<div class="cc-lbl"><span>endereço do FLUX</span></div>
+      <div class="kaddr"><span class="kmono">${esc(MCP_URL)}</span><button data-copy>copiar</button></div>
+      <p class="kline">cole no assistente e autorize no FLUX.</p>`,
+    onMount: el => el.addEventListener("click", e => { const b = e.target.closest("[data-copy]"); if (b) copyText(b, MCP_URL); }),
+  });
+}
+function openIADetail(g, onDel) {
+  const line = (main, val) => srow({ attr: 'tabindex="-1"', main, val, chev: false });
+  openScreen({
+    title: g.client.name || "assistente",
+    body: `<div class="slist2 kinfo">${line("pode", "ver e lançar")}${line("conectado em", keyDay(g.granted_at))}</div>
+      <div class="sbtns"><button class="sbtn is-danger" data-desc><span class="hold-lbl">desconectar</span></button></div>`,
+    onMount: (el, s) => bindHold($("[data-desc]", el), async () => {
+      if (!SB || !SB_USER || !isOnline()) return toast("sem internet. conecte-se para desconectar", true);
+      try { await iaFetch("DELETE", "?client_id=" + encodeURIComponent(g.client.id)); }
+      catch (e) { console.warn(e); return toast("não deu para desconectar agora. tente de novo", true); }
+      onDel(); s.close();
+    }),
+  });
+}
+function openKeyDetail(k, onDel) {
+  const line = (main, val) => srow({ attr: 'tabindex="-1"', main, val, chev: false });
+  openScreen({
+    title: k.nome,
+    body: `<div class="slist2 kinfo">${line("pode", keyPerm(k))}${line("último uso", k.ultimo_uso ? keyWhen(k.ultimo_uso) : "nunca")}${line("criada em", keyDay(k.criada_em))}${line("chave", `<span class="kmono">${KEY_PRE}••••${esc(k.final)}</span>`)}</div>
+      <div class="sbtns"><button class="sbtn is-danger" data-delkey><span class="hold-lbl">apagar</span></button></div>`,
+    onMount: (el, s) => bindHold($("[data-delkey]", el), async () => {
+      if (!SB || !SB_USER || !isOnline()) return toast("sem internet. conecte-se para apagar a chave", true);
+      const { error } = await SB.from(T_KEY).delete().eq("user_id", SB_USER.id).eq("id", k.id);
+      if (error) { console.warn(error); return toast("não deu para apagar agora. tente de novo", true); }
+      onDel(); s.close();
+    }),
+  });
+}
 
 /* ===== editar perfil: toque no nome para escrever, toque na foto para trocar ===== */
 const CAM = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8.5h3l1.6-2.5h6.8L17 8.5h3v10H4z"/><circle cx="12" cy="13" r="3.2"/></svg>';
@@ -5222,6 +5392,9 @@ const DI={
   descricao: DU(Lf("M15.2 4.3a2.4 2.4 0 0 1 3.4 3.4L8 18.3 3.5 19.5 4.7 15z"), Ss("M13 20h7.5",2.6)),
   data:    DU(Lf(RR(3,5,18,15.5,4)), Ss("M3.5 10h17M8 3v4M16 3v4",2.4)),
   repete:  DU(Ss("M4.5 11.5v-1A3.5 3.5 0 0 1 8 7h7.5"), TS([[15,3.6],[15,10.4],[19.6,7]]), Ls("M19.5 12.5v1A3.5 3.5 0 0 1 16 17H8.5"), TL([[9,13.6],[9,20.4],[4.4,17]])),
+  chave:   DU(Lf(CI(7.5,12,5.5)), Ss("M12.5 12H21",2.8), Ss("M17.5 12v3.4"), Ss("M21 12v2.4"), Sf(CI(7.5,12,2.1))),
+  ia:      DU(Lf(RR(3.5,7,17,13,4.5)), Ss("M12 3.5V7",2.4), Sf(CI(12,3.2,1.5)), Sf(CI(9,13.5,1.7)), Sf(CI(15,13.5,1.7))),
+  sistema: DU(Lf(RR(2.5,4,19,13,3.5)), Ss("M8 20.5h8"), Ss("M12 17v3.5"), Ss("M7.5 10.5l2.2 2-2.2 2M12 14.5h4",2.2)),
 };
 
 /* ===== ícones em dois tons aplicados no app ===== */

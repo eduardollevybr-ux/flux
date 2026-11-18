@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex">
+<title>FLUX · conectar</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&display=swap">
+<style>
+:root{--screen:#000;--surface2:#141414;--text:#EDEDEE;--muted:#9C9AA6;--line:rgba(237,237,238,.11);--accent:#8A3FD9;--acc2:#B98AF0;--danger:#EF4B4F;--font:"DM Sans",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;color-scheme:dark}
+@media (prefers-color-scheme:light){:root{--screen:#fff;--surface2:#F3F3F5;--text:#1D1F23;--muted:#686D76;--line:rgba(29,31,35,.09);--accent:#820AD1;--acc2:#820AD1;color-scheme:light}}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;min-height:100%;background:var(--screen);color:var(--text);font:16px/1.45 var(--font);-webkit-font-smoothing:antialiased}
+.wrap{min-height:100dvh;max-width:440px;margin:0 auto;padding:calc(env(safe-area-inset-top) + 40px) 24px calc(env(safe-area-inset-bottom) + 28px);display:flex;flex-direction:column}
+.logo{width:64px;height:64px;border-radius:18px;background:linear-gradient(140deg,#9B4FF0,#5E1FB0);display:grid;place-items:center;--logo-a:#fff;--logo-b:#fff;margin-bottom:28px}
+.logo svg{width:40px;height:40px}
+h1{margin:0 0 6px;font-size:26px;line-height:1.2;font-weight:700}
+.sub{margin:0;color:var(--muted);font-size:16px}
+.who{color:var(--text);font-weight:600}
+.list{margin:28px 0 0;padding:0;list-style:none}
+.list li{display:flex;align-items:center;gap:14px;padding:14px 0;border-bottom:1px solid var(--line);font-size:16px}
+.list li:last-child{border-bottom:0}
+.ic{width:24px;height:24px;flex:none;color:var(--acc2)}
+.ic .L{fill:currentColor;opacity:.42}.ic .S{fill:currentColor}
+.ic .Sk{stroke:currentColor}.ic .Lk{stroke:currentColor;opacity:.42}
+.acc{margin-top:22px;color:var(--muted);font-size:14px}
+.grow{flex:1;min-height:24px}
+.btns{display:flex;flex-direction:column;gap:6px;margin-top:28px}
+.btn{height:54px;border:0;border-radius:16px;font:700 16px var(--font);cursor:pointer;transition:transform .15s,opacity .2s}
+.btn:active{transform:scale(.98)}
+.btn.solid{background:var(--text);color:var(--screen)}
+.btn.plain{background:none;color:var(--muted);font-weight:600}
+.btn[disabled]{opacity:.5;pointer-events:none}
+.field{display:flex;flex-direction:column;gap:6px;padding:14px 0;border-bottom:1px solid var(--line)}
+.field label{font-size:14px;color:var(--muted)}
+.field input{border:0;background:none;color:var(--text);font:400 17px var(--font);outline:none;padding:2px 0}
+.field input::placeholder{color:var(--muted);opacity:.6}
+.err{min-height:22px;margin-top:10px;color:var(--danger);font-size:14px}
+.spin{width:22px;height:22px;border-radius:99px;border:2.5px solid var(--line);border-top-color:var(--text);animation:sp .8s linear infinite;margin:40px auto 0}
+@keyframes sp{to{transform:rotate(360deg)}}
+.hide{display:none!important}
+.fade{animation:fd .35s ease both}@keyframes fd{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+</style>
+</head>
+<body>
+<main class="wrap">
+  <div class="logo" aria-hidden="true"><svg class="logo-svg" width="56" height="56" viewBox="-140 -114 2200 2200" role="img" aria-label="FLUX"><g transform="translate(0,1980) scale(0.1,-0.1)"><path fill="var(--logo-b)" d="M15530 9714 c-68 -13 -138 -28 -155 -33 -16 -6 -52 -13 -80 -16 -27 -4 -111 -20 -185 -35 -74 -16 -169 -36 -210 -44 -210 -41 -276 -58 -293 -75 -17 -17 -18 -173 -20 -3688 -2 -3594 -2 -3671 -21 -3692 -30 -33 -2372 -33 -2402 0 -19 21 -19 92 -21 3361 -2 2270 -6 3345 -13 3358 -17 31 -56 35 -114 12 -28 -12 -64 -24 -81 -27 -16 -4 -55 -15 -85 -25 -30 -10 -131 -41 -225 -69 -234 -70 -330 -99 -400 -123 -33 -11 -89 -28 -125 -38 -36 -10 -146 -46 -245 -80 -99 -35 -227 -78 -285 -96 -58 -17 -170 -55 -250 -84 -80 -29 -179 -63 -220 -77 -41 -14 -109 -38 -150 -53 -41 -15 -127 -44 -190 -65 -63 -20 -128 -43 -145 -51 -16 -8 -55 -22 -85 -33 -71 -25 -256 -92 -345 -126 -38 -15 -92 -35 -120 -45 -27 -10 -111 -42 -185 -70 -74 -28 -153 -57 -175 -65 -76 -25 -154 -64 -165 -84 -7 -14 -10 -848 -10 -2768 0 -2579 -1 -2749 -17 -2760 -30 -23 -1394 -18 -1422 4 -22 18 -22 18 -22 2437 0 1718 -3 2424 -11 2433 -17 21 -76 15 -116 -12 -20 -14 -42 -25 -49 -25 -12 0 -230 -100 -273 -126 -14 -8 -45 -24 -70 -35 -83 -38 -375 -179 -400 -194 -14 -8 -106 -56 -205 -106 -99 -49 -238 -121 -310 -160 -71 -38 -157 -83 -190 -99 -33 -17 -105 -57 -160 -89 -55 -32 -145 -84 -199 -115 -54 -31 -111 -66 -126 -76 -16 -11 -31 -20 -35 -20 -19 0 -676 -410 -820 -511 -38 -27 -108 -75 -155 -107 -90 -61 -223 -156 -305 -220 -27 -22 -69 -51 -91 -65 -93 -58 -84 67 -84 -1173 0 -668 -4 -1102 -10 -1118 -17 -47 -37 -47 -140 -4 -52 22 -117 49 -145 60 -54 21 -86 40 -226 131 -154 102 -381 358 -440 499 -94 223 -119 308 -119 402 0 91 -62 118 -112 48 -14 -20 -55 -69 -90 -109 -124 -142 -147 -170 -211 -269 -36 -54 -80 -119 -98 -144 -38 -52 -120 -216 -139 -275 -7 -22 -23 -65 -35 -95 -74 -179 -94 -503 -41 -684 33 -113 96 -255 134 -303 162 -201 186 -226 327 -332 146 -109 154 -115 385 -236 195 -102 413 -192 575 -236 39 -10 95 -27 125 -38 30 -11 134 -38 230 -60 96 -23 211 -50 255 -61 44 -11 117 -24 162 -30 46 -5 109 -16 140 -24 32 -8 101 -19 153 -25 135 -16 247 -31 305 -41 28 -5 136 -16 240 -25 105 -9 251 -22 325 -30 74 -8 293 -21 485 -30 193 -8 456 -20 585 -26 166 -9 1611 -13 4919 -16 4398 -4 4685 -3 4702 13 19 17 19 125 19 4453 0 3999 -2 4439 -16 4459 -18 26 -24 26 -184 -4z"/><path fill="var(--logo-a)" d="M12063 19057 c-29 -18 -110 -71 -180 -119 -172 -116 -396 -266 -540 -361 -65 -43 -219 -147 -343 -232 -124 -85 -243 -165 -265 -176 -22 -12 -53 -33 -70 -46 -16 -14 -77 -56 -135 -94 -123 -82 -176 -118 -285 -194 -44 -30 -109 -74 -145 -98 -36 -23 -179 -118 -319 -212 -139 -93 -309 -207 -377 -251 -68 -45 -139 -96 -158 -112 -19 -17 -45 -33 -58 -37 -13 -4 -39 -19 -58 -34 -19 -14 -53 -37 -76 -51 -23 -14 -88 -56 -143 -95 -56 -38 -136 -93 -179 -122 -120 -80 -140 -96 -152 -122 -7 -16 -10 -510 -10 -1704 0 -1555 -1 -1682 -16 -1699 -27 -29 -76 -23 -123 15 -22 17 -62 47 -88 65 -27 18 -89 61 -140 97 -50 36 -95 65 -99 65 -4 0 -18 10 -31 22 -13 12 -43 34 -67 48 -24 14 -61 37 -82 51 -22 15 -118 79 -214 142 -96 64 -200 134 -230 156 -30 23 -71 49 -91 60 -19 11 -41 27 -49 36 -7 9 -27 23 -44 32 -17 9 -74 45 -128 80 -113 74 -112 74 -174 27 -27 -21 -67 -49 -91 -63 -23 -14 -59 -38 -80 -52 -21 -14 -104 -71 -186 -125 -81 -54 -225 -152 -320 -217 -94 -65 -191 -130 -215 -145 -24 -15 -82 -53 -130 -85 -48 -32 -121 -80 -162 -107 -41 -27 -85 -56 -96 -64 -66 -46 -339 -229 -539 -362 -126 -84 -246 -164 -265 -179 -34 -25 -105 -73 -215 -145 -29 -19 -127 -84 -217 -144 -90 -61 -242 -162 -338 -227 -96 -64 -217 -145 -267 -180 -51 -35 -117 -80 -146 -99 -119 -78 -194 -130 -210 -148 -16 -18 -17 -165 -17 -2201 -1 -2383 3 -2237 -57 -2263 -15 -7 -46 -24 -68 -39 -22 -14 -83 -53 -135 -85 -221 -136 -555 -365 -675 -463 -27 -23 -67 -53 -88 -68 -21 -16 -62 -48 -91 -73 -29 -25 -110 -94 -182 -155 -155 -131 -479 -454 -587 -585 -43 -52 -95 -115 -116 -140 -34 -41 -91 -119 -166 -225 -27 -38 -88 -131 -156 -235 -37 -57 -189 -360 -215 -430 -97 -252 -135 -379 -181 -600 -80 -387 -61 -864 47 -1205 16 -49 32 -108 36 -130 8 -47 51 -166 65 -180 17 -17 26 12 32 98 14 190 127 495 272 737 25 41 55 93 66 115 12 22 44 66 70 98 27 32 49 62 49 67 0 10 85 124 138 186 23 27 57 68 75 91 109 142 633 685 710 736 24 16 74 58 152 127 27 25 75 66 105 90 30 25 87 72 125 105 64 56 195 158 249 195 12 8 89 67 172 131 125 97 314 231 494 349 20 14 122 82 226 151 104 69 200 132 214 139 14 7 61 36 105 65 44 29 111 70 149 91 38 22 101 58 140 81 39 24 89 52 112 63 22 10 51 28 65 38 13 10 65 40 114 66 99 53 126 68 325 178 141 77 804 408 995 496 61 28 191 87 290 132 99 45 194 90 210 100 17 10 53 26 80 35 28 9 86 34 130 54 44 21 107 49 140 64 33 14 101 44 150 66 50 22 158 67 240 100 83 34 179 74 215 90 87 39 394 163 500 201 46 17 96 38 110 45 14 8 50 23 80 34 30 10 98 36 150 56 100 39 221 84 305 114 73 26 353 130 405 151 25 10 68 26 95 35 62 21 208 72 340 120 55 19 161 56 235 80 74 25 252 84 395 132 289 97 358 119 525 170 63 19 144 45 180 58 36 13 79 27 95 30 30 7 78 21 395 119 96 29 202 61 235 69 195 51 254 68 285 81 19 8 60 20 90 25 30 6 91 22 135 36 44 14 114 34 155 44 41 11 122 33 180 49 230 65 344 95 540 143 219 54 361 90 450 116 50 15 165 42 390 92 47 11 132 31 190 45 271 67 553 131 615 141 22 4 81 17 130 30 50 13 115 26 145 29 30 4 84 16 120 26 36 11 101 26 145 35 44 9 150 29 235 46 85 17 205 41 265 54 61 13 187 38 280 55 94 17 222 42 285 55 63 13 183 36 265 51 83 15 184 33 225 41 41 7 149 27 240 43 262 46 575 103 880 160 58 11 135 25 172 30 37 6 111 19 165 29 54 11 134 25 178 31 44 6 125 20 180 31 55 12 138 27 185 34 47 7 207 34 355 60 149 26 311 53 360 60 50 7 212 34 360 60 149 26 311 51 362 56 96 10 143 22 143 38 0 14 -122 39 -250 51 -63 6 -187 19 -275 30 -615 76 -1709 88 -2585 29 -80 -5 -212 -14 -295 -19 -82 -6 -157 -13 -165 -15 -8 -2 -113 -12 -233 -20 -120 -9 -242 -20 -270 -26 -66 -12 -367 -43 -429 -43 -35 -1 -53 5 -68 19 -20 21 -20 21 -20 2778 l0 2757 -37 40 c-20 23 -50 47 -67 54 -17 7 -88 53 -159 102 -70 49 -153 106 -185 126 -31 20 -102 69 -157 107 -55 39 -116 80 -135 91 -37 21 -128 81 -250 165 -77 52 -128 87 -176 119 -16 10 -53 35 -82 55 -29 20 -74 50 -101 66 -63 39 -404 268 -439 295 -15 11 -76 53 -136 93 -324 214 -387 257 -449 304 -23 18 -46 33 -52 33 -5 0 -29 15 -52 33 -39 30 -74 53 -133 87 -15 8 -53 34 -86 58 -32 23 -115 80 -184 126 -69 45 -174 116 -233 157 -60 41 -123 83 -141 94 -17 11 -47 32 -66 46 -19 14 -62 43 -95 63 -33 21 -75 48 -94 62 -43 31 -64 29 -128 -9z m148 -1747 c19 -5 53 -25 75 -43 21 -18 66 -50 99 -71 33 -20 79 -51 102 -69 52 -39 130 -93 292 -200 197 -130 204 -135 241 -157 19 -12 60 -39 90 -61 30 -22 93 -65 140 -96 47 -31 109 -73 138 -92 28 -20 70 -47 91 -61 21 -14 71 -47 110 -75 39 -27 109 -75 155 -105 142 -94 240 -159 265 -177 13 -10 52 -36 87 -58 54 -34 245 -161 339 -225 17 -11 59 -39 95 -63 60 -39 66 -46 77 -92 10 -39 12 -545 10 -2359 -2 -2309 -2 -2309 -28 -2328 -17 -13 -53 -23 -100 -28 -41 -5 -87 -13 -104 -19 -16 -5 -68 -15 -115 -21 -47 -6 -123 -19 -170 -30 -47 -10 -116 -23 -155 -29 -90 -14 -421 -76 -545 -101 -52 -11 -126 -24 -165 -30 -38 -7 -90 -18 -115 -25 -25 -8 -76 -19 -115 -25 -38 -7 -106 -20 -150 -30 -44 -11 -114 -26 -155 -34 -41 -9 -131 -29 -200 -44 -69 -16 -146 -32 -173 -35 -26 -4 -61 -13 -77 -22 -41 -21 -92 -19 -118 5 -22 21 -22 21 -23 3388 -1 1852 0 3374 1 3382 5 39 35 48 101 30z m-5057 -4869 c25 -22 82 -64 128 -95 46 -30 156 -104 244 -163 89 -59 180 -119 203 -133 23 -14 71 -46 106 -73 58 -43 101 -71 188 -125 16 -9 64 -42 107 -72 43 -30 91 -63 107 -72 86 -51 289 -198 307 -222 21 -27 21 -34 24 -984 1 -526 0 -967 -3 -978 -8 -33 -46 -53 -194 -100 -238 -76 -946 -319 -1048 -359 -34 -14 -70 -25 -81 -25 -11 0 -46 -13 -77 -30 -69 -36 -79 -37 -110 -5 -25 24 -25 24 -25 1723 0 1699 0 1699 21 1726 28 36 50 33 103 -13z"/></g></svg></div>
+
+  <!-- carregando -->
+  <section id="v-load"><div class="spin" aria-label="carregando"></div></section>
+
+  <!-- entrar (quando ainda não está logado neste navegador) -->
+  <section id="v-login" class="hide fade">
+    <h1>entre no FLUX</h1>
+    <p class="sub">para conectar <span class="who" data-cli>o assistente</span> à sua conta.</p>
+    <form id="f-login" autocomplete="on" style="margin-top:22px">
+      <div class="field"><label for="em">e-mail</label><input id="em" type="email" autocomplete="email" required></div>
+      <div class="field"><label for="pw">senha</label><input id="pw" type="password" autocomplete="current-password" required></div>
+      <div class="err" id="e-login" role="alert"></div>
+      <div class="btns"><button class="btn solid" type="submit" id="b-login">entrar</button></div>
+    </form>
+  </section>
+
+  <!-- autorizar -->
+  <section id="v-ok" class="hide fade" style="display:flex;flex-direction:column;flex:1">
+    <h1><span data-cli>o assistente</span> quer acessar seu FLUX</h1>
+    <p class="sub">ao autorizar, ele vai poder:</p>
+    <ul class="list">
+      <li><span class="ic"><svg viewBox="0 0 24 24" aria-hidden="true"><path class="L" d="M1.8 12C4 7.6 7.7 5 12 5s8 2.6 10.2 7C20 16.4 16.3 19 12 19S4 16.4 1.8 12Z"/><path class="S" d="M8.6 12A3.4 3.4 0 1 0 15.4 12A3.4 3.4 0 1 0 8.6 12Z"/></svg></span>ver seus lançamentos e saldos</li>
+      <li><span class="ic"><svg viewBox="0 0 24 24" aria-hidden="true"><path class="L" d="M2.5 12A9.5 9.5 0 1 0 21.5 12A9.5 9.5 0 1 0 2.5 12Z"/><path class="Sk" d="M12 7.8v8.4M7.8 12h8.4" fill="none" stroke-width="2.6" stroke-linecap="round"/></svg></span>lançar gastos e recebimentos</li>
+    </ul>
+    <p class="acc">conta: <span class="who" id="conta"></span></p>
+    <div class="grow"></div>
+    <div class="err" id="e-ok" role="alert"></div>
+    <div class="btns">
+      <button class="btn solid" id="b-sim">autorizar</button>
+      <button class="btn plain" id="b-nao">agora não</button>
+    </div>
+  </section>
+
+  <!-- fim ou erro -->
+  <section id="v-msg" class="hide fade">
+    <h1 id="m-t"></h1>
+    <p class="sub" id="m-s"></p>
+  </section>
+</main>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.119.0/dist/umd/supabase.js"></script>
+<script>
+/* tela de autorizar do FLUX: o assistente de IA manda a pessoa para cá, ela confirma e volta para o assistente.
+   usa a mesma sessão do app (mesma chave de login guardada no navegador). */
+const URL_SB = "https://ccxiuaqirickchmrowrz.supabase.co";
+const ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNjeGl1YXFpcmlja2NobXJvd3J6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODYxMDg2NTQsImV4cCI6MjEwMTY4NDY1NH0.TiInMdno4_yvWK-c8mg6DY7IymPaJKrtN1CwS-8dm8U";
+const $ = s => document.querySelector(s);
+const show = id => { ["v-load", "v-login", "v-ok", "v-msg"].forEach(v => $("#" + v).classList.toggle("hide", v !== id)); };
+const msg = (t, s) => { $("#m-t").textContent = t; $("#m-s").textContent = s; show("v-msg"); };
+const authId = new URLSearchParams(location.search).get("authorization_id");
+let SB;
+try { SB = supabase.createClient(URL_SB, ANON, { auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: false, storageKey: "flux-auth" } }); }
+catch { SB = null; }
+
+async function carregar() {
+  if (!SB) return msg("não deu para abrir agora", "verifique sua internet e tente de novo pelo assistente.");
+  if (!authId) return msg("esse link não vale mais", "comece de novo pelo assistente.");
+  const { data: { session } } = await SB.auth.getSession();
+  if (!session) { show("v-login"); setTimeout(() => $("#em").focus(), 50); return; }
+  const { data, error } = await SB.auth.oauth.getAuthorizationDetails(authId);
+  if (error || !data) return msg("esse link não vale mais", "comece de novo pelo assistente.");
+  if (data.redirect_url && !data.authorization_id) { location.replace(data.redirect_url); return; } // já tinha autorizado antes
+  const nome = (data.client && data.client.name) || "o assistente";
+  document.querySelectorAll("[data-cli]").forEach(e => { e.textContent = nome; });
+  $("#conta").textContent = (data.user && data.user.email) || session.user.email || "";
+  show("v-ok");
+}
+
+$("#f-login").addEventListener("submit", async e => {
+  e.preventDefault();
+  const b = $("#b-login"); b.disabled = true; $("#e-login").textContent = "";
+  const { error } = await SB.auth.signInWithPassword({ email: $("#em").value.trim(), password: $("#pw").value });
+  b.disabled = false;
+  if (error) { $("#e-login").textContent = /invalid/i.test(error.message) ? "e-mail ou senha incorretos." : "não deu para entrar agora. tente de novo."; return; }
+  show("v-load"); carregar();
+});
+
+async function decidir(aprovar) {
+  const b1 = $("#b-sim"), b2 = $("#b-nao"); b1.disabled = b2.disabled = true; $("#e-ok").textContent = "";
+  const f = aprovar ? SB.auth.oauth.approveAuthorization : SB.auth.oauth.denyAuthorization;
+  const { data, error } = await f.call(SB.auth.oauth, authId, { skipBrowserRedirect: true });
+  if (error || !data || !data.redirect_url) { b1.disabled = b2.disabled = false; $("#e-ok").textContent = "não deu para concluir agora. tente de novo."; return; }
+  if (aprovar) msg("pronto, conectado", "voltando para o assistente.");
+  else msg("tudo bem, nada foi conectado", "voltando para o assistente.");
+  setTimeout(() => location.replace(data.redirect_url), 600);
+}
+$("#b-sim").addEventListener("click", () => decidir(true));
+$("#b-nao").addEventListener("click", () => decidir(false));
+carregar();
+</script>
+</body>
+</html>
