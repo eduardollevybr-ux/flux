@@ -1,5 +1,5 @@
 /* FLUX: guarda uma cópia do app no aparelho para abrir sem internet */
-const VERSION = "flux-v9";
+const VERSION = "flux-v8";
 const SHELL = ["./", "./index.html", "./manifest.json", "./icons/icon-192.png", "./icons/icon-512.png", "./icons/icon-rounded-192.png", "./icons/icon-rounded-512.png",
   "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"];
 
@@ -25,11 +25,9 @@ self.addEventListener("fetch", e => {
   }
 
   // páginas: tenta a versão nova na internet; sem internet, usa a cópia guardada
-  // só a página do app vira a cópia do app (autorizar.html e docs.html não podem ocupar o lugar dela)
   if (req.mode === "navigate") {
-    const ehApp = /\/(index\.html)?$/.test(url.pathname);
-    e.respondWith(fetch(req).then(r => { if (ehApp && r && r.ok) { const cp = r.clone(); caches.open(VERSION).then(c => c.put("./index.html", cp)); } return r; })
-      .catch(() => ehApp ? caches.match("./index.html").then(r => r || caches.match("./")) : caches.match(req)));
+    e.respondWith(fetch(req).then(r => { const cp = r.clone(); caches.open(VERSION).then(c => c.put("./index.html", cp)); return r; })
+      .catch(() => caches.match("./index.html").then(r => r || caches.match("./"))));
     return;
   }
   // demais arquivos (biblioteca, fonte, ícones): usa a cópia e atualiza por trás
