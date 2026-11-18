@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <title>API do FLUX · documentação</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&display=swap">
@@ -10,7 +10,7 @@
 :root{--bg:#000;--s2:#141414;--s3:#1F1F1F;--line:rgba(237,237,238,.11);--line2:rgba(237,237,238,.18);--text:#EDEDEE;--muted:#9C9AA6;--acc:#8A3FD9;--acc2:#BE8CFF;--blue:#7FA8FF;--red:#FF8A8E;--font:"DM Sans",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;--mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
 @media (prefers-color-scheme:light){:root{--bg:#fff;--s2:#F3F3F5;--s3:#E9E9EC;--line:rgba(29,31,35,.09);--line2:rgba(29,31,35,.16);--text:#1D1F23;--muted:#686D76;--acc:#820AD1;--acc2:#820AD1;--blue:#2F5DA8;--red:#B3373B}}
 *{box-sizing:border-box}
-html{scroll-behavior:smooth}
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%;text-size-adjust:100%;overflow-x:hidden;overscroll-behavior-x:none}body{overflow-x:hidden;touch-action:pan-y;overscroll-behavior-x:none}
 body{margin:0;background:var(--bg);color:var(--text);font:15.5px/1.6 var(--font);-webkit-font-smoothing:antialiased}
 a{color:var(--acc2);text-decoration:none}a:hover{text-decoration:underline}
 .wrap{display:grid;grid-template-columns:240px minmax(0,1fr);max-width:1180px;margin:0 auto}
@@ -257,6 +257,17 @@ print(p[<span class="s">"menor_saldo"</span>])</code></pre>
 </main>
 </div>
 <script>
+/* zoom bloqueado, como no app */
+if ("ontouchstart" in window || navigator.maxTouchPoints > 0) {
+  const stop = e => e.preventDefault();
+  ["gesturestart", "gesturechange", "gestureend"].forEach(ev => document.addEventListener(ev, stop, { passive: false }));
+  document.addEventListener("touchstart", e => { if (e.touches.length > 1) e.preventDefault(); }, { passive: false });
+  document.addEventListener("touchmove", e => { if (e.touches.length > 1 || (e.scale && e.scale !== 1)) e.preventDefault(); }, { passive: false });
+  let lastTap = 0;
+  document.addEventListener("touchend", e => { const t = Date.now(); if (t - lastTap < 350 && !e.target.closest("button,a,input,textarea,select,label,[role=button]")) e.preventDefault(); lastTap = t; }, { passive: false });
+  document.addEventListener("dblclick", stop, { passive: false });
+}
+
 document.querySelectorAll("table").forEach(t => { const hr = t.querySelector("tr"); const h = hr && hr.querySelector("th") ? [...hr.children].map(x => x.textContent.trim()) : []; if (h.length) hr.classList.add("hd"); t.querySelectorAll("tr").forEach(r => [...r.children].forEach((c, i) => { if (c.tagName === "TD" && h[i]) c.dataset.label = h[i]; })); });
 document.querySelectorAll("[data-tabs]").forEach(t => {
   const id = t.dataset.tabs, bs = [...t.children], ps = [...document.querySelectorAll(`[data-pane="${id}"]`)];
