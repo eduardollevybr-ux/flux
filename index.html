@@ -539,6 +539,10 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 @media (max-width:700px){ .page:has(.m-list),.page:has(.hz),.page.page-flush{padding-bottom:0} }
 .cell.fc .v,.m-cell.fc span{opacity:.75}
 .cell.fc .v,.m-cell.fc>span{padding-right:.18em;margin-right:-.18em}
+@keyframes hzL{from{transform:translateX(100%);opacity:.3}}
+@keyframes hzR{from{transform:translateX(-100%);opacity:.3}}
+.hz.slide-l{animation:hzL .36s cubic-bezier(.22,.8,.2,1)}
+.hz.slide-r{animation:hzR .36s cubic-bezier(.22,.8,.2,1)}
 .page:has(.hz){overflow-x:hidden}
 .fab{position:fixed;right:16px;bottom:90px;z-index:30;width:58px;height:58px;border-radius:99px;background:var(--accent);color:#fff;display:none;place-items:center;box-shadow:0 10px 28px rgba(80,40,160,.35)}
 .fab svg{width:26px;height:26px}
@@ -600,6 +604,10 @@ html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 .view.hz-enter{animation:hzEnter .42s var(--ease-out);transform-origin:50% 0}
 .view.hz-leave{animation:hzLeave .42s var(--ease-out);transform-origin:50% 0}
 @keyframes riseX{from{opacity:0;transform:translateX(40px) scale(.98)}}
+@keyframes slideL{from{transform:translateX(38%);opacity:0}}
+@keyframes slideR{from{transform:translateX(-38%);opacity:0}}
+.slide-l{animation:slideL .5s var(--ease-out)!important}
+.slide-r{animation:slideR .5s var(--ease-out)!important}
 /* toques: tudo responde */
 .btn,.icon-btn,.fab,.frow,.sitem,.lrow,.row,.pop-item,.m-sel,.pill-dd,.scope,.m-grid,.m-cal,.ph-date,.cal2-grid button{transition:transform .22s var(--spring),background-color .2s,color .2s,box-shadow .2s,border-color .2s}
 .btn:active,.icon-btn:active,.fab:active,.pop-item:active,.m-sel:active,.pill-dd:active,.scope:active,.m-grid:active,.m-cal:active,.cal2-grid button:active{transform:scale(.92)}
@@ -2782,108 +2790,26 @@ function periodHTML() {
   }
   return "";
 }
-/* ===== cascata: a marca do FLUX ao passar de período (mês, dia, ano) em todas as telas =====
-   o conteúdo de agora sai rápido para o lado contrário e os blocos do período novo entram
-   um atrás do outro, vindo do lado da seta; o nome do período anda junto */
-const CAS = { run: null, t: 0, anims: [], ghosts: [] };
-const CAS_EASE = "cubic-bezier(.16,1,.3,1)";
-/* o que não muda de um período para o outro (cabeçalhos fixos, títulos, filtros) fica parado, sem piscar */
-const CAS_SKIP = ".m-headrow,.hz-head,.hzh-chips,.section-title,thead,.pill-dd";
-const CAS_LEAF = ".card,.row,.lrow,.m-day,.mvb-r,.cs-total,.crow,button,svg,canvas,.bar,.skel,.empty,.wd";
-function casFinish() {
-  clearTimeout(CAS.t);
-  const a = CAS.anims; CAS.anims = []; a.forEach(x => { try { x.finish(); } catch (e) { } });
-  const r = CAS.run; CAS.run = null; if (r) r();
-  CAS.ghosts.forEach(g => g.remove()); CAS.ghosts = [];
+function animateSlide(sel, dir) {
+  const el = $("#view " + sel); if (!el) return;
+  el.classList.remove("slide-l", "slide-r"); void el.offsetWidth;
+  el.classList.add(dir > 0 ? "slide-l" : "slide-r");
 }
-const casAnim = (el, kf, o) => { const a = el.animate(kf, { easing: CAS_EASE, fill: "both", ...o }); CAS.anims.push(a); a.onfinish = () => { try { a.cancel(); } catch (e) { } }; return a; };
-/* blocos visíveis do conteúdo, agrupados por linha da tela (o que está lado a lado entra junto) */
-function casBlocks(root) {
-  const vh = innerHeight, out = [];
-  const walk = (el, depth) => {
-    if (depth && el.matches(CAS_SKIP)) return;
-    const r = el.getBoundingClientRect();
-    if (!r.width && !r.height && el.children.length && !el.getClientRects().length) { [...el.children].forEach(k => walk(k, depth)); return; }
-    if (!r.width || !r.height || r.bottom < 0 || r.top > vh || r.right < 0 || r.left > innerWidth) return;
-    const kids = [...el.children].filter(k => k.getClientRects().length);
-    if (depth < 8 && kids.length && (kids.length === 1 || r.height > 90) && !el.matches(CAS_LEAF) && out.length < 240) { kids.forEach(k => walk(k, depth + 1)); return; }
-    out.push([el, r.top]);
-  };
-  walk(root, 0);
-  out.sort((a, b) => a[1] - b[1]);
-  let row = -1, top = -1e9;
-  return out.map(([el, t]) => { if (t - top > 8) { row++; top = t; } return [el, Math.min(row, 10)]; });
-}
-function casOut(root, dir) { casBlocks(root).forEach(([el]) => casAnim(el, [{ opacity: 1, transform: "none" }, { opacity: 0, transform: `translateX(${-dir * 16}px)` }], { duration: 150, easing: "ease-in" })); }
-function casIn(root, dir) {
-  if (!root) return;
-  casBlocks(root).forEach(([el, row]) => { el.style.animation = "none"; casAnim(el, [{ opacity: 0, transform: `translateX(${dir * 34}px)` }, { opacity: 1, transform: "none" }], { duration: 460, delay: row * 36 }); });
-}
-/* nome do período no topo: o antigo sai deslizando na hora do clique (uma cópia por cima, que não depende
-   do redesenho da tela) e o novo entra deslizando do lado da seta, sem intervalo vazio entre os dois */
-function casLabelOut(sel, dir) {
-  if (!sel) return;
-  $$(sel).forEach(el => {
-    const r = el.getBoundingClientRect(); if (!r.width) return;
-    const cs = getComputedStyle(el), g = el.cloneNode(true);
-    g.removeAttribute("id"); g.setAttribute("aria-hidden", "true");
-    const box = document.createElement("div"); box.setAttribute("aria-hidden", "true");
-    Object.assign(box.style, { position: "fixed", left: r.left + "px", top: r.top - 4 + "px", width: r.width + "px", height: r.height + 8 + "px", overflow: "hidden", zIndex: 2147483000, pointerEvents: "none" });
-    Object.assign(g.style, { position: "absolute", left: "0", top: "4px", width: r.width + "px", height: r.height + "px", margin: "0", font: cs.font, color: cs.color, lineHeight: cs.lineHeight, letterSpacing: cs.letterSpacing, textAlign: cs.textAlign, whiteSpace: "nowrap", display: cs.display === "inline" ? "inline-block" : cs.display, animation: "none", background: "none" });
-    box.appendChild(g); document.body.appendChild(box); CAS.ghosts.push(box);
-    g.animate([{ transform: "none", opacity: 1 }, { transform: `translateX(${-dir * 60}%)`, opacity: 0 }], { duration: 260, easing: "cubic-bezier(.4,0,.6,1)", fill: "forwards" }).onfinish = () => { box.remove(); CAS.ghosts = CAS.ghosts.filter(x => x !== box); };
-    casAnim(el, [{ opacity: 0 }, { opacity: 0 }], { duration: 150 });
-  });
-}
-function casLabelIn(sel, dir) { if (sel) $$(sel).forEach(el => casAnim(el, [{ opacity: 0, transform: `translateX(${dir * 25}%)` }, { opacity: 1, transform: "none" }], { duration: 380 })); }
-/* troca de período com cascata: root() é onde ficam os blocos; render() desenha o período novo; label é o nome do período */
-function casSwap(dir, render, { root, label, out } = {}) {
-  casFinish();
-  const r0 = root && root();
-  if (!r0) { render(); return; }
-  if (out) out(r0); else casOut(r0, dir);
-  casLabelOut(label, dir);
-  const run = () => { CAS.anims.forEach(x => { try { x.cancel(); } catch (e) { } }); CAS.anims = []; render(); casIn(root && root(), dir); casLabelIn(label, dir); };
-  CAS.run = run;
-  CAS.t = setTimeout(() => { if (CAS.run === run) { CAS.run = null; run(); } }, out ? 170 : 150);
-}
-const casView = () => $("#view .pane.cur") || $("#view .page");
-const CAS_TOP = "#period .period-label";
 function changeMonth(d, minMi = MIN_MI) { const n = Math.min(MAX_MI, Math.max(minMi, UI.tMonth + d)); if (n === UI.tMonth) return; UI.tMonth = n; renderAll(); const pg = $("#view .page"); if (pg) pg.scrollTop = 0; }
 function scrollToMonth(mi, smooth) {
   const board = $("#board"); if (!board) return;
   if (isHz()) mi = Math.max(CUR, Math.min(HZ_END, mi));
   else if (mi < UI.bStart || mi > UI.bEnd) { UI.bStart = Math.max(MIN_MI, Math.min(UI.bStart, mi - 3)); UI.bEnd = Math.min(MAX_MI, Math.max(UI.bEnd, mi + 11)); renderAll(); }
   const c = $(`#board .mcard[data-mi="${mi}"]`); if (!c) return;
-  if (smooth) { boardGlide(c.offsetLeft - 24); boardTo = mi; } else { cancelAnimationFrame(boardGlideRaf); $("#board").scrollLeft = c.offsetLeft - 24; }
-}
-/* saldos no PC (deslize com ímã): as setas levam a tela deslizando até o mês; no touchpad a tela rola livre
-   e, quando os dedos param, o mês mais perto se encaixa no lugar */
-let boardGlideRaf = 0, boardSnapT = 0, boardTo = null; // boardTo: mês para onde a tela está deslizando (cliques seguidos somam a partir dele)
-function boardGlide(to, dur = 440) {
-  cancelAnimationFrame(boardGlideRaf); clearTimeout(boardSnapT); boardTo = null;
-  const b0 = $("#board"); if (!b0) return;
-  const from = b0.scrollLeft, dist = to - from, t0 = performance.now();
-  if (Math.abs(dist) < 2) { b0.scrollLeft = to; return; }
-  const step = now => { const b = $("#board"); if (!b) return; const k = Math.min(1, (now - t0) / dur), e = 1 - Math.pow(1 - k, 3); b.scrollLeft = from + dist * e; if (k < 1) boardGlideRaf = requestAnimationFrame(step); else boardTo = null; };
-  boardGlideRaf = requestAnimationFrame(step);
-}
-function boardSnap() {
-  const b = $("#board"); if (!b || isHz()) return;
-  let best = null, bd = 1e9;
-  for (const c of $$(".mcard", b)) { const d = Math.abs(c.offsetLeft - 24 - b.scrollLeft); if (d < bd) { bd = d; best = c; } }
-  if (best && bd > 1) boardGlide(Math.min(best.offsetLeft - 24, b.scrollWidth - b.clientWidth), 320);
+  $("#board").scrollTo({ left: c.offsetLeft - 24, behavior: smooth ? "smooth" : "auto" });
 }
 $("#period").addEventListener("click", e => {
   const s = e.target.closest("[data-scroll]"), m = e.target.closest("[data-m]");
-  if (s) {
-    const d = +s.dataset.scroll, cur = boardTo ?? visibleMi(), to = Math.min(MAX_MI, Math.max(MIN_MI, cur + d));
-    if (to !== cur) scrollToMonth(to, true);
-  }
+  if (s) { const cur = visibleMi(); scrollToMonth(Math.min(MAX_MI, Math.max(MIN_MI, cur + +s.dataset.scroll)), true); }
   if (m) {
-    const d = +m.dataset.m, n = UI.tMonth + d;
-    if (m.disabled || n < MIN_MI || n > MAX_MI) return;
-    casSwap(d, () => changeMonth(d), { root: casView, label: CAS_TOP });
+    const d = +m.dataset.m, pg = $("#view .pager[data-pager='tot']");
+    if (isMobile() && pg && !pg.dataset.anim && (d > 0 ? pg.dataset.next : pg.dataset.prev) === "1" && UI.tMonth + d >= MIN_MI) { slidePager(pg, d, () => applyPager("tot", d)); return; }
+    changeMonth(d); if (isMobile()) animateSlide(".pane.cur", d);
   }
 });
 /* rodinha e touchpad: deslocamento em pixels nos dois sentidos (shift + rodinha vira horizontal) */
@@ -2951,7 +2877,7 @@ function bindVScroll(board) {
     const ax = Math.abs(wg.sx), ay = Math.abs(wg.sy);
     if (!wg.ax) { if (ax + ay >= 6 || e.deltaMode) wg.ax = ax > ay ? "x" : "y"; }
     else if (wg.ax === "y" && ax > 24 && ax > ay * 1.5) wg.ax = "x";
-    if (wg.ax === "x" || (!wg.ax && Math.abs(x) > Math.abs(y))) { e.preventDefault(); cancelAnimationFrame(boardGlideRaf); boardTo = null; board.scrollLeft += x; clearTimeout(boardSnapT); boardSnapT = setTimeout(boardSnap, 160); return; }
+    if (wg.ax === "x" || (!wg.ax && Math.abs(x) > Math.abs(y))) { e.preventDefault(); board.scrollLeft += x; return; }
     if (e.target.closest(".mbox")) return; // dentro do mês a rolagem vertical continua a do navegador
     e.preventDefault(); vSet(Math.max(0, Math.min(vMax(), VTOP + y)));
   }, { passive: false });
@@ -3037,17 +2963,7 @@ function slidePager(pg, dir, then, dur) {
   track.addEventListener("transitionend", fin, { once: true }); setTimeout(fin, (dur || 480) + 60);
 }
 let PG = null;
-const moveTo = (p, x) => {
-  if (p.cas) { const ok = x < 0 ? p.pg.dataset.next === "1" : p.pg.dataset.prev === "1"; p.cur.style.transform = `translate3d(${x}px,0,0)`; p.cur.style.opacity = ok ? Math.max(.25, 1 - Math.abs(x) / p.w * 1.3) : 1; return; }
-  if (p.solo) p.list.style.setProperty("--dx", `${x}px`); else p.track.style.transform = `translate3d(${-p.w + x}px,0,0)`;
-};
-/* pager com cascata: ao soltar, o mês sai no sentido do dedo e o novo entra em cascata; sem passar do ponto, volta */
-function casDrop(p, dir) {
-  const cur = p.cur, x = p.dx, op = +cur.style.opacity || 1;
-  cur.style.transform = ""; cur.style.opacity = "";
-  if (!dir) { cur.animate([{ transform: `translate3d(${x}px,0,0)`, opacity: op }, { transform: "none", opacity: 1 }], { duration: 300, easing: CAS_EASE }); return; }
-  casSwap(dir, () => applyPager(p.pg.dataset.pager, dir), { root: casView, label: CAS_TOP, out: () => casAnim(cur, [{ transform: `translate3d(${x}px,0,0)`, opacity: op }, { transform: `translate3d(${-dir * p.w * .6}px,0,0)`, opacity: 0 }], { duration: 170, easing: "ease-in" }) });
-}
+const moveTo = (p, x) => { if (p.solo) p.list.style.setProperty("--dx", `${x}px`); else p.track.style.transform = `translate3d(${-p.w + x}px,0,0)`; };
 /* saldos no celular: termina o deslize só da coluna do meio */
 function slideSolo(p, dir, then, dur) {
   const { pg, list, w } = p;
@@ -3062,8 +2978,7 @@ $("#view").addEventListener("touchstart", e => {
   // arrasto anterior que não terminou (a tela foi redesenhada no meio do toque): limpa antes de começar outro
   if (PG) {
     if (PG.raf) cancelAnimationFrame(PG.raf);
-    if (PG.cas) { if (PG.cur) { PG.cur.style.transform = ""; PG.cur.style.opacity = ""; } }
-    else if (PG.pg.isConnected && !PG.pg.dataset.anim) { if (PG.solo) PG.list.style.removeProperty("--dx"); else { PG.track.style.transition = ""; PG.track.style.transform = ""; } }
+    if (PG.pg.isConnected && !PG.pg.dataset.anim) { if (PG.solo) PG.list.style.removeProperty("--dx"); else { PG.track.style.transition = ""; PG.track.style.transform = ""; } }
     PG = null;
   }
   $$("#view .pager.dragging").forEach(p => p.classList.remove("dragging"));
@@ -3072,7 +2987,7 @@ $("#view").addEventListener("touchstart", e => {
   const pg = e.target.closest(".pager"); if (!pg || pg.dataset.anim) return;
   const t = e.touches[0], now = performance.now();
   const solo = pg.classList.contains("solo"), mid = solo ? $(".m-day .m-mid", pg) : null;
-  PG = { pg, solo, cas: pg.dataset.pager === "tot", cur: $(".pane.cur", pg), list: solo ? $(".m-list", pg) : null, track: pg.firstElementChild, x0: t.clientX, y0: t.clientY, dx: 0, axis: null, w: solo ? (mid ? mid.offsetWidth : pg.clientWidth) : pg.clientWidth, lx: t.clientX, lt: now, v: 0 };
+  PG = { pg, solo, list: solo ? $(".m-list", pg) : null, track: pg.firstElementChild, x0: t.clientX, y0: t.clientY, dx: 0, axis: null, w: solo ? (mid ? mid.offsetWidth : pg.clientWidth) : pg.clientWidth, lx: t.clientX, lt: now, v: 0 };
 }, { passive: true });
 $("#view").addEventListener("touchmove", e => {
   if (!PG) return;
@@ -3080,7 +2995,7 @@ $("#view").addEventListener("touchmove", e => {
   if (!PG.axis) {
     if (Math.abs(dx) + Math.abs(dy) < 8) return;
     PG.axis = Math.abs(dx) > Math.abs(dy) * 1.1 ? "x" : "y";
-    if (PG.axis === "x") { lpCancel(); if (PG.cas) casFinish(); else if (!PG.solo) { alignPanes(PG.pg); PG.track.style.transition = "none"; } PG.pg.classList.add("dragging"); PG.x0 = t.clientX - Math.sign(dx) * 0; }
+    if (PG.axis === "x") { lpCancel(); if (!PG.solo) { alignPanes(PG.pg); PG.track.style.transition = "none"; } PG.pg.classList.add("dragging"); PG.x0 = t.clientX - Math.sign(dx) * 0; }
   }
   if (PG.axis !== "x") return;
   e.preventDefault();
@@ -3104,8 +3019,7 @@ const pgEnd = () => {
   // duração proporcional ao que falta andar e à velocidade do dedo: parece continuar o movimento
   const rest = commit ? p.w - Math.abs(p.dx) : Math.abs(p.dx);
   const dur = Math.max(220, Math.min(520, rest / Math.max(0.9, Math.abs(p.v)) ));
-  if (p.cas) casDrop(p, commit ? dir : 0);
-  else if (p.solo) slideSolo(p, commit ? dir : 0, () => applyPager(p.pg.dataset.pager, dir), dur);
+  if (p.solo) slideSolo(p, commit ? dir : 0, () => applyPager(p.pg.dataset.pager, dir), dur);
   else slidePager(p.pg, commit ? dir : 0, () => applyPager(p.pg.dataset.pager, dir), dur);
 };
 $("#view").addEventListener("touchend", pgEnd);
@@ -3114,20 +3028,8 @@ let wheelPg = null;
 const pagerWheel = wheelStepper(dir => {
   const pg = wheelPg; if (!pg || !pg.isConnected || pg.dataset[dir > 0 ? "next" : "prev"] !== "1") return;
   const go = () => applyPager(pg.dataset.pager, dir);
-  if (pg.dataset.pager === "tot") return casSwap(dir, go, { root: casView, label: CAS_TOP });
   if (pg.classList.contains("solo")) { const mid = $(".m-day .m-mid", pg); slideSolo({ pg, list: $(".m-list", pg), w: mid ? mid.offsetWidth : pg.clientWidth }, dir, go); }
   else { alignPanes(pg); slidePager(pg, dir, go); }
-});
-/* PC: no totais, touchpad (dois dedos para o lado) e setas do teclado passam o mês, com a cascata */
-const totWheel = wheelStepper(d => { const n = UI.tMonth + d; if (n < MIN_MI || n > MAX_MI) return; casSwap(d, () => changeMonth(d), { root: casView, label: CAS_TOP }); });
-$("#view").addEventListener("wheel", e => { if (!isMobile() && UI.tab === "totais") totWheel(e, () => true); }, { passive: false });
-document.addEventListener("keydown", e => {
-  if ((e.key !== "ArrowLeft" && e.key !== "ArrowRight") || isMobile() || e.altKey || e.ctrlKey || e.metaKey) return;
-  if (e.target.closest && e.target.closest("input,textarea,select,[contenteditable]")) return;
-  const d = e.key === "ArrowRight" ? 1 : -1;
-  if (modals.length) { const top = modals[modals.length - 1], b = top.el && $(`[data-cm="${d}"]`, top.el); if (b && !b.disabled) { e.preventDefault(); b.click(); } return; }
-  if (PANEL.open) { const b = $(`#drawer-root [data-pstep="${d}"], #drawer-root [data-cy="${d}"]`); if (b && !b.disabled) { e.preventDefault(); b.click(); } return; }
-  if (UI.tab === "totais" || UI.tab === "saldos") { const b = $(`#period [data-m="${d}"], #period [data-scroll="${d}"]`); if (b && !b.disabled) { e.preventDefault(); b.click(); } }
 });
 $("#view").addEventListener("wheel", e => {
   if (!isMobile()) return;
@@ -3794,8 +3696,8 @@ function renderPanel() {
 $("#drawer-root").addEventListener("click", e => {
   const cy = e.target.closest("[data-cy]");
   if (!cy || cy.disabled || PANEL.mode !== "calc") return;
-  const d = +cy.dataset.cy;
-  casSwap(d, () => { PANEL.year += d; renderPanel(); }, { root: () => $("#drawer-root .cs"), label: "#drawer-root .pill-nav .num" });
+  const d = +cy.dataset.cy; PANEL.year += d; renderPanel();
+  const el = $("#drawer-root .cs"); if (el) animateSlideEl(el, d);
 });
 $("#drawer-root").addEventListener("click", e => {
   const t = e.target;
@@ -3805,10 +3707,8 @@ $("#drawer-root").addEventListener("click", e => {
   const st = t.closest("[data-pstep]");
   if (st) {
     const d = +st.dataset.pstep;
-    if (st.disabled) return;
-    casSwap(d, () => { if (PANEL.mode === "day") PANEL.date = ymd(addDays(parse(PANEL.date), d)); else PANEL.mi += d; renderPanel(); },
-      { root: () => $("#drawer-root .pb"), label: "#drawer-root .ph-title" });
-    return;
+    if (PANEL.mode === "day") PANEL.date = ymd(addDays(parse(PANEL.date), d)); else PANEL.mi += d;
+    renderPanel(); const el = $("#drawer-root .lrows, #drawer-root .empty"); if (el) animateSlideEl(el, d); return;
   }
   const pc = t.closest("[data-pcal]"); if (pc) { datePicker(pc, PANEL.date, v => { PANEL.date = v; renderPanel(); }); return; }
   const pf = t.closest("[data-pfilter]");
@@ -3831,6 +3731,7 @@ $("#drawer-root").addEventListener("click", e => {
 });
 // iOS só aplica :active em toques quando existe um ouvinte de toque na página
 document.addEventListener("touchstart", () => { }, { passive: true });
+function animateSlideEl(el, dir) { el.classList.remove("slide-l", "slide-r"); void el.offsetWidth; el.classList.add(dir > 0 ? "slide-l" : "slide-r"); }
 
 /* ===== repetições: escolher o alcance (somente esta, esta e as próximas, todas) ===== */
 function occInfo(tx, date) { let r = null; expand(tx, date, date, (d, v, n, t, b) => { r = { date: d, value: v, n, total: t, base: b }; }); return r; }
@@ -4088,7 +3989,7 @@ function datePicker(anchor, value, onPick) {
   const body = $(".modal-body", s.el);
   s.el.addEventListener("click", e => {
     const cm = e.target.closest("[data-cm]");
-    if (cm) { if (cm.disabled) return; const d = +cm.dataset.cm; casSwap(d, () => { const mi = vy * 12 + vm + d; vy = miY(mi); vm = miM(mi); body.innerHTML = html(); }, { root: () => $(".cal2-grid", body), label: ".cal2-head b" }); return; }
+    if (cm) { const mi = vy * 12 + vm + +cm.dataset.cm; vy = miY(mi); vm = miM(mi); body.innerHTML = html(); const g = $(".cal2-grid", body); if (g) animateSlideEl(g, +cm.dataset.cm); return; }
     if (e.target.closest("[data-today]")) { sel = TODAY; vy = NOW.getFullYear(); vm = NOW.getMonth(); body.innerHTML = html(); return; }
     const d = e.target.closest("[data-day]");
     if (d) { sel = d.dataset.day; const p = parse(sel); vy = p.getFullYear(); vm = p.getMonth(); body.innerHTML = html(); return; }
