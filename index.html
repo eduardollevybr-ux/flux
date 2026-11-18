@@ -2785,22 +2785,22 @@ function periodHTML() {
 /* ===== cascata: a marca do FLUX ao passar de período (mês, dia, ano) em todas as telas =====
    o conteúdo de agora sai rápido para o lado contrário e os blocos do período novo entram
    um atrás do outro, vindo do lado da seta; o nome do período anda junto */
-const CAS = { run: null, t: 0, anims: [] };
+const CAS = { run: null, t: 0, anims: [], ghosts: [] };
 const CAS_EASE = "cubic-bezier(.16,1,.3,1)";
 const CAS_LEAF = ".card,.row,.lrow,.m-day,.mvb-r,.cs-total,.crow,button,svg,canvas,.bar,.skel,.empty,.wd";
-const casRM = () => matchMedia("(prefers-reduced-motion: reduce)").matches;
 function casFinish() {
   clearTimeout(CAS.t);
   const a = CAS.anims; CAS.anims = []; a.forEach(x => { try { x.finish(); } catch (e) { } });
   const r = CAS.run; CAS.run = null; if (r) r();
+  CAS.ghosts.forEach(g => g.remove()); CAS.ghosts = [];
 }
 const casAnim = (el, kf, o) => { const a = el.animate(kf, { easing: CAS_EASE, fill: "both", ...o }); CAS.anims.push(a); a.onfinish = () => { try { a.cancel(); } catch (e) { } }; return a; };
 /* blocos visíveis do conteúdo, agrupados por linha da tela (o que está lado a lado entra junto) */
 function casBlocks(root) {
   const vh = innerHeight, out = [];
   const walk = (el, depth) => {
-    if (getComputedStyle(el).display === "contents") { [...el.children].forEach(k => walk(k, depth)); return; }
     const r = el.getBoundingClientRect();
+    if (!r.width && !r.height && el.children.length && !el.getClientRects().length) { [...el.children].forEach(k => walk(k, depth)); return; }
     if (!r.width || !r.height || r.bottom < 0 || r.top > vh || r.right < 0 || r.left > innerWidth) return;
     const kids = [...el.children].filter(k => k.getClientRects().length);
     if (depth < 8 && kids.length && (kids.length === 1 || r.height > 90) && !el.matches(CAS_LEAF) && out.length < 240) { kids.forEach(k => walk(k, depth + 1)); return; }
@@ -2816,18 +2816,31 @@ function casIn(root, dir) {
   if (!root) return;
   casBlocks(root).forEach(([el, row]) => { el.style.animation = "none"; casAnim(el, [{ opacity: 0, transform: `translateX(${dir * 34}px)` }, { opacity: 1, transform: "none" }], { duration: 460, delay: row * 36 }); });
 }
-function casLabels(sel, dir, phase) {
+/* nome do período no topo: o antigo sai deslizando na hora do clique (uma cópia por cima, que não depende
+   do redesenho da tela) e o novo entra deslizando do lado da seta, sem intervalo vazio entre os dois */
+function casLabelOut(sel, dir) {
   if (!sel) return;
-  $$(sel).forEach(el => casAnim(el, phase ? [{ opacity: 0, transform: `translateX(${dir * 40}%)` }, { opacity: 1, transform: "none" }] : [{ opacity: 1, transform: "none" }, { opacity: 0, transform: `translateX(${-dir * 40}%)` }], { duration: phase ? 380 : 150, easing: phase ? CAS_EASE : "ease-in" }));
+  $$(sel).forEach(el => {
+    const r = el.getBoundingClientRect(); if (!r.width) return;
+    const cs = getComputedStyle(el), g = el.cloneNode(true);
+    g.removeAttribute("id"); g.setAttribute("aria-hidden", "true");
+    const box = document.createElement("div"); box.setAttribute("aria-hidden", "true");
+    Object.assign(box.style, { position: "fixed", left: r.left + "px", top: r.top - 4 + "px", width: r.width + "px", height: r.height + 8 + "px", overflow: "hidden", zIndex: 2147483000, pointerEvents: "none" });
+    Object.assign(g.style, { position: "absolute", left: "0", top: "4px", width: r.width + "px", height: r.height + "px", margin: "0", font: cs.font, color: cs.color, lineHeight: cs.lineHeight, letterSpacing: cs.letterSpacing, textAlign: cs.textAlign, whiteSpace: "nowrap", display: cs.display === "inline" ? "inline-block" : cs.display, animation: "none", background: "none" });
+    box.appendChild(g); document.body.appendChild(box); CAS.ghosts.push(box);
+    g.animate([{ transform: "none", opacity: 1 }, { transform: `translateX(${-dir * 60}%)`, opacity: 0 }], { duration: 260, easing: "cubic-bezier(.4,0,.6,1)", fill: "forwards" }).onfinish = () => { box.remove(); CAS.ghosts = CAS.ghosts.filter(x => x !== box); };
+    casAnim(el, [{ opacity: 0 }, { opacity: 0 }], { duration: 150 });
+  });
 }
+function casLabelIn(sel, dir) { if (sel) $$(sel).forEach(el => casAnim(el, [{ opacity: 0, transform: `translateX(${dir * 25}%)` }, { opacity: 1, transform: "none" }], { duration: 380 })); }
 /* troca de período com cascata: root() é onde ficam os blocos; render() desenha o período novo; label é o nome do período */
 function casSwap(dir, render, { root, label, out } = {}) {
   casFinish();
   const r0 = root && root();
-  if (casRM() || !r0) { render(); return; }
+  if (!r0) { render(); return; }
   if (out) out(r0); else casOut(r0, dir);
-  casLabels(label, dir, 0);
-  const run = () => { CAS.anims.forEach(x => { try { x.cancel(); } catch (e) { } }); CAS.anims = []; render(); casIn(root && root(), dir); casLabels(label, dir, 1); };
+  casLabelOut(label, dir);
+  const run = () => { CAS.anims.forEach(x => { try { x.cancel(); } catch (e) { } }); CAS.anims = []; render(); casIn(root && root(), dir); casLabelIn(label, dir); };
   CAS.run = run;
   CAS.t = setTimeout(() => { if (CAS.run === run) { CAS.run = null; run(); } }, out ? 170 : 150);
 }
