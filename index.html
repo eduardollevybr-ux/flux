@@ -3556,16 +3556,17 @@ $("#view").addEventListener("click", e => {
 
 /* ================= painel do dia / movimentações do mês (tela cheia) ================= */
 const PANEL = { open: false, mode: "day", date: TODAY, mi: CUR, filter: null };
-function openPanel(date, types) {
-  Object.assign(PANEL, { open: true, mode: "day", calc: null, calcF: null, date, filter: types && types.length === 1 ? types[0] : null });
+// only: id de um lançamento para mostrar só ele no dia (resultado da busca)
+function openPanel(date, types, only) {
+  Object.assign(PANEL, { open: true, mode: "day", calc: null, calcF: null, date, only: only || null, filter: types && types.length === 1 ? types[0] : null });
   renderPanel();
 }
 function openMonthScreen(mi, type) {
-  Object.assign(PANEL, { open: true, mode: "month", calc: null, calcF: null, mi, filter: type === "all" ? null : type });
+  Object.assign(PANEL, { open: true, mode: "month", calc: null, calcF: null, only: null, mi, filter: type === "all" ? null : type });
   renderPanel();
 }
 function openCalcScreen(key, year) {
-  Object.assign(PANEL, { open: true, mode: "calc", calc: key, year, calcF: null, filter: null, detail: null });
+  Object.assign(PANEL, { open: true, mode: "calc", only: null, calc: key, year, calcF: null, filter: null, detail: null });
   renderPanel();
 }
 function calcScreen() {
@@ -3595,7 +3596,7 @@ function calcScreen() {
   return { head, body, label: C.t };
 }
 function openCalcMonth(key, mi) {
-  Object.assign(PANEL, { open: true, mode: "month", mi, calc: key, calcF: key, filter: null, detail: null });
+  Object.assign(PANEL, { open: true, mode: "month", only: null, mi, calc: key, calcF: key, filter: null, detail: null });
   renderPanel();
 }
 function backToCalc() { const key = PANEL.calcF; openCalcScreen(key, miY(PANEL.mi)); }
@@ -3666,6 +3667,8 @@ function renderPanel() {
       list = list.filter(x => ok.includes(x.tx.type) && !ignores(x.tx, key, tm));
       const P = CALC_PREV[key] ? r2(perDayPrev() * prevDaysIn(PANEL.mi)) : 0;
       if (P > 0.004) prevRow = `<div class="lrow static" role="group" aria-label="previsão de diário: ${brl(P)}"><span class="lrow-top">${ti("prev")}<b class="ellip">previsão de diário</b><span class="lrow-val num">${brl(P)}</span></span><span class="lrow-sub">previsão dos dias que ainda vão chegar</span></div>`;
+    } else if (day && PANEL.only) {
+      list = list.filter(x => x.tx.id === PANEL.only);
     } else {
       if (PANEL.filter) list = list.filter(x => x.tx.type === PANEL.filter);
       const pd = perDayPrev();
@@ -3681,7 +3684,7 @@ function renderPanel() {
       : `<div class="empty"><button class="plus" data-padd aria-label="adicionar movimentação">${I.plus.replace("<svg", '<svg width="26" height="26"')}</button><span>sem movimentações por aqui.<br>toque no + para adicionar.</span></div>`;
     // saldo no fim do dia, no topo da lista do dia (o valor rola quando muda)
     const dsal = day && !PANEL.calcF && S.loaded ? `<div class="dsal"><small>saldo no fim do dia</small><div class="amt num ${(calc().saldo[PANEL.date] ?? 0) < -0.004 ? "neg" : ""}"><sup>R$</sup><span data-dsal></span></div></div>` : "";
-    body = `${dsal}${PANEL.calcF ? calcFilterBar(PANEL.calcF) : `<div class="pbar">${dd}</div>`}${items}`;
+    body = `${dsal}${PANEL.calcF ? calcFilterBar(PANEL.calcF) : day && PANEL.only ? `<div class="pbar" style="padding:0;height:10px" aria-hidden="true"></div>` : `<div class="pbar">${dd}</div>`}${items}`;
   }
   const fresh = !root.firstChild && !PANEL.flip;
   root.innerHTML = `<div class="drawer-ov" data-pclose ${fresh ? "" : 'style="animation:none"'}></div><aside class="drawer screen" role="dialog" aria-label="${label || (PANEL.mode === "day" ? "movimentações do dia" : "movimentações do mês")}" ${fresh ? "" : 'style="animation:none"'}><div class="drawer-head ph">${head}</div><div class="drawer-body pb">${body}</div></aside>`;
@@ -3707,10 +3710,11 @@ $("#drawer-root").addEventListener("click", e => {
   const st = t.closest("[data-pstep]");
   if (st) {
     const d = +st.dataset.pstep;
+    PANEL.only = null;
     if (PANEL.mode === "day") PANEL.date = ymd(addDays(parse(PANEL.date), d)); else PANEL.mi += d;
     renderPanel(); const el = $("#drawer-root .lrows, #drawer-root .empty"); if (el) animateSlideEl(el, d); return;
   }
-  const pc = t.closest("[data-pcal]"); if (pc) { datePicker(pc, PANEL.date, v => { PANEL.date = v; renderPanel(); }); return; }
+  const pc = t.closest("[data-pcal]"); if (pc) { datePicker(pc, PANEL.date, v => { PANEL.date = v; PANEL.only = null; renderPanel(); }); return; }
   const pf = t.closest("[data-pfilter]");
   if (pf) {
     const opt = (k, lbl, ic) => `<button class="pop-item ${(PANEL.filter || "all") === k ? "on" : ""}" data-fk="${k}" role="menuitemradio" aria-checked="${(PANEL.filter || "all") === k}">${ic}${lbl}</button>`;
@@ -4049,7 +4053,7 @@ function bsSearch() {
 function bsItem(x) {
   const r = repShort(x), yr = x.date.slice(0, 4) !== String(NOW.getFullYear());
   const sub = [txCard(x.tx), yr ? dYY(x.date) : ddmm(x.date)].filter(Boolean).join(" · ") + pendIco(x.tx);
-  return `<button class="lrow" data-item="${x.tx.id}" data-date="${x.date}" aria-label="${esc(TYPES[x.tx.type].label)}: ${esc(x.tx.desc)}, ${brl(x.value)}, ${dBR(x.date)}. ver o dia">
+  return `<button class="lrow" data-item="${x.tx.id}" data-date="${x.date}" aria-label="${esc(TYPES[x.tx.type].label)}: ${esc(x.tx.desc)}, ${brl(x.value)}, ${dBR(x.date)}. ver o lançamento">
     <span class="lrow-top">${ti(x.tx.type, true)}<b class="ellip">${esc(x.tx.desc)}</b><span class="lrow-val num">${brl(x.value)}</span></span>
     <span class="lrow-sub"><span class="num">${sub}</span>${r ? `<span class="lrow-rep num">${r}</span>` : ""}</span></button>`;
 }
@@ -4195,7 +4199,7 @@ $("#view").addEventListener("click", e => {
     return;
   }
   const it = t.closest("[data-item]");
-  if (it) { $("#bs-q")?.blur(); openPanel(it.dataset.date); }
+  if (it) { $("#bs-q")?.blur(); openPanel(it.dataset.date, null, it.dataset.item); }
 });
 
 /* ================= telas cheias do menu (previsão, cartões, perfil, aparência) ================= */
